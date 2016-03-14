@@ -1,0 +1,18 @@
+ss
+Down : 0.301350 ms
+down success
+ss
+up-col : 0.195800 ms
+up col success
+up-row : 0.144800 ms
+up row success
+up : 2.051050 ms
+up success
+ss
+sum = 168864012, mean = 161
+sobel : 2.708450 ms
+Sobel success
+mean : 0.372350 ms
+sum1 = 168864012, mean1 = 161
+sub-sharpness : 1.856250 ms
+all success

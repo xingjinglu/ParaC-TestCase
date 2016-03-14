@@ -1,0 +1,41 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BufferError	ClHost.h	/^static char BufferError[error_len];$/;"	v
+CFLAGS	Makefile	/^CFLAGS = -I\/opt\/AMDAPPSDK\/include $/;"	m
+COLS	svd-right.c	10;"	d	file:
+COLS	svd_high_level.c	10;"	d	file:
+FLAG	svd-right.c	17;"	d	file:
+FLAG	svd_high_level.c	17;"	d	file:
+IN_PRODUCT	svd-right.c	18;"	d	file:
+IN_PRODUCT	svd_high_level.c	18;"	d	file:
+LIBS	Makefile	/^LIBS = -lOpenCL$/;"	m
+M	svd-right.c	7;"	d	file:
+M	svd_high_level.c	7;"	d	file:
+MAX_ITERATIONS	svd-right.c	14;"	d	file:
+MAX_ITERATIONS	svd_high_level.c	14;"	d	file:
+N	svd-right.c	8;"	d	file:
+N	svd_high_level.c	8;"	d	file:
+PADDING	ClHost.h	11;"	d
+PADDING_LINE	ClHost.h	12;"	d
+ROWS	svd-right.c	9;"	d	file:
+ROWS	svd_high_level.c	9;"	d	file:
+ReadSources	ClHost.h	/^static inline char* ReadSources(const char* fileName)$/;"	f
+THRESHOLD	svd-right.c	15;"	d	file:
+THRESHOLD	svd_high_level.c	15;"	d	file:
+TYPE	svd-right.c	12;"	d	file:
+TYPE	svd_high_level.c	12;"	d	file:
+checkErr	ClHost.h	/^static inline void checkErr(cl_int err,const char *name)$/;"	f
+error_len	ClHost.h	14;"	d
+g_context	ClHost.h	/^static cl_context g_context;$/;"	v
+g_program	ClHost.h	/^static cl_program g_program;$/;"	v
+g_queue	ClHost.h	/^static cl_command_queue g_queue;$/;"	v
+main	svd-right.c	/^int main() {$/;"	f
+main	svd_high_level.c	/^int main() {$/;"	f
+openCLCreate	ClHost.h	/^static inline int openCLCreate(const char* inputfile,char * remain)$/;"	f
+status	ClHost.h	/^static cl_int status;$/;"	v
+svd	svd-right.c	/^void svd(double (*A)[2][256][256], double (*S)[256], double (*V)[2][256][256]) {$/;"	f
+svd	svd_high_level.c	/^void svd(double (*A)[2][256][256], double (*S)[256], double (*V)[2][256][256]) {$/;"	f

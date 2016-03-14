@@ -1,0 +1,729 @@
+83c83
+<   if (gidx >= 256 || gidy >= 1)
+---
+>   if (gidx >= 1 || gidy >= 256)
+126,127c126,127
+<     if (gidy == 1024 / 4 - 1) {
+<              *dstImageDSDt1 = *srcImageSrcDt3;
+---
+>     if (gidy == (1024 / 4)-1) {
+>                    *dstImageDSDt1 = *srcImageSrcDt3;
+141c141
+<       float border_mp_1Result1 [4][1] ;
+---
+>       float Result1 [4][1] ;
+144c144
+<       *( (float*)border_mp_1Result1 + i*1+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j * sizeof(float) )) * *(srcImageSrcDt5); 
+---
+>       *( (float*)Result1 + i*1+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt5); 
+147c147
+<       float border_mp_0Result1 [4][1] ;
+---
+>       float Result2 [4][1] ;
+150c150
+<       *( (float*)border_mp_0Result1 + i*1+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j * sizeof(float) )) * *(srcImageSrcDt3); 
+---
+>       *( (float*)Result2 + i*1+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt3); 
+153,157c153,157
+<       float border_mp_0Result1Result1[4][1];
+<       *( (float*)border_mp_0Result1Result1 + 0) = *( (float*)border_mp_0Result1 + 0) + *( (float*) border_mp_1Result1 + 0);
+<       *( (float*)border_mp_0Result1Result1 + 1) = *( (float*)border_mp_0Result1 + 1) + *( (float*) border_mp_1Result1 + 1);
+<       *( (float*)border_mp_0Result1Result1 + 2) = *( (float*)border_mp_0Result1 + 2) + *( (float*) border_mp_1Result1 + 2);
+<       *( (float*)border_mp_0Result1Result1 + 3) = *( (float*)border_mp_0Result1 + 3) + *( (float*) border_mp_1Result1 + 3);
+---
+>       float Result3[4][1];
+>       *( (float*)Result3 + 0) = *( (float*)Result2 + 0) + *( (float*) Result1 + 0);
+>       *( (float*)Result3 + 1) = *( (float*)Result2 + 1) + *( (float*) Result1 + 1);
+>       *( (float*)Result3 + 2) = *( (float*)Result2 + 2) + *( (float*) Result1 + 2);
+>       *( (float*)Result3 + 3) = *( (float*)Result2 + 3) + *( (float*) Result1 + 3);
+159,160c159,160
+<       for(int i=0;i<4;i++)
+<       *( (__global unsigned char*)( (__global char*)dstImageDSDt2 + i * dstImageDSStep) ) = *( (  float*)( ( char*)border_mp_0Result1Result1 + i * 1 * sizeof(float)) );
+---
+>       for(int j=0;j<4;j++)
+>       *(dstImageDSDt2 + j *dstImageDSStep ) = *( ( float*)Result3 + j);
+163,165c163,165
+<       *( (__global unsigned char*)( (__global char*)dstImageDSDt1 + i * dstImageDSStep) ) = *( ( __global unsigned char*)( (__global char*)dstImageDSDt2 + i * dstImageDSStep) );
+<             
+<       float border_mp_1Result2 [4][1] ;
+---
+>       *(dstImageDSDt1 + i * dstImageDSStep) = *(  dstImageDSDt2 + i * dstImageDSStep );
+>              
+>       float Result4 [4][1] ;
+168c168
+<       *( (float*)border_mp_1Result2 + i*1+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j * sizeof(float) )) * *(srcImageSrcDt6); 
+---
+>       *( (float*)Result4 + i*1+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt6); 
+171c171
+<       float border_mp_0Result2 [4][1] ;
+---
+>       float Result5 [4][1] ;
+174c174
+<       *( (float*)border_mp_0Result2 + i*1+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j * sizeof(float) )) * *(srcImageSrcDt4); 
+---
+>       *( (float*)Result5 + i*1+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt4); 
+177,181c177,181
+<       float border_mp_0Result2Result1[4][1];
+<       *( (float*)border_mp_0Result2Result1 + 0) = *( (float*)border_mp_0Result2 + 0) + *( (float*) border_mp_1Result2 + 0);
+<       *( (float*)border_mp_0Result2Result1 + 1) = *( (float*)border_mp_0Result2 + 1) + *( (float*) border_mp_1Result2 + 1);
+<       *( (float*)border_mp_0Result2Result1 + 2) = *( (float*)border_mp_0Result2 + 2) + *( (float*) border_mp_1Result2 + 2);
+<       *( (float*)border_mp_0Result2Result1 + 3) = *( (float*)border_mp_0Result2 + 3) + *( (float*) border_mp_1Result2 + 3);
+---
+>       float Result6[4][1];
+>       *( (float*)Result6 + 0) = *( (float*)Result5 + 0) + *( (float*) Result4 + 0);
+>       *( (float*)Result6 + 1) = *( (float*)Result5 + 1) + *( (float*) Result4 + 1);
+>       *( (float*)Result6 + 2) = *( (float*)Result5 + 2) + *( (float*) Result4 + 2);
+>       *( (float*)Result6 + 3) = *( (float*)Result5 + 3) + *( (float*) Result4 + 3);
+183,184c183,184
+<       for(int i=0;i<4;i++)
+<       *( (__global unsigned char*)( (__global char*)dstImageDSDt3 + i * dstImageDSStep) ) = *( (  float*)( ( char*)border_mp_0Result2Result1 + i * 1 * sizeof(float)) );
+---
+>       for(int j=0;j<4;j++)
+>       *(dstImageDSDt3 + j * dstImageDSStep) = *( ( float*)Result6 + j);
+187,188c187,188
+<       *( (__global unsigned char*)( (__global char*)dstImageDSDt4 + i * dstImageDSStep) ) = *( ( __global unsigned char*)( (__global char*)dstImageDSDt3 + i * dstImageDSStep) );
+<           }
+---
+>       *(dstImageDSDt4 + i * dstImageDSStep) = *(  dstImageDSDt3 + i * dstImageDSStep);
+>            }
+267c267
+<       float border_mp_1Result1 [1][4] ;
+---
+>       float Result1 [1][4] ;
+270c270
+<       *( (float*)border_mp_1Result1 + i*4+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j * sizeof(float) )) * *(srcImageSrcDt4); 
+---
+>       *( (float*)Result1 + i*0+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt4); 
+271a272
+> 
+273c274
+<       float border_mp_0Result1 [1][4] ;
+---
+>       float Result2 [1][4] ;
+276c277
+<       *( (float*)border_mp_0Result1 + i*4+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j * sizeof(float) )) * *(srcImageSrcDt3); 
+---
+>       *( (float*)Result2 + i*0+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt3); 
+279,284c280,289
+<       float border_mp_0Result1Result1[1][4];
+<       *( (float*)border_mp_0Result1Result1 + 0) = *( (float*)border_mp_0Result1 + 0) + *( (float*) border_mp_1Result1 + 0);
+<       *( (float*)border_mp_0Result1Result1 + 1) = *( (float*)border_mp_0Result1 + 1) + *( (float*) border_mp_1Result1 + 1);
+<       *( (float*)border_mp_0Result1Result1 + 2) = *( (float*)border_mp_0Result1 + 2) + *( (float*) border_mp_1Result1 + 2);
+<       *( (float*)border_mp_0Result1Result1 + 3) = *( (float*)border_mp_0Result1 + 3) + *( (float*) border_mp_1Result1 + 3);
+<       
+---
+>       float Result3[1][4];
+>       *( (float*)Result3 + 0) = *( (float*)Result2 + 0) + *( (float*) Result1 + 0);
+>       *( (float*)Result3 + 1) = *( (float*)Result2 + 1) + *( (float*) Result1 + 1);
+>       *( (float*)Result3 + 2) = *( (float*)Result2 + 2) + *( (float*) Result1 + 2);
+>       *( (float*)Result3 + 3) = *( (float*)Result2 + 3) + *( (float*) Result1 + 3);
+>       
+>       for(int i=0;i<1;i++)
+>       for(int j=0;j<4;j++){
+>       *(dstImageDSDt3 + j + i * dstImageDSStep) = *(( float*)Result3 + j+i * sizeof(float));
+>       }      
+286,291c291,293
+<       *( (__global unsigned char*)((__global char*)dstImageDSDt3 + j * sizeof(unsigned char)) ) = *( ( float*)( ( char*)border_mp_0Result1Result1) + j );
+<       
+<       for(int j=0;j<4;j++)
+<       *( (__global unsigned char*)((__global char*)dstImageDSDt1 + j * sizeof(unsigned char)) ) = *( (__global unsigned char*)( (__global char*)dstImageDSDt3) + j );
+<             
+<       float border_mp_1Result2 [1][4] ;
+---
+>       *(dstImageDSDt1 + j) = *( ( __global unsigned char*)dstImageDSDt3 + j);
+>              
+>       float Result4 [1][4] ;
+294c296
+<       *( (float*)border_mp_1Result2 + i*4+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j * sizeof(float) )) * *(srcImageSrcDt6); 
+---
+>       *( (float*)Result4 + i*0+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt6); 
+297c299
+<       float border_mp_0Result2 [1][4] ;
+---
+>       float Result5 [1][4] ;
+300c302
+<       *( (float*)border_mp_0Result2 + i*4+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j * sizeof(float) )) * *(srcImageSrcDt5); 
+---
+>       *( (float*)Result5 + i*0+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j*sizeof(float)) ) * *(srcImageSrcDt5); 
+303,311c305,315
+<       float border_mp_0Result2Result1[1][4];
+<       *( (float*)border_mp_0Result2Result1 + 0) = *( (float*)border_mp_0Result2 + 0) + *( (float*) border_mp_1Result2 + 0);
+<       *( (float*)border_mp_0Result2Result1 + 1) = *( (float*)border_mp_0Result2 + 1) + *( (float*) border_mp_1Result2 + 1);
+<       *( (float*)border_mp_0Result2Result1 + 2) = *( (float*)border_mp_0Result2 + 2) + *( (float*) border_mp_1Result2 + 2);
+<       *( (float*)border_mp_0Result2Result1 + 3) = *( (float*)border_mp_0Result2 + 3) + *( (float*) border_mp_1Result2 + 3);
+<       
+<       for(int j=0;j<4;j++)
+<       *( (__global unsigned char*)((__global char*)dstImageDSDt5 + j * sizeof(unsigned char)) ) = *( ( float*)( ( char*)border_mp_0Result2Result1) + j );
+<       
+---
+> 
+>       float Result6[1][4];
+>       *( (float*)Result6 + 0) = *( (float*)Result5 + 0) + *( (float*) Result4 + 0);
+>       *( (float*)Result6 + 1) = *( (float*)Result5 + 1) + *( (float*) Result4 + 1);
+>       *( (float*)Result6 + 2) = *( (float*)Result5 + 2) + *( (float*) Result4 + 2);
+>       *( (float*)Result6 + 3) = *( (float*)Result5 + 3) + *( (float*) Result4 + 3);
+>       
+>       for(int i=0;i<1;i++)
+>       for(int j=0;j<4;j++){
+>       *(dstImageDSDt5 + j + i * dstImageDSStep) = *(( float*)Result6 + j + i * i * sizeof(float));
+>       }      
+313,314c317,318
+<       *( (__global unsigned char*)((__global char*)dstImageDSDt7 + j * sizeof(unsigned char)) ) = *( (__global unsigned char*)( (__global char*)dstImageDSDt5) + j );
+<           }
+---
+>       *(dstImageDSDt7 + j) = *( ( __global unsigned char*)dstImageDSDt5 + j);
+>            }
+342c346
+<   if (gidx >= 255 || gidy >= 255)
+---
+>   if (gidx >= 256-1 || gidy >= 256-1)
+350c354
+<   __global float *mpSrcDt1 = (__global char *)mpSrc + mpSrcShift;
+---
+>   __global float *mpSrcDt1 = (__global char*)mpSrc + mpSrcShift;
+356,380c360,409
+<         float result0[4][4];
+<     float *result0_0;
+<     float *result0_1;
+<     float *result0_2;
+<     float *result0_3;
+<        result0_0 = (float*)result0;
+<        result0_1 = (float*)result0_0 + 4;
+<        result0_2 = (float*)result0_1 + 4;
+<        result0_3 = (float*)result0_2 + 4;
+<        *(result0_0+0) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)));
+<        *(result0_0+1) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)));
+<        *(result0_0+2) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)));
+<        *(result0_0+3) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)));
+<        *(result0_1+0) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)));
+<        *(result0_1+1) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)));
+<        *(result0_1+2) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)));
+<        *(result0_1+3) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)));
+<        *(result0_2+0) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)));
+<        *(result0_2+1) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)));
+<        *(result0_2+2) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)));
+<        *(result0_2+3) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)));
+<        *(result0_3+0) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)));
+<        *(result0_3+1) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)));
+<        *(result0_3+2) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)));
+<        *(result0_3+3) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)));
+---
+>         char result0[4][4];
+>         char *result0_0;
+>         char *result0_1;
+>         char *result0_2;
+>         char *result0_3;
+> 
+>        result0_0 = (char*)result0;
+>        result0_1 = result0_0 + sizeof(char) * 4;
+>        result0_2 = result0_1 + sizeof(char) * 4;
+>        result0_3 = result0_2 + sizeof(char) * 4;
+> 
+>        mpSrcStep = mpSrcStep/4;
+> 
+>     //float mp[4][2] = { 7 / 8.0f, 1 / 8.0f, 5 / 8.0f, 3 / 8.0f, 3 / 8.0f, 5 / 8.0f, 1 / 8.0f, 7 / 8.0f };
+> 
+>        *(result0_0+0) = (char)(    (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) 
+>                                 +  (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+0*mpSrcStep) 
+>                                 +  (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) 
+>                                 +  (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+0*mpSrcStep));
+> 
+>        *(result0_0+1) = (char)(    (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) 
+>                                  + (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+1*mpSrcStep) 
+>                                  + (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) 
+>                                  + (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+1*mpSrcStep));
+> 
+>        *(result0_0+2) = (char)(    (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) 
+>                                  + (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+2*mpSrcStep) 
+>                                  + (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) 
+>                                  + (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+2*mpSrcStep));
+> 
+>        *(result0_0+3) = (char)(    (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) 
+>                              +     (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+3*mpSrcStep) 
+>                              +     (*(mpSrcDt1+0+0*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) 
+>                              +     (*(mpSrcDt1+1+0*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+3*mpSrcStep));
+>        *(result0_1+0) = (char)(    (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) 
+>                              +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+0*mpSrcStep) 
+>                              +     (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) 
+>                              +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+0*mpSrcStep));
+> 
+>        *(result0_1+1) = (char)(    (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+1*mpSrcStep) +     (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+1*mpSrcStep));
+>        *(result0_1+2) = (char)(    (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+2*mpSrcStep) +     (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+2*mpSrcStep));
+>        *(result0_1+3) = (char)(    (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+3*mpSrcStep) +     (*(mpSrcDt1+0+1*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+1*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+3*mpSrcStep));
+>        *(result0_2+0) = (char)(    (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+0*mpSrcStep) +     (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+0*mpSrcStep));
+>        *(result0_2+1) = (char)(    (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+1*mpSrcStep) +     (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+1*mpSrcStep));
+>        *(result0_2+2) = (char)(    (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+2*mpSrcStep) +     (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+2*mpSrcStep));
+>        *(result0_2+3) = (char)(    (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+3*mpSrcStep) +     (*(mpSrcDt1+0+2*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+2*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+3*mpSrcStep));
+>        *(result0_3+0) = (char)(    (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+0*mpSrcStep) +     (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+0*mpSrcStep));
+>        *(result0_3+1) = (char)(    (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+1*mpSrcStep) +     (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+1*mpSrcStep));
+>        *(result0_3+2) = (char)(    (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+2*mpSrcStep) +     (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+2*mpSrcStep));
+>        *(result0_3+3) = (char)(    (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *(mpSrcDt1+0+3*mpSrcStep) +     (*(mpSrcDt1+0+3*mpSrcStep) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*(mpSrcDt1+1+3*mpSrcStep) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *(mpSrcDt1+1+3*mpSrcStep));
+384,385c413,414
+<     *( (__global unsigned char*)( (__global char*)dstImageDstDt1 + i * dstImageDstStep + j) ) = *( ( float*)( ( char*)result0 + j * sizeof(float)  + i * 4 * sizeof(float)));
+<     }      }
+---
+>     *(dstImageDstDt1 + j + i * dstImageDstStep) = *(( char*)result0 + j + i * 4 * sizeof(char));
+>     }       }
+417c446
+<   if (gidx >= 1024 || gidy >= 1024)
+---
+>   if (gidx >= 256 || gidy >= 1024)
+421,422c450,454
+<   int yPlaneSrcIdx3 = yPlaneSrcShift + ((float)gidy + -1) *yPlaneSrcStep + ((float)gidx + -1) *sizeof(unsigned char);
+<   int pEdgeDstIdx1 = pEdgeDstShift + ((float)gidy) *pEdgeDstStep + ((float)gidx) *sizeof(unsigned short);
+---
+>   //int yPlaneSrcIdx3 = yPlaneSrcShift + ((float)gidy -1) *yPlaneSrcStep + ((float)gidx -1) *sizeof(unsigned char);
+> 
+>   int yPlaneSrcIdx3 = yPlaneSrcShift + ((float)gidy -1) *yPlaneSrcStep + ((float)gidx*4 -1) *sizeof(unsigned char);
+> 
+>   int pEdgeDstIdx1 = pEdgeDstShift + ((float)gidy) *pEdgeDstStep + ((float)gidx*4) *sizeof(unsigned short);
+426a459
+> 
+428c461,467
+<   __global unsigned short *pEdgeDstDt1 = (__global char *)pEdgeDst + pEdgeDstIdx1;
+---
+>   __global unsigned short *pEdgeDstDt1 = (__global unsigned short*)((__global char*)pEdgeDst + pEdgeDstIdx1);
+> 
+>   if(gidy == 0 || gidy == 1023)
+>   {
+>       *((global short4*)(pEdgeDstDt1))= (short4)0;
+>       return;
+>   }
+432,435c471,474
+<          int gy[3];
+<      int yPlane[3];
+<      int R2Next;
+<      int res1;
+---
+>         char gy[3];
+>     uchar4 yPlane;
+>     uchar  R2Next;
+>     short4 res;
+437,463c476,535
+<       gy[0] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 0 + gySrcStep * 0)));
+<       gy[1] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 1 + gySrcStep * 0)));
+<       gy[2] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 2 + gySrcStep * 0)));
+<       yPlane[0] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 0 + yPlaneSrcStep * 0)));
+<       yPlane[1] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 1 + yPlaneSrcStep * 0)));
+<       yPlane[2] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 2 + yPlaneSrcStep * 0)));
+<       res1 = gy[0] * yPlane[0]; 
+<       res1 += gy[1] * yPlane[1]; 
+<       res1 += gy[2] * yPlane[2]; 
+<       gy[0] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 0 + gySrcStep * 1)));
+<       gy[1] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 1 + gySrcStep * 1)));
+<       gy[2] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 2 + gySrcStep * 1)));
+<       yPlane[0] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 0 + yPlaneSrcStep * 1)));
+<       yPlane[1] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 1 + yPlaneSrcStep * 1)));
+<       yPlane[2] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 2 + yPlaneSrcStep * 1)));
+<       res1 += gy[0] * yPlane[0]; 
+<       res1 += gy[1] * yPlane[1]; 
+<       res1 += gy[2] * yPlane[2]; 
+<       gy[0] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 0 + gySrcStep * 2)));
+<       gy[1] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 1 + gySrcStep * 2)));
+<       gy[2] = ( int) (*((__global char*) ((__global char*) gySrcDt2 + 2 + gySrcStep * 2)));
+<       yPlane[0] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 0 + yPlaneSrcStep * 2)));
+<       yPlane[1] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 1 + yPlaneSrcStep * 2)));
+<       yPlane[2] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 2 + yPlaneSrcStep * 2)));
+<       res1 += gy[0] * yPlane[0]; 
+<       res1 += gy[1] * yPlane[1]; 
+<       res1 += gy[2] * yPlane[2]; 
+---
+> 
+>       gy[0] = *(gySrcDt2 + 0 + gxSrcStep * 0);
+>       gy[1] = *(gySrcDt2 + 1 + gxSrcStep * 0);
+>       gy[2] = *(gySrcDt2 + 2 + gxSrcStep * 0);
+>         /*
+>       gy[0] = *(gySrc + 0 + 3 * 0);
+>       gy[1] = *(gySrc + 1 + 3 * 0);
+>       gy[2] = *(gySrc + 2 + 3 * 0);
+>       */
+>       yPlane = vload4(0, yPlaneSrcDt3 + 4 * 0);
+> 
+>       res.s0 = gy[0] * yPlane.s0 + gy[1] * yPlane.s1 + gy[2] * yPlane.s2;
+>       res.s1 = gy[0] * yPlane.s1 + gy[1] * yPlane.s2 + gy[2] * yPlane.s3;
+>       res.s2 = gy[0] * yPlane.s2 + gy[1] * yPlane.s3;
+> 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s2 += gy[2] * R2Next; 
+> 
+>       res.s3 = gy[0] * yPlane.s3;
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s3 += gy[1] * R2Next; 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 1);
+>       res.s3 += gy[2] * R2Next; 
+> 
+>       yPlaneSrcDt3 = yPlaneSrcDt3 + yPlaneSrcStep;
+>       gy[0] = *(gySrcDt2 + 0 + gxSrcStep * 1);
+>       gy[1] = *(gySrcDt2 + 1 + gxSrcStep * 1);
+>       gy[2] = *(gySrcDt2 + 2 + gxSrcStep * 1);
+>       yPlane = vload4(0, yPlaneSrcDt3 + 4 * 0);
+> 
+>       res.s0 += gy[0] * yPlane.s0 + gy[1] * yPlane.s1 + gy[2] * yPlane.s2;
+>       res.s1 += gy[0] * yPlane.s1 + gy[1] * yPlane.s2 + gy[2] * yPlane.s3;
+>       res.s2 += gy[0] * yPlane.s2 + gy[1] * yPlane.s3;
+> 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s2 += gy[2] * R2Next; 
+>       res.s3 += gy[0] * yPlane.s3;
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s3 += gy[1] * R2Next; 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 1);
+>       res.s3 += gy[2] * R2Next; 
+> 
+>       yPlaneSrcDt3 = yPlaneSrcDt3 + yPlaneSrcStep;
+>       gy[0] = *(gySrcDt2 + 0 + gxSrcStep * 2);
+>       gy[1] = *(gySrcDt2 + 1 + gxSrcStep * 2);
+>       gy[2] = *(gySrcDt2 + 2 + gxSrcStep * 2);
+>       //yPlane = *(yPlaneSrcDt3 + 4 * 0);
+>       //yPlane = *((__global uchar4*)(yPlaneSrcDt3 + 4 * 0));
+>       yPlane = vload4(0, yPlaneSrcDt3 + 4 * 0);
+>       res.s0 += gy[0] * yPlane.s0 + gy[1] * yPlane.s1 + gy[2] * yPlane.s2;
+>       res.s1 += gy[0] * yPlane.s1 + gy[1] * yPlane.s2 + gy[2] * yPlane.s3;
+>       res.s2 += gy[0] * yPlane.s2 + gy[1] * yPlane.s3;
+> 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s2 += gy[2] * R2Next; 
+>       res.s3 += gy[0] * yPlane.s3;
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s3 += gy[1] * R2Next; 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 1);
+>       res.s3 += gy[2] * R2Next; 
+465,466c537,541
+<          int gx[3];
+<      int res2;
+---
+> 
+>     yPlaneSrcDt3 -= yPlaneSrcStep*2;
+> 
+>     ushort4 temp0= convert_ushort4(abs(res));
+>         char gx[3];
+468,494c543,589
+<       gx[0] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 0 + gxSrcStep * 0)));
+<       gx[1] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 1 + gxSrcStep * 0)));
+<       gx[2] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 2 + gxSrcStep * 0)));
+<       yPlane[0] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 0 + yPlaneSrcStep * 0)));
+<       yPlane[1] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 1 + yPlaneSrcStep * 0)));
+<       yPlane[2] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 2 + yPlaneSrcStep * 0)));
+<       res2 = gx[0] * yPlane[0]; 
+<       res2 += gx[1] * yPlane[1]; 
+<       res2 += gx[2] * yPlane[2]; 
+<       gx[0] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 0 + gxSrcStep * 1)));
+<       gx[1] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 1 + gxSrcStep * 1)));
+<       gx[2] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 2 + gxSrcStep * 1)));
+<       yPlane[0] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 0 + yPlaneSrcStep * 1)));
+<       yPlane[1] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 1 + yPlaneSrcStep * 1)));
+<       yPlane[2] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 2 + yPlaneSrcStep * 1)));
+<       res2 += gx[0] * yPlane[0]; 
+<       res2 += gx[1] * yPlane[1]; 
+<       res2 += gx[2] * yPlane[2]; 
+<       gx[0] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 0 + gxSrcStep * 2)));
+<       gx[1] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 1 + gxSrcStep * 2)));
+<       gx[2] = ( int) (*((__global char*) ((__global char*) gxSrcDt1 + 2 + gxSrcStep * 2)));
+<       yPlane[0] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 0 + yPlaneSrcStep * 2)));
+<       yPlane[1] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 1 + yPlaneSrcStep * 2)));
+<       yPlane[2] = ( int) ( *((__global unsigned char*) ((__global char*) yPlaneSrcDt3 + 2 + yPlaneSrcStep * 2)));
+<       res2 += gx[0] * yPlane[0]; 
+<       res2 += gx[1] * yPlane[1]; 
+<       res2 += gx[2] * yPlane[2]; 
+---
+>       gx[0] = *(gxSrcDt1 + 0 + gxSrcStep * 0);
+>       gx[1] = *(gxSrcDt1 + 1 + gxSrcStep * 0);
+>       gx[2] = *(gxSrcDt1 + 2 + gxSrcStep * 0);
+>       yPlane = vload4(0, yPlaneSrcDt3 + 4 * 0);
+>       res.s0 = gx[0] * yPlane.s0 + gx[1] * yPlane.s1 + gx[2] * yPlane.s2;
+>       res.s1 = gx[0] * yPlane.s1 + gx[1] * yPlane.s2 + gx[2] * yPlane.s3;
+>       res.s2 = gx[0] * yPlane.s2 + gx[1] * yPlane.s3;
+> 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s2 += gx[2] * R2Next; 
+>       res.s3 = gx[0] * yPlane.s3;
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s3 += gx[1] * R2Next; 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 1);
+>       res.s3 += gx[2] * R2Next; 
+>       yPlaneSrcDt3 = yPlaneSrcDt3 + yPlaneSrcStep;
+>       gx[0] = *(gxSrcDt1 + 0 + gxSrcStep * 1);
+>       gx[1] = *(gxSrcDt1 + 1 + gxSrcStep * 1);
+>       gx[2] = *(gxSrcDt1 + 2 + gxSrcStep * 1);
+>       yPlane = vload4(0, yPlaneSrcDt3 + 4 * 0);
+>       res.s0 += gx[0] * yPlane.s0 + gx[1] * yPlane.s1 + gx[2] * yPlane.s2;
+>       res.s1 += gx[0] * yPlane.s1 + gx[1] * yPlane.s2 + gx[2] * yPlane.s3;
+>       res.s2 += gx[0] * yPlane.s2 + gx[1] * yPlane.s3;
+> 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s2 += gx[2] * R2Next; 
+>       res.s3 += gx[0] * yPlane.s3;
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s3 += gx[1] * R2Next; 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 1);
+>       res.s3 += gx[2] * R2Next; 
+>       yPlaneSrcDt3 = yPlaneSrcDt3 + yPlaneSrcStep;
+>       gx[0] = *(gxSrcDt1 + 0 + gxSrcStep * 2);
+>       gx[1] = *(gxSrcDt1 + 1 + gxSrcStep * 2);
+>       gx[2] = *(gxSrcDt1 + 2 + gxSrcStep * 2);
+>       yPlane = vload4(0, yPlaneSrcDt3 + 4 * 0);
+>       res.s0 += gx[0] * yPlane.s0 + gx[1] * yPlane.s1 + gx[2] * yPlane.s2;
+>       res.s1 += gx[0] * yPlane.s1 + gx[1] * yPlane.s2 + gx[2] * yPlane.s3;
+>       res.s2 += gx[0] * yPlane.s2 + gx[1] * yPlane.s3;
+> 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s2 += gx[2] * R2Next; 
+>       res.s3 += gx[0] * yPlane.s3;
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 0);
+>       res.s3 += gx[1] * R2Next; 
+>       R2Next = *(yPlaneSrcDt3 + 4 * 1 + 1);
+>       res.s3 += gx[2] * R2Next; 
+496,500d590
+<     if (gidy == 0 || (gidx) == 0 || gidy == 1024 - 1 || gidx == 1024 - 1)
+<       *pEdgeDstDt1 = 0;
+<     else
+<       *pEdgeDstDt1 = abs(res2) + abs(res1);
+<   }
+501a592,610
+>     temp0 += convert_ushort4(abs(res));
+>     if(gidx == 0)
+>         temp0.s0 = 0;
+> 
+>     if(gidx == 255)
+>         temp0.s3 = 0;
+> 
+> 
+>     /*
+>     *pEdgeDstDt1 = temp1.s0;
+>     *(pEdgeDstDt1 + 1) = temp1.s1;
+>     *(pEdgeDstDt1 + 2) = temp1.s2;
+>     *(pEdgeDstDt1 + 3) = temp1.s3;
+>     */
+>     *pEdgeDstDt1 = temp0.s0;
+>     *(pEdgeDstDt1 + 1) = temp0.s1;
+>     *(pEdgeDstDt1 + 2) = temp0.s2;
+>     *(pEdgeDstDt1 + 3) = temp0.s3;
+>   }
+511,512c620,621
+<   __global unsigned short * _gtmpDst,
+<   __local unsigned int * _ltmp0)
+---
+>   __global int * _gtmpDst,
+>   __local  int * _ltmp0)
+532d640
+<   __global unsigned short *pEdgeSrcDt1 = (__global char *)pEdgeSrc + pEdgeSrcIdx1;
+535c643,645
+<   ushort4 _rtmp0;
+---
+>   //ushort4 _rtmp0;
+>   ushort4 _rtmp0=(0,0,0,0);
+> 
+538,539c648
+<   _rtmp0 = *( ( __global ushort4* )pEdgeSrcDt1 );
+<   *( _ltmp0 + lid) =    _rtmp0.s0   +    _rtmp0.s1   +    _rtmp0.s2   +    _rtmp0.s3  ;
+---
+>         _rtmp0 = *( ( __global ushort4* )((__global char *)pEdgeSrc + pEdgeSrcIdx1));
+540a650,651
+> 
+>  *( _ltmp0 + lid) = (int)( _rtmp0.s0   +    _rtmp0.s1   +    _rtmp0.s2   +    _rtmp0.s3)  ;
+553c664,669
+<       *(_ltmp0 + lid) += *(_ltmp0 + lid + 64);
+---
+>      *(_ltmp0 + lid) += *(_ltmp0 + lid + 64);
+>   }
+>   barrier(CLK_LOCAL_MEM_FENCE);
+> 
+> if ((gidx << 2 ) < pEdgeSrcWidth && gidy < pEdgeSrcHeight)
+> {
+567c683
+<   atomic_add((__global int*) _gtmpDst, (int)_ltmp0[0]);
+---
+>     atomic_add((__global int*)_gtmpDst, (int)_ltmp0[0]);
+570d685
+< 
+604c719
+<   if ( gidx   >=  (1024/4) || gidy >= 1024)
+---
+>   if (gidx >= 256 || gidy >= 1024)
+608,612c723,728
+<   int pEdgeSrcIdx4 = pEdgeSrcShift + ((float)gidy) *pEdgeSrcStep + ((float)gidx *4) *sizeof(unsigned short);
+<   int yPlaneSrcIdx5 = yPlaneSrcShift + ((float)gidy + -1) *yPlaneSrcStep + ((float)gidx *4 + -1) *sizeof(unsigned char);
+<   int yPlaneSrcIdx6 = yPlaneSrcShift + ((float)gidy) *yPlaneSrcStep + ((float)gidx *4) *sizeof(unsigned char);
+<   int yPlaneCSERSrcIdx7 = yPlaneCSERSrcShift + ((float)gidy) *yPlaneCSERSrcStep + ((float)gidx *4) *sizeof(unsigned char);
+<   int dstDstIdx1 = dstDstShift + ((float)gidy) *dstDstStep + ((float)gidx *4) *sizeof(unsigned char);
+---
+> 
+>   int pEdgeSrcIdx4      = pEdgeSrcShift      + ((float)gidy)    *pEdgeSrcStep      + ((float)gidx*4)    *sizeof(unsigned short);
+>   int yPlaneSrcIdx5     = yPlaneSrcShift     + ((float)gidy -1) *yPlaneSrcStep     + ((float)gidx*4 -1) *sizeof(unsigned char);
+>   int yPlaneSrcIdx6     = yPlaneSrcShift     + ((float)gidy)    *yPlaneSrcStep     + ((float)gidx*4)    *sizeof(unsigned char);
+>   int yPlaneCSERSrcIdx7 = yPlaneCSERSrcShift + ((float)gidy)    *yPlaneCSERSrcStep + ((float)gidx*4)    *sizeof(unsigned char);
+>   int dstDstIdx1        = dstDstShift        + ((float)gidy)    *dstDstStep        + ((float)gidx*4)     *sizeof(unsigned char);
+615c731
+<   __global unsigned short *pEdgeSrcDt4 = (__global char *)pEdgeSrc + pEdgeSrcIdx4;
+---
+>   __global unsigned short *pEdgeSrcDt4 = (__global unsigned short*)((__global char*)pEdgeSrc + pEdgeSrcIdx4);
+629,632d744
+<     
+<   __global uchar *yPlaneSrcDt5Ptr = yPlaneSrcDt5; 
+< ;
+<       tans = vload4(0, yPlaneSrcDt5Ptr);
+634,635c746,749
+<       pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     4);
+---
+>       tans = vload4(0, yPlaneSrcDt5);
+>       pSrctemp = vload4(0, yPlaneSrcDt5);
+> 
+>       pSrcnext = *(yPlaneSrcDt5 +     4);
+640c754
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     5);
+---
+>       pSrcnext = *(yPlaneSrcDt5 +     5);
+645d758
+<       yPlaneSrcDt5Ptr = yPlaneSrcDt5Ptr + yPlaneSrcStep * 1;
+647,650c760,766
+<         pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<     tans = max(tans, pSrctemp);
+<       pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     4);
+---
+>       yPlaneSrcDt5 += yPlaneSrcStep * 1;
+> 
+> 
+>       pSrctemp = vload4(0, yPlaneSrcDt5);
+>       tans = max(tans, pSrctemp);
+> 
+>       pSrcnext = *(yPlaneSrcDt5 +     4);
+655c771
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     5);
+---
+>       pSrcnext = *(yPlaneSrcDt5 +     5);
+660d775
+<       yPlaneSrcDt5Ptr = yPlaneSrcDt5Ptr + yPlaneSrcStep * 1;
+662,665c777,782
+<         pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<     tans = max(tans, pSrctemp);
+<       pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     4);
+---
+>       yPlaneSrcDt5 += yPlaneSrcStep * 1;
+> 
+>       pSrctemp = vload4(0, yPlaneSrcDt5);
+>       tans = max(tans, pSrctemp);
+> 
+>       pSrcnext = *(yPlaneSrcDt5 +     4);
+670c787
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     5);
+---
+>       pSrcnext = *(yPlaneSrcDt5 +     5);
+674a792
+>     
+676,677c794,795
+<     uchar4 maxValue;
+< maxValue = convert_uchar4( max_ans1 );
+---
+>       uchar4 maxValue;
+>       maxValue = convert_uchar4( max_ans1 );
+684,687d801
+<     
+<   yPlaneSrcDt5Ptr = yPlaneSrcDt5; 
+< ;
+<       tans = vload4(0, yPlaneSrcDt5Ptr);
+689,690c803,808
+<       pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     4);
+---
+>       yPlaneSrcDt5 -= yPlaneSrcStep * 2;
+> 
+>       tans = vload4(0, yPlaneSrcDt5);
+>       pSrctemp = vload4(0, yPlaneSrcDt5);
+> 
+>       pSrcnext = *(yPlaneSrcDt5 +     4);
+695c813
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     5);
+---
+>       pSrcnext = *(yPlaneSrcDt5 +     5);
+700d817
+<       yPlaneSrcDt5Ptr = yPlaneSrcDt5Ptr + yPlaneSrcStep * 1;
+702,705c819,822
+<         pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<     tans = min(tans, pSrctemp);
+<       pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     4);
+---
+>       yPlaneSrcDt5 += yPlaneSrcStep * 1;
+>       pSrctemp = vload4(0, yPlaneSrcDt5);
+>       tans = min(tans, pSrctemp);
+>       pSrcnext = *(yPlaneSrcDt5 +     4);
+710c827
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     5);
+---
+>       pSrcnext = *(yPlaneSrcDt5 +     5);
+715d831
+<       yPlaneSrcDt5Ptr = yPlaneSrcDt5Ptr + yPlaneSrcStep * 1;
+717,720c833,836
+<         pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<     tans = min(tans, pSrctemp);
+<       pSrctemp = vload4(0, yPlaneSrcDt5Ptr);
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     4);
+---
+>       yPlaneSrcDt5 += yPlaneSrcStep * 1;
+>       pSrctemp = vload4(0, yPlaneSrcDt5);
+>       tans = min(tans, pSrctemp);
+>       pSrcnext = *(yPlaneSrcDt5 +     4);
+725c841
+<       pSrcnext = *(yPlaneSrcDt5Ptr +     5);
+---
+>       pSrcnext = *(yPlaneSrcDt5 +     5);
+731,739c847,858
+<     uchar4 minValue;
+< minValue = convert_uchar4( min_ans1 );
+<     int4 Op_ans1 = ((convert_int4)  (*((__global uchar4*) yPlaneSrcDt6))) - ( (convert_int4) (*((__global uchar4*) yPlaneCSERSrcDt7)));
+<     float4 pError;
+< pError = convert_float4( Op_ans1 );
+<     float4 Op_ans2 = (convert_float4) ((convert_int4)  (*((__global ushort4*) pEdgeSrcDt4))) * (convert_float4) ( (convert_int4) (*((__global ushort4*) pEdgeSrcDt4)));
+<       float4 MatrixSub_ans1 = (convert_float4) (*((__global ushort4*) pEdgeSrcDt4));
+<       float4 MatrixSub_ans2 = (convert_float4) (*((__global ushort4*) pEdgeSrcDt4));
+<     float4 edge2Order = convert_float4(Op_ans2 * convert_float4(MatrixSub_ans1) * convert_float4(MatrixSub_ans2));
+---
+>       uchar4 minValue;
+>       minValue = convert_uchar4( min_ans1 );
+> 
+> 
+> 
+>     float4 pError = convert_float4(*((__global uchar4*)yPlaneSrcDt6)) - convert_float4(*((__global uchar4 *)yPlaneCSERSrcDt7));
+>     
+> 
+>     float4 Op = convert_float4(*((__global short4*)pEdgeSrcDt4));
+>     float4 edge2Order = Op * Op *Op *Op; 
+> 
+> 
+742,745c861,871
+<     strength = convert_float4((enhancedF - 1) / (enhancedF * strength) + 1);
+<       float4 MatrixSub_ans3 = (convert_float4) (*((__global uchar4*) yPlaneCSERSrcDt7));
+<     enhancedF = convert_float4(pError * strength + convert_float4(MatrixSub_ans3));
+<     strength = convert_float4((0.0500000007F * edge2Order + cutoff2Order) / (cutoff2Order + edge2Order));
+---
+>     strength = convert_float4((enhancedF - 1) / (convert_float4(enhancedF * strength)) + 1);
+> 
+>     //uchar4 MatrixSub_ans3 = *(yPlaneCSERSrcDt7);
+>     //enhancedF = convert_float4(convert_uchar4(pError * strength) + MatrixSub_ans3);
+> 
+>     float4 yPlaneCESR4 = convert_float4(*((__global uchar4 *)(yPlaneCSERSrcDt7)));
+>     enhancedF = convert_float4(convert_int4(pError * strength + yPlaneCESR4));//////////////////////
+> 
+> 
+>       strength = convert_float4((0.05f * edge2Order + cutoff2Order) / (cutoff2Order + edge2Order));
+> 
+747,748c873,877
+<     edge2Order = convert_float4(convert_float4(minValue) - strength * (convert_float4(minValue) - enhancedF));
+<     strength = convert_float4(convert_float4(maxValue) + strength * (enhancedF - convert_float4(maxValue)));
+---
+> 
+>     edge2Order = convert_float4(minValue) +(- strength) * (convert_float4(minValue) - enhancedF);
+> 
+> 
+>     strength = convert_float4(maxValue)+ (strength * (enhancedF - convert_float4(maxValue)));
+750c879,881
+<     edge2Order = convert_float4(enhancedF < convert_float4(minValue) ? (edge2Order > 0 ? edge2Order : 0) : pSharpness_value);
+---
+> 
+>     edge2Order = (enhancedF < convert_float4(minValue) ? (edge2Order > 0 ? edge2Order : 0) : pSharpness_value);
+> 
+752a884
+> 

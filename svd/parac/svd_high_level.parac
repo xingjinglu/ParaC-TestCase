@@ -1,0 +1,197 @@
+#define M 256
+#define N 256
+#define ROWS 256
+#define COLS 256
+
+#define TYPE double
+
+#define MAX_ITERATIONS 40
+#define THRESHOLD 0.00001
+
+#define FLAG 1
+#define IN_PRODUCT 0
+
+#include<stdlib.h>
+
+//仅用于测试新语言，仅更新A
+void svd(parac_matrix parac_complex double &A[ROWS][COLS], parac_vector double &S[COLS], parac_matrix parac_complex double &V[ROWS][COLS])
+{
+    int pass;
+    int iterations_passed = 0;
+    
+    //初始化列索引
+    parac_matrix parac_complex double A_H[COLS][ROWS];
+    parac_matrix parac_complex double V_H[COLS][ROWS];
+
+    //
+    //transe(A, A_H); // TBD.
+    //transe(V, V_H);
+    //A_H = transe(A); // TBD.
+    //V_H = transe(V);
+#if 0 
+    for(int i = 0; i < ROWS; i++){
+      for(int j = 0; j < COLS; j++){
+        A_H[j][i].r = A[i][j].r; 
+        A_H[j][i].i = A[i][j].i; 
+      }
+    }
+#endif
+
+    // init index.
+    parac_vector int rotate_col_idx[COLS];
+    for(int i = 0; i < COLS; i++)
+        rotate_col_idx[i] = i;
+		
+    
+    int iteration = MAX_ITERATIONS;
+    int start_index, skip_trans;
+    while(iteration > 0)
+    {
+      //判断程序是否收敛
+
+      for(int i = 0; i < COLS; i++)
+      {
+        //判断是奇数阶段还是偶数阶段，如果是偶数阶段，从第0个索引开始，否则从第1个索引开始
+        start_index = (i % 2 == 0) ? 0 : 1;
+
+        parac_iterator it(iter_row; start_index:COLS:2)
+        {
+          
+
+        if ( i == 0 && itx == 0 ) pass = 1;
+          //获取需要进行正交变换的两列
+          int col_p = rotate_col_idx[itx];
+          int col_q = rotate_col_idx[itx+1];
+
+          parac_vector parac_complex double &ci[COLS] = A_H[col_p][*];				
+          parac_vector parac_complex double &cj[COLS] = A_H[col_q][*];
+
+          // 
+          // parac_complex double testCD = {0,2};
+          // double (*testCD)[2] = &{0,2};
+          // testCD.r = 10;
+          // (*testCD)[0] = 10;
+
+          //判断两列是否正交
+          parac_complex double value = inner_product(ci,cj);
+
+          //inner_product 实现
+          //parac_complex_double value;
+          //parac_iterator it1(0:ROWS-1:1)
+          //{
+          //value.r += ci[it1].r * cj[it1].r + ci[it1].i * cj[it1].i;
+          //value.i += ci[it1].r * cj[it1].i - ci[it1].i * cj[it1].r;
+          //}				
+
+          double value_abs = complex_norm(value);
+
+            if(value_abs >= THRESHOLD)
+            {
+              //SVD 列列变换
+              pass = 0;
+
+              double a = value.i, b=value.r;
+              TYPE s_a2b2 = sig(b) * sqrt(a * a + b * b);
+              TYPE sin_alpha = a / s_a2b2;
+              TYPE cos_alpha = b / s_a2b2;
+              TYPE m = -1 * (b * cos_alpha + a * sin_alpha);
+
+              double part_value = part_product (ci, cj);
+
+              //part_product 实现
+              //double part_value
+              //parac_iterator it2(0:ROWS-1:1)
+              //{
+              //part_value += cj[it2].r * cj[it2].r + cj[it2].i * cj[it2].i - ci[it2].r * ci[it2].r - ci[it2].i * ci[it2].i;
+              //}
+
+              TYPE n = 0.5 * part_value;
+              TYPE w = sig(n) * m / sqrt(m*m + n*n);
+
+              TYPE sin_x = w/sqrt(2 * (1 + sqrt(1 - w * w)));
+              TYPE cos_x = sqrt(1 - sin_x * sin_x);
+
+              parac_vector parac_complex double mid_result[COLS], mid_result1[COLS];
+
+              parac_complex double d = {0, 1};
+
+              mid_result  = ci * cos_x + cj * cos_alpha * sin_x - d * cj * sin_alpha * sin_x;
+              mid_result1 = cj * cos_x - ci * cos_alpha * sin_x - d * ci * sin_alpha * sin_x;
+
+              A_H[col_p][*] = mid_result;
+              A_H[col_q][*] = mid_result1;
+
+              parac_vector parac_complex double &vi[COLS] = V_H[col_p][*];				
+              parac_vector parac_complex double &vj[COLS] = V_H[col_q][*];
+
+              mid_result  = vi * cos_x + vj * cos_alpha * sin_x - d * vj * sin_alpha * sin_x;
+              mid_result1 = vj * cos_x - vi * cos_alpha * sin_x - d * vi * sin_alpha * sin_x;
+
+              V_H[col_p][*] = mid_result;
+              V_H[col_q][*] = mid_result1;
+            }
+
+          rotate_col_idx[itx] = col_q; // bugs? j-1
+          rotate_col_idx[itx+1] = col_p;
+        }
+      }
+
+      iteration--;
+      if(pass == 1)
+        break;
+    }
+	
+
+
+	parac_iterator it2(iter_row; 0:COLS:1)
+	{
+    parac_vector parac_complex double &ci[COLS] = A_H[it2x][*];
+    double norm_A = sqrt(complex_norm(inner_product(ci,ci)));
+
+    S[it2x] = norm_A;	
+
+    ci = ci/norm_A;
+  }	
+  //transe(A_H, A);
+  //transe(V_H, V);
+  //transe(A);
+  //transe(V);
+}
+
+int main()
+{
+	double *data; // = data_in_memory;//data_in_memory 为分解矩阵的数据,复数存数方式为分离存储
+	
+  double *A_data = (double*)malloc(sizeof(double)*M*N*2);
+  double *A_H_data = (double*)malloc(sizeof(double)*M*N*2);
+  double *V_data = (double*)malloc(sizeof(double)*M*N*2);
+  double *V_H_data = (double*)malloc(sizeof(double)*M*N*2);
+  memset(V_data, 0, M*N*2*sizeof(double));
+  for(int i = 0; i < N; i++)
+        V_data[i*N+i]=1.0f;
+
+  for(int i = 0; i < ROWS*2; i++){
+    for( int j = 0; j < COLS; j++){
+      A_data[i*COLS + j] = rand() % 256; 
+    }
+  }
+
+  // Transe.
+  for(int i = 0; i < ROWS; i++){
+    for( int j = 0; j < COLS; j++){
+      A_H_data[j*COLS +i] = A_data[i*COLS+j]; 
+    }
+  }
+
+  for(int i = ROWS; i < ROWS; i++){
+    for( int j = 0; j < COLS; j++){
+      A_H_data[(i+ROWS)*COLS+j] = A_data[(j+ROWS)*COLS+i]; 
+    }
+  }
+
+	parac_matrix parac_complex double &A[M][N] = A_H_data; // = data;
+  parac_matrix parac_complex double &V[M][N] = V_data;
+	parac_vector double S[N];
+	
+	svd(A, S, V);
+}

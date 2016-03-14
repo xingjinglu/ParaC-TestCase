@@ -1,0 +1,274 @@
+Error: build kernel fails
+
+			BUILD LOG
+"/tmp/OCL21394T8.cl", line 50: warning: a value of type "__global char *"
+          cannot be used to initialize an entity of type "__global int *"
+    __global int *rotate_col_idxDSDt5 = (__global char *)rotate_col_idxDS + rotate_col_idxDSIdx5;
+                                        ^
+
+"/tmp/OCL21394T8.cl", line 51: warning: a value of type "__global char *"
+          cannot be used to initialize an entity of type "__global int *"
+    __global int *rotate_col_idxDSDt6 = (__global char *)rotate_col_idxDS + rotate_col_idxDSIdx6;
+                                        ^
+
+"/tmp/OCL21394T8.cl", line 57: error: identifier "rotate_col_idx" is undefined
+      int col_p = rotate_col_idx[gridy];
+                  ^
+
+"/tmp/OCL21394T8.cl", line 62: error: expression must have pointer-to-object
+          type
+      ci[1] = &A_HDS[1][col_p];
+               ^
+
+"/tmp/OCL21394T8.cl", line 63: error: expression must have pointer-to-object
+          type
+      ci[0] = &A_HDS[0][col_p];
+               ^
+
+"/tmp/OCL21394T8.cl", line 67: error: expression must have pointer-to-object
+          type
+      cj[1] = &A_HDS[1][col_q];
+               ^
+
+"/tmp/OCL21394T8.cl", line 68: error: expression must have pointer-to-object
+          type
+      cj[0] = &A_HDS[0][col_q];
+               ^
+
+"/tmp/OCL21394T8.cl", line 75: error: function "inner_product" declared
+          implicitly
+      double (*value)[2] = (double(*)[2])inner_product(ci0R,ci0I,cj0R,cj0I,ld1,ld2,lidx );
+                                         ^
+
+"/tmp/OCL21394T8.cl", line 89: error: function "part_product" declared
+          implicitly
+        double part_value = part_product(ci1R,ci1I,cj1R,cj1I,ld1,lidx );
+                            ^
+
+"/tmp/OCL21394T8.cl", line 96: error: expression must have arithmetic type
+        mid_result[1][lidx] = ci[1][lidx] * cos_x + cj[1][lidx] * cos_alpha * sin_x - i * cj[1][lidx] * sin_alpha * sin_x;
+                              ^
+
+"/tmp/OCL21394T8.cl", line 96: error: expression must have arithmetic type
+        mid_result[1][lidx] = ci[1][lidx] * cos_x + cj[1][lidx] * cos_alpha * sin_x - i * cj[1][lidx] * sin_alpha * sin_x;
+                                                    ^
+
+"/tmp/OCL21394T8.cl", line 96: error: expression must have arithmetic type
+        mid_result[1][lidx] = ci[1][lidx] * cos_x + cj[1][lidx] * cos_alpha * sin_x - i * cj[1][lidx] * sin_alpha * sin_x;
+                                                                                          ^
+
+"/tmp/OCL21394T8.cl", line 97: error: expression must have arithmetic type
+        mid_result[0][lidx] = ci[0][lidx] * cos_x + cj[0][lidx] * cos_alpha * sin_x - i * cj[0][lidx] * sin_alpha * sin_x;
+                              ^
+
+"/tmp/OCL21394T8.cl", line 97: error: expression must have arithmetic type
+        mid_result[0][lidx] = ci[0][lidx] * cos_x + cj[0][lidx] * cos_alpha * sin_x - i * cj[0][lidx] * sin_alpha * sin_x;
+                                                    ^
+
+"/tmp/OCL21394T8.cl", line 97: error: expression must have arithmetic type
+        mid_result[0][lidx] = ci[0][lidx] * cos_x + cj[0][lidx] * cos_alpha * sin_x - i * cj[0][lidx] * sin_alpha * sin_x;
+                                                                                          ^
+
+"/tmp/OCL21394T8.cl", line 98: error: expression must have arithmetic type
+        mid_result1[1][lidx] = cj[1][lidx] * cos_x - ci[1][lidx] * cos_alpha * sin_x - i * ci[1][lidx] * sin_alpha * sin_x;
+                               ^
+
+"/tmp/OCL21394T8.cl", line 98: error: expression must have arithmetic type
+        mid_result1[1][lidx] = cj[1][lidx] * cos_x - ci[1][lidx] * cos_alpha * sin_x - i * ci[1][lidx] * sin_alpha * sin_x;
+                                                     ^
+
+"/tmp/OCL21394T8.cl", line 98: error: expression must have arithmetic type
+        mid_result1[1][lidx] = cj[1][lidx] * cos_x - ci[1][lidx] * cos_alpha * sin_x - i * ci[1][lidx] * sin_alpha * sin_x;
+                                                                                           ^
+
+"/tmp/OCL21394T8.cl", line 99: error: expression must have arithmetic type
+        mid_result1[0][lidx] = cj[0][lidx] * cos_x - ci[0][lidx] * cos_alpha * sin_x - i * ci[0][lidx] * sin_alpha * sin_x;
+                               ^
+
+"/tmp/OCL21394T8.cl", line 99: error: expression must have arithmetic type
+        mid_result1[0][lidx] = cj[0][lidx] * cos_x - ci[0][lidx] * cos_alpha * sin_x - i * ci[0][lidx] * sin_alpha * sin_x;
+                                                     ^
+
+"/tmp/OCL21394T8.cl", line 99: error: expression must have arithmetic type
+        mid_result1[0][lidx] = cj[0][lidx] * cos_x - ci[0][lidx] * cos_alpha * sin_x - i * ci[0][lidx] * sin_alpha * sin_x;
+                                                                                           ^
+
+"/tmp/OCL21394T8.cl", line 107: error: expression must have pointer-to-object
+          type
+        vi[1] = &V_HDS[1][col_p];
+                 ^
+
+"/tmp/OCL21394T8.cl", line 108: error: expression must have pointer-to-object
+          type
+        vi[0] = &V_HDS[0][col_p];
+                 ^
+
+"/tmp/OCL21394T8.cl", line 112: error: expression must have pointer-to-object
+          type
+        vj[1] = &V_HDS[1][col_q];
+                 ^
+
+"/tmp/OCL21394T8.cl", line 113: error: expression must have pointer-to-object
+          type
+        vj[0] = &V_HDS[0][col_q];
+                 ^
+
+"/tmp/OCL21394T8.cl", line 114: error: expression must have arithmetic type
+        mid_result[1][lidx] = vi[1][lidx] * cos_x + vj[1][lidx] * cos_alpha * sin_x - i * vj[1][lidx] * sin_alpha * sin_x;
+                              ^
+
+"/tmp/OCL21394T8.cl", line 114: error: expression must have arithmetic type
+        mid_result[1][lidx] = vi[1][lidx] * cos_x + vj[1][lidx] * cos_alpha * sin_x - i * vj[1][lidx] * sin_alpha * sin_x;
+                                                    ^
+
+"/tmp/OCL21394T8.cl", line 114: error: expression must have arithmetic type
+        mid_result[1][lidx] = vi[1][lidx] * cos_x + vj[1][lidx] * cos_alpha * sin_x - i * vj[1][lidx] * sin_alpha * sin_x;
+                                                                                          ^
+
+"/tmp/OCL21394T8.cl", line 115: error: expression must have arithmetic type
+        mid_result[0][lidx] = vi[0][lidx] * cos_x + vj[0][lidx] * cos_alpha * sin_x - i * vj[0][lidx] * sin_alpha * sin_x;
+                              ^
+
+"/tmp/OCL21394T8.cl", line 115: error: expression must have arithmetic type
+        mid_result[0][lidx] = vi[0][lidx] * cos_x + vj[0][lidx] * cos_alpha * sin_x - i * vj[0][lidx] * sin_alpha * sin_x;
+                                                    ^
+
+"/tmp/OCL21394T8.cl", line 115: error: expression must have arithmetic type
+        mid_result[0][lidx] = vi[0][lidx] * cos_x + vj[0][lidx] * cos_alpha * sin_x - i * vj[0][lidx] * sin_alpha * sin_x;
+                                                                                          ^
+
+"/tmp/OCL21394T8.cl", line 116: error: expression must have arithmetic type
+        mid_result1[1][lidx] = vj[1][lidx] * cos_x - vi[1][lidx] * cos_alpha * sin_x - i * vi[1][lidx] * sin_alpha * sin_x;
+                               ^
+
+"/tmp/OCL21394T8.cl", line 116: error: expression must have arithmetic type
+        mid_result1[1][lidx] = vj[1][lidx] * cos_x - vi[1][lidx] * cos_alpha * sin_x - i * vi[1][lidx] * sin_alpha * sin_x;
+                                                     ^
+
+"/tmp/OCL21394T8.cl", line 116: error: expression must have arithmetic type
+        mid_result1[1][lidx] = vj[1][lidx] * cos_x - vi[1][lidx] * cos_alpha * sin_x - i * vi[1][lidx] * sin_alpha * sin_x;
+                                                                                           ^
+
+"/tmp/OCL21394T8.cl", line 117: error: expression must have arithmetic type
+        mid_result1[0][lidx] = vj[0][lidx] * cos_x - vi[0][lidx] * cos_alpha * sin_x - i * vi[0][lidx] * sin_alpha * sin_x;
+                               ^
+
+"/tmp/OCL21394T8.cl", line 117: error: expression must have arithmetic type
+        mid_result1[0][lidx] = vj[0][lidx] * cos_x - vi[0][lidx] * cos_alpha * sin_x - i * vi[0][lidx] * sin_alpha * sin_x;
+                                                     ^
+
+"/tmp/OCL21394T8.cl", line 117: error: expression must have arithmetic type
+        mid_result1[0][lidx] = vj[0][lidx] * cos_x - vi[0][lidx] * cos_alpha * sin_x - i * vi[0][lidx] * sin_alpha * sin_x;
+                                                                                           ^
+
+"/tmp/OCL21394T8.cl", line 94: warning: variable "mid_result" was set but
+          never used
+        double mid_result[2][256];
+               ^
+
+"/tmp/OCL21394T8.cl", line 95: warning: variable "mid_result1" was set but
+          never used
+        double mid_result1[2][256];
+               ^
+
+"/tmp/OCL21394T8.cl", line 9: warning: parameter "pass" was set but never used
+    int pass,
+        ^
+
+"/tmp/OCL21394T8.cl", line 46: warning: variable "A_HDSDt1" was set but never
+          used
+    __global double *A_HDSDt1;
+                     ^
+
+"/tmp/OCL21394T8.cl", line 47: warning: variable "A_HDSDt2" was set but never
+          used
+    __global double *A_HDSDt2;
+                     ^
+
+"/tmp/OCL21394T8.cl", line 48: warning: variable "V_HDSDt3" was set but never
+          used
+    __global double *V_HDSDt3;
+                     ^
+
+"/tmp/OCL21394T8.cl", line 49: warning: variable "V_HDSDt4" was set but never
+          used
+    __global double *V_HDSDt4;
+                     ^
+
+"/tmp/OCL21394T8.cl", line 50: warning: variable "rotate_col_idxDSDt5" was
+          declared but never referenced
+    __global int *rotate_col_idxDSDt5 = (__global char *)rotate_col_idxDS + rotate_col_idxDSIdx5;
+                  ^
+
+"/tmp/OCL21394T8.cl", line 51: warning: variable "rotate_col_idxDSDt6" was
+          declared but never referenced
+    __global int *rotate_col_idxDSDt6 = (__global char *)rotate_col_idxDS + rotate_col_idxDSIdx6;
+                  ^
+
+"/tmp/OCL21394T8.cl", line 153: warning: a value of type "__global char *"
+          cannot be used to initialize an entity of type "__global double *"
+    __global double *A_HDSDt1 = (__global char *)A_HDS + A_HDSIdx1;
+                                ^
+
+"/tmp/OCL21394T8.cl", line 157: warning: initialization with "{...}" expected
+          for aggregate object
+      double (*ci[2])[256] = A_H[gridy][*];
+                             ^
+
+"/tmp/OCL21394T8.cl", line 157: error: identifier "A_H" is undefined
+      double (*ci[2])[256] = A_H[gridy][*];
+                             ^
+
+"/tmp/OCL21394T8.cl", line 157: error: expected an expression
+      double (*ci[2])[256] = A_H[gridy][*];
+                                         ^
+
+"/tmp/OCL21394T8.cl", line 158: error: identifier "it2x" is undefined
+      ci[1] = &A_HDS[1][it2x];
+                        ^
+
+"/tmp/OCL21394T8.cl", line 158: error: expression must have pointer-to-object
+          type
+      ci[1] = &A_HDS[1][it2x];
+               ^
+
+"/tmp/OCL21394T8.cl", line 159: error: expression must have pointer-to-object
+          type
+      ci[0] = &A_HDS[0][it2x];
+               ^
+
+"/tmp/OCL21394T8.cl", line 166: error: function "inner_product" declared
+          implicitly
+          double (*TempVal1)[2] = (double(*)[2])inner_product(TempVal1R, TempVal1I, STempVal1R, STempVal1I, TempVal1ld1, TempVal1ld2, lidx);
+                                                ^
+
+"/tmp/OCL21394T8.cl", line 168: error: identifier "S" is undefined
+      S[gidy] = norm_A;
+      ^
+
+"/tmp/OCL21394T8.cl", line 169: error: expression must have arithmetic type
+      ci[1][lidx] = ci[1][lidx] / norm_A;
+                    ^
+
+"/tmp/OCL21394T8.cl", line 169: error: expression must be a modifiable lvalue
+      ci[1][lidx] = ci[1][lidx] / norm_A;
+      ^
+
+"/tmp/OCL21394T8.cl", line 170: error: expression must have arithmetic type
+      ci[0][lidx] = ci[0][lidx] / norm_A;
+                    ^
+
+"/tmp/OCL21394T8.cl", line 170: error: expression must be a modifiable lvalue
+      ci[0][lidx] = ci[0][lidx] / norm_A;
+      ^
+
+"/tmp/OCL21394T8.cl", line 153: warning: variable "A_HDSDt1" was declared but
+          never referenced
+    __global double *A_HDSDt1 = (__global char *)A_HDS + A_HDSIdx1;
+                     ^
+
+46 errors detected in the compilation of "/tmp/OCL21394T8.cl".
+
+Frontend phase failed compilation.
+
+Error: clCreateKernel for kernel_1 -46
