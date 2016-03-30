@@ -1,0 +1,1 @@
+scp -P 4404 blur.parac blur.c blur.cl luxingjing@10.12.0.163:~/software/parac/blur/
