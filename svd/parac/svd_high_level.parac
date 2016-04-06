@@ -11,7 +11,8 @@
 #define FLAG 1
 #define IN_PRODUCT 0
 
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 //仅用于测试新语言，仅更新A
 void svd(parac_matrix parac_complex double &A[ROWS][COLS], parac_vector double &S[COLS], parac_matrix parac_complex double &V[ROWS][COLS])
@@ -161,6 +162,14 @@ void svd(parac_matrix parac_complex double &A[ROWS][COLS], parac_vector double &
 int main()
 {
 	double *data; // = data_in_memory;//data_in_memory 为分解矩阵的数据,复数存数方式为分离存储
+  
+  // I/O part.
+  FILE *fin = fopen("./data/Matrix_input_A256.txt", "r");
+  if(!fin){
+      printf("Matrix input A is not available\n");
+      return 1;
+  }
+
 	
   double *A_data = (double*)malloc(sizeof(double)*M*N*2);
   double *A_H_data = (double*)malloc(sizeof(double)*M*N*2);
@@ -170,10 +179,21 @@ int main()
   for(int i = 0; i < N; i++)
         V_data[i*N+i]=1.0f;
 
+#if 0
   for(int i = 0; i < ROWS*2; i++){
     for( int j = 0; j < COLS; j++){
       A_data[i*COLS + j] = rand() % 256; 
     }
+  }
+#endif
+
+  for( int i = 0; i < ROWS; i++)
+  {
+    for( int j = 0; j < COLS; j++) // Real part.
+      fscanf(fin,  "%lf", &A_data[i * COLS + j]);
+
+    for( int j = 0; j < COLS; j++)
+      fscanf(fin, "%lf",  &A_data[ROWS*COLS + i * COLS + j]);
   }
 
   // Transe.
