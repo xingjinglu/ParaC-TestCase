@@ -4,16 +4,16 @@
 #define COLS 1024
 #define M 1024
 #define N 1024
-int Laplacian(matrix unsigned char &Src[M][N], matrix unsigned char &layer[M][N])
+int Laplacian(parac_matrix unsigned char &Src[M][N], parac_matrix unsigned char &layer[M][N])
 {
-    matrix unsigned char filter_horizon[1][5] = {1,4,6,4,1};
-    matrix unsigned char filter_vertical[5][1] = {1,4,6,4,1};
-    matrix unsigned char dst_horizon[M][N];    
-    matrix unsigned char dst_vertical[M][N];    
-    matrix unsigned char dst_ds[(M+1)/2][(N+1)/2];            
+    parac_matrix unsigned char filter_horizon[1][5] = {1,4,6,4,1};
+    parac_matrix unsigned char filter_vertical[5][1] = {1,4,6,4,1};
+    parac_matrix unsigned char dst_horizon[M][N];    
+    parac_matrix unsigned char dst_vertical[M][N];    
+    parac_matrix unsigned char dst_ds[(M+1)/2][(N+1)/2];            
 
     //定义越界规则
-    border_rule br
+    parac_border_rule br
     {
         Src[*][-2] = Src[*][3]*4-Src[*][1]*4+Src[*][0]*2-Src[*][2];
         Src[*][-1] = Src[*][1]*2-Src[*][3];
@@ -22,13 +22,13 @@ int Laplacian(matrix unsigned char &Src[M][N], matrix unsigned char &layer[M][N]
     }
 
     //水平滤波
-    iterator it(iter_element; 0:M:1; 0:N:1) border_rule(br)
+    parac_iterator it(iter_element; 0:M:1; 0:N:1) parac_border_rule(br)
     {
         dst_horizon[itx][ity] = (convolution(filter_horizon, Src[itx][ity-2:5:1])+8)/16;
     }
 
     //定义越界规
-    border_rule br1
+    parac_border_rule br1
     {
         dst_horizon [-2][*] = dst_horizon [3][*]*4- dst_horizon [1][*]*4+ dst_horizon [0][*]*2- dst_horizon [2][*];
         dst_horizon [-1][*] = dst_horizon [1][*]*2- dst_horizon [3][*];
@@ -38,20 +38,20 @@ int Laplacian(matrix unsigned char &Src[M][N], matrix unsigned char &layer[M][N]
 
 
     //垂直滤波+4倍下采样
-    iterator it1(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1) border_rule(br1)
+    parac_iterator it1(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1) parac_border_rule(br1)
     {
         dst_ds[it1x][it1y] = (convolution(filter_vertical, dst_horizon [it1x*2-2:5:1][it1y*2])+8)/16;
     }
 
     /*  分为两个kernel，暂时不采用这个方案
     //垂直滤波
-    iterator it1(iter_element; 0:M:1; 0:N:1) border_rule(br1)
+    parac_iterator it1(iter_element; 0:M:1; 0:N:1) parac_border_rule(br1)
     {
         dst_vertical[it1x][it1y] = (convolution(dst_horizon [it1x-2:5:1][it1y], filter_vertical)+8)/16;
     }
     
     //4倍下采样
-    iterator it2(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1)
+    parac_iterator it2(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1)
     {
         dst_ds[it1x][it1y] = dst_vertical[it1x *2][it1y*2];
     }
@@ -63,7 +63,7 @@ int Laplacian(matrix unsigned char &Src[M][N], matrix unsigned char &layer[M][N]
     int widthOdd = N - (halfWidth*2);
     int heightOdd = M - (halfHeight*2);
     
-    iterator it(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1)
+    parac_iterator it(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1)
     {
       //int widthOdd = N - (halfWidth*2);
       //int heightOdd = M - (halfHeight*2);
@@ -115,8 +115,8 @@ int main()
     unsigned char *src_data = (unsigned char *)malloc(sizeof(unsigned char) * ROWS * COLS);
     unsigned char *dst_data = (unsigned char *)malloc(sizeof(unsigned char) * ROWS * COLS);
     
-    matrix unsigned char &src[ROWS][COLS] = src_data;
-    matrix unsigned char &Layer[ROWS][COLS] = dst_data;
+    parac_matrix unsigned char &src[ROWS][COLS] = src_data;
+    parac_matrix unsigned char &Layer[ROWS][COLS] = dst_data;
     
     for (int i = 0; i < ROWS*COLS; i++)
     {
