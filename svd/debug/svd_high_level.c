@@ -1,13 +1,6 @@
 /**************************************************/
 /* This file is generated automatically by clang. */
 /**************************************************/
-#include<iostream>
-#include<stdlib.h>
-#include<fstream>
-#include<math.h>
-#include<iomanip>
-#include<memory.h>
-#include<sys/time.h>
 
 #include"CL/cl.h"
 #include"ClHost.h"
@@ -26,46 +19,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
-using namespace std;
-
-//比较两个向量是否相等，只为测试
-bool is_matrix_equal(TYPE *A, TYPE *B, TYPE eps) 
-{
-    for(int i = 0; i < ROWS * 2; i++)
-        for(int j = 0; j < COLS; j++)
-        {
-            if(fabs(A[i * COLS + j] - B[i * COLS +j]) > eps)
-            {
-                cout << "i = " << i << "j = " << j  <<endl;
-                cout << "A = " << A[i * COLS + j] <<endl;
-                cout << "B= "  << B[i * COLS + j] << endl; 
-                return 0;
-            }
-        }
-
-    return 1;
-}
-//比较两个奇异值是否相等，只为测试
-bool is_vector_equal(TYPE *A, TYPE *B, TYPE eps) 
-{
-    for(int j = 0; j < COLS; j++)
-    {
-        if(fabs(A[j] - B[j]) > eps)
-        {
-            cout << "j = " << j  <<endl;
-            cout << "A = " << A[j] <<endl;
-            cout << "B= "  << B[j] << endl; 
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-
-
-
 
 //仅用于测试新语言，仅更新A
 void svd(double (*A)[2][256][256], double (*S)[256], double (*V)[2][256][256]) {
@@ -306,81 +259,6 @@ int main() {
   double (*V)[2][256][256] = (double (*)[2][256][256])V_data;
   double S[256];
   svd(A, &S, V);
-
-/*****************************测试运算结果************************************/
-    TYPE *A1 = new TYPE[ROWS * COLS * 2];   
-    TYPE *V1 = new TYPE[ROWS * COLS * 2];  
-    TYPE *S1 = new TYPE[COLS];            
-
-    //测试A的正确性
-    fstream f1("./data/Matrix_out_A256.txt", ios::in);
-    if(!f1)
-    {
-        cout << "matrix output A is not found" << endl;
-        return 1;
-    }
-    for(int i = 0; i < ROWS; i++)
-    {
-        for(int j = 0; j < COLS; j++)
-            f1 >>setprecision(6) >>  A1[i * COLS + j];
-
-        for(int j = 0; j < COLS; j++)
-            f1 >>setprecision(6) >>  A1[ROWS * COLS + i * COLS + j];
-    }
-
-    f1.close();
-
-    cout << "compare A" << endl;
-
-    bool result;// = is_matrix_equal(A, A1, 0.1);
-    //if(result ==1)
-        cout << "success" << endl;
-
-
-    //测试V的正确性
-    fstream f2("./data/Matrix_out_V256.txt", ios::in);
-    if(!f2)
-    {
-        cout << "matrix output V is not found" << endl;
-        return 1;
-    }
-    for(int i = 0; i < ROWS; i++)
-    {
-        for(int j = 0; j < COLS; j++)
-            f2 >>setprecision(6) >>  V1[i * COLS + j];
-
-        for(int j = 0; j < COLS; j++)
-            f2 >>setprecision(6) >>  V1[ROWS * COLS + i * COLS + j];
-    }
-
-    f2.close();
-
-    cout << "compare V" << endl;
-
-    result = is_matrix_equal((double*)V, V1, 0.1);
-    if(result ==1)
-        cout << "success" << endl;
-
-    //测试矩阵S的正确性
-    fstream f3("./data/Matrix_out_S256.txt", ios::in);
-    if(!f3)
-    {
-        cout << "matrix output S is not found" << endl;
-        return 1;
-    }
-
-    for(int i = 0; i < COLS; i++)
-        f3 >>setprecision(6) >>  S1[i];
-
-    f3.close();
-
-    cout << "compare S" << endl;
-
-    result = is_vector_equal(S, S1, 0.1);
-    if(result ==1)
-        cout << "success" << endl;
-
-
 }
 
 
