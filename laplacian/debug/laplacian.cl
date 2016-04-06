@@ -25,8 +25,8 @@ __kernel void kernel_1(
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx   >=  (1024/4) || gidy >= 1024)
-   return;
+  if ( gidx >= (1024/4) || gidy >= 1024 )
+    return;
 
   /* kernel index calculation */
   int SrcSrcIdx1 = SrcSrcShift + ((float)gidy) *SrcSrcStep + ((float)gidx *4 + -2) *sizeof(unsigned char);
@@ -210,8 +210,8 @@ __kernel void kernel_2(
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if (gidx >= 512 || gidy >= 512)
-   return;
+  if ( gidx >= 512 || gidy >= 512 )
+    return;
 
   /* kernel index calculation */
   int dst_horizonSrcIdx1 = dst_horizonSrcShift + ((float)gidy * 2 + -2) *dst_horizonSrcStep + ((float)gidx * 2) *sizeof(unsigned char);
@@ -346,7 +346,7 @@ __kernel void kernel_3(
   int dst_dsSrcShift,
   int widthOdd,
   int heightOdd,
-  __global short *layerDst,
+  __global unsigned char *layerDst,
   int layerDstWidth,
   int layerDstHeight,
   int layerDstStep,
@@ -357,12 +357,12 @@ __kernel void kernel_3(
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if (gidx >= 512 || gidy >= 512)
-   return;
+  if ( gidx >= 512 || gidy >= 512 )
+    return;
 
   /* kernel index calculation */
-  int SrcSrcIdx1 = SrcSrcShift + ((float)gidx * 2) *sizeof(unsigned char);
-  int SrcSrcIdx2 = SrcSrcShift + ((float)gidx * 2 + 1) *sizeof(unsigned char);
+  int SrcSrcIdx1;
+  int SrcSrcIdx2;
   int SrcSrcIdx3 = SrcSrcShift + (1024 - 1) *SrcSrcStep + ((float)gidx * 2) *sizeof(unsigned char);
   int SrcSrcIdx4 = SrcSrcShift + (1024 - 1) *SrcSrcStep + ((float)gidx * 2 + 1) *sizeof(unsigned char);
   int SrcSrcIdx5 = SrcSrcShift + ((float)gidy * 2 + -1) *SrcSrcStep + ((float)gidx * 2) *sizeof(unsigned char);
@@ -372,23 +372,24 @@ __kernel void kernel_3(
   int dst_dsSrcIdx9 = dst_dsSrcShift + ((1024 + 1) / 2 - 1) *dst_dsSrcStep + ((float)gidx) *sizeof(unsigned char);
   int dst_dsSrcIdx10 = dst_dsSrcShift + ((1024 + 1) / 2 - 1) *dst_dsSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
   int dst_dsSrcIdx11 = dst_dsSrcShift + ((float)gidx) *sizeof(unsigned char);
-  int dst_dsSrcIdx12 = dst_dsSrcShift + ((float)gidx + 1) *sizeof(unsigned char);
-  int dst_dsSrcIdx13 = dst_dsSrcShift + ((float)gidy + -1) *dst_dsSrcStep + ((float)gidx) *sizeof(unsigned char);
-  int dst_dsSrcIdx14 = dst_dsSrcShift + ((float)gidy + -1) *dst_dsSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
-  int dst_dsSrcIdx15 = dst_dsSrcShift + ((float)gidy) *dst_dsSrcStep + ((float)gidx) *sizeof(unsigned char);
-  int dst_dsSrcIdx16 = dst_dsSrcShift + ((float)gidy) *dst_dsSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
-  int layerDstIdx1 = layerDstShift + ((float)gidx * 2) *sizeof(short);
-  int layerDstIdx2 = layerDstShift + ((float)gidx * 2 + 1) *sizeof(short);
-  int layerDstIdx3 = layerDstShift + (1024 - 1) *layerDstStep + ((float)gidx * 2) *sizeof(short);
-  int layerDstIdx4 = layerDstShift + (1024 - 1) *layerDstStep + ((float)gidx * 2 + 1) *sizeof(short);
-  int layerDstIdx5 = layerDstShift + ((float)gidy * 2 + -1) *layerDstStep + ((float)gidx * 2) *sizeof(short);
-  int layerDstIdx6 = layerDstShift + ((float)gidy * 2 + -1) *layerDstStep + ((float)gidx * 2 + 1) *sizeof(short);
-  int layerDstIdx7 = layerDstShift + ((float)gidy * 2) *layerDstStep + ((float)gidx * 2) *sizeof(short);
-  int layerDstIdx8 = layerDstShift + ((float)gidy * 2) *layerDstStep + ((float)gidx * 2 + 1) *sizeof(short);
+  int dst_dsSrcIdx12;
+  int dst_dsSrcIdx13 = dst_dsSrcShift + (1024 - 1) *dst_dsSrcStep + ((float)gidx) *sizeof(unsigned char);
+  int dst_dsSrcIdx14 = dst_dsSrcShift + ((float)gidy + -1) *dst_dsSrcStep + ((float)gidx) *sizeof(unsigned char);
+  int dst_dsSrcIdx15 = dst_dsSrcShift + ((float)gidy + -1) *dst_dsSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
+  int dst_dsSrcIdx16 = dst_dsSrcShift + ((float)gidy) *dst_dsSrcStep + ((float)gidx) *sizeof(unsigned char);
+  int dst_dsSrcIdx17 = dst_dsSrcShift + ((float)gidy) *dst_dsSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
+  int layerDstIdx1;
+  int layerDstIdx2;
+  int layerDstIdx3 = layerDstShift + (1024 - 1) *layerDstStep + ((float)gidx * 2) *sizeof(unsigned char);
+  int layerDstIdx4 = layerDstShift + (1024 - 1) *layerDstStep + ((float)gidx * 2 + 1) *sizeof(unsigned char);
+  int layerDstIdx5 = layerDstShift + ((float)gidy * 2 + -1) *layerDstStep + ((float)gidx * 2) *sizeof(unsigned char);
+  int layerDstIdx6 = layerDstShift + ((float)gidy * 2 + -1) *layerDstStep + ((float)gidx * 2 + 1) *sizeof(unsigned char);
+  int layerDstIdx7 = layerDstShift + ((float)gidy * 2) *layerDstStep + ((float)gidx * 2) *sizeof(unsigned char);
+  int layerDstIdx8 = layerDstShift + ((float)gidy * 2) *layerDstStep + ((float)gidx * 2 + 1) *sizeof(unsigned char);
 
   /* kernel operands */
-  __global unsigned char *SrcSrcDt1 = SrcSrc + SrcSrcIdx1;
-  __global unsigned char *SrcSrcDt2 = SrcSrc + SrcSrcIdx2;
+  __global unsigned char *SrcSrcDt1;
+  __global unsigned char *SrcSrcDt2;
   __global unsigned char *SrcSrcDt3 = SrcSrc + SrcSrcIdx3;
   __global unsigned char *SrcSrcDt4 = SrcSrc + SrcSrcIdx4;
   __global unsigned char *SrcSrcDt5 = SrcSrc + SrcSrcIdx5;
@@ -398,58 +399,73 @@ __kernel void kernel_3(
   __global unsigned char *dst_dsSrcDt9 = dst_dsSrc + dst_dsSrcIdx9;
   __global unsigned char *dst_dsSrcDt10 = dst_dsSrc + dst_dsSrcIdx10;
   __global unsigned char *dst_dsSrcDt11 = dst_dsSrc + dst_dsSrcIdx11;
-  __global unsigned char *dst_dsSrcDt12 = dst_dsSrc + dst_dsSrcIdx12;
+  __global unsigned char *dst_dsSrcDt12;
   __global unsigned char *dst_dsSrcDt13 = dst_dsSrc + dst_dsSrcIdx13;
   __global unsigned char *dst_dsSrcDt14 = dst_dsSrc + dst_dsSrcIdx14;
   __global unsigned char *dst_dsSrcDt15 = dst_dsSrc + dst_dsSrcIdx15;
   __global unsigned char *dst_dsSrcDt16 = dst_dsSrc + dst_dsSrcIdx16;
-  __global short *layerDstDt1 = (__global char *)layerDst + layerDstIdx1;
-  __global short *layerDstDt2 = (__global char *)layerDst + layerDstIdx2;
-  __global short *layerDstDt3 = (__global char *)layerDst + layerDstIdx3;
-  __global short *layerDstDt4 = (__global char *)layerDst + layerDstIdx4;
-  __global short *layerDstDt5 = (__global char *)layerDst + layerDstIdx5;
-  __global short *layerDstDt6 = (__global char *)layerDst + layerDstIdx6;
-  __global short *layerDstDt7 = (__global char *)layerDst + layerDstIdx7;
-  __global short *layerDstDt8 = (__global char *)layerDst + layerDstIdx8;
+  __global unsigned char *dst_dsSrcDt17 = dst_dsSrc + dst_dsSrcIdx17;
+  __global unsigned char *layerDstDt1;
+  __global unsigned char *layerDstDt2;
+  __global unsigned char *layerDstDt3 = layerDst + layerDstIdx3;
+  __global unsigned char *layerDstDt4 = layerDst + layerDstIdx4;
+  __global unsigned char *layerDstDt5 = layerDst + layerDstIdx5;
+  __global unsigned char *layerDstDt6 = layerDst + layerDstIdx6;
+  __global unsigned char *layerDstDt7 = layerDst + layerDstIdx7;
+  __global unsigned char *layerDstDt8 = layerDst + layerDstIdx8;
 
   /* kernel operation */
   {
     if (gidy == 0) {
+      SrcSrcIdx1 = SrcSrcShift + ((float)gidx * 2) *sizeof(unsigned char);
+      SrcSrcDt1 = SrcSrc + SrcSrcIdx1;
+      layerDstIdx1 = layerDstShift + ((float)gidx * 2) *sizeof(unsigned char);
+      layerDstDt1 = layerDst + layerDstIdx1;
       int Op_ans1 = ( *((__global unsigned char*) SrcSrcDt1)) - (*(((__global unsigned char*) dst_dsSrcDt11)));
-      *layerDstDt1 = (__global short)Op_ans1;
+      *layerDstDt1 = (__global uchar)Op_ans1;
+      SrcSrcIdx2 = SrcSrcShift + ((float)gidx * 2 + 1) *sizeof(unsigned char);
+      SrcSrcDt2 = SrcSrc + SrcSrcIdx2;
+      dst_dsSrcIdx12 = dst_dsSrcShift + ((float)gidx + 1) *sizeof(unsigned char);
+      dst_dsSrcDt12 = dst_dsSrc + dst_dsSrcIdx12;
+      layerDstIdx2 = layerDstShift + ((float)gidx * 2 + 1) *sizeof(unsigned char);
+      layerDstDt2 = layerDst + layerDstIdx2;
       int Op_ans2 = ( *((__global unsigned char*) dst_dsSrcDt11)) + (*(((__global unsigned char*) dst_dsSrcDt12)));
       if (gidx != (1024 + 1) / 2 - 1)
         *layerDstDt2 = *(SrcSrcDt2) - (Op_ans2 + 1) / 2;
+      SrcSrcIdx2 = SrcSrcShift + ((float)gidx * 2 + 1) *sizeof(unsigned char);
+      SrcSrcDt2 = SrcSrc + SrcSrcIdx2;
+      layerDstIdx2 = layerDstShift + ((float)gidx * 2 + 1) *sizeof(unsigned char);
+      layerDstDt2 = layerDst + layerDstIdx2;
       int Op_ans3 = ( *((__global unsigned char*) SrcSrcDt2)) - (*(((__global unsigned char*) dst_dsSrcDt11)));
       if (gidx == (1024 + 1) / 2 - 1 && widthOdd == 0)
-        *layerDstDt2 = (__global short)Op_ans3;
+        *layerDstDt2 = (__global uchar)Op_ans3;
     }
     if (heightOdd == 0 && gidy == (1024 + 1) / 2 - 1) {
       int Op_ans4 = ( *((__global unsigned char*) SrcSrcDt3)) - (*(((__global unsigned char*) dst_dsSrcDt9)));
-      *layerDstDt3 = (__global short)Op_ans4;
+      *layerDstDt3 = (__global uchar)Op_ans4;
       int Op_ans5 = ( *((__global unsigned char*) dst_dsSrcDt9)) + (*(((__global unsigned char*) dst_dsSrcDt10)));
       if (gidx != (1024 + 1) / 2 - 1)
         *layerDstDt4 = *(SrcSrcDt4) - (Op_ans5 + 1) / 2;
-      int Op_ans6 = ( *((__global unsigned char*) SrcSrcDt4)) - (*(((__global unsigned char*) dst_dsSrcDt9)));
+      int Op_ans6 = ( *((__global unsigned char*) SrcSrcDt4)) - (*(((__global unsigned char*) dst_dsSrcDt13)));
       if (gidx == (1024 + 1) / 2 - 1 && widthOdd == 0)
-        *layerDstDt4 = (__global short)Op_ans6;
+        *layerDstDt4 = (__global uchar)Op_ans6;
     }
     if (gidy != 0) {
-      int Op_ans7 = ( *((__global unsigned char*) dst_dsSrcDt13)) + (*(((__global unsigned char*) dst_dsSrcDt15)));
+      int Op_ans7 = ( *((__global unsigned char*) dst_dsSrcDt14)) + (*(((__global unsigned char*) dst_dsSrcDt16)));
       *layerDstDt5 = *(SrcSrcDt5) - (Op_ans7 + 1) / 2;
-      int Op_ans8 = ( *((__global unsigned char*) SrcSrcDt7)) - (*(((__global unsigned char*) dst_dsSrcDt15)));
-      *layerDstDt7 = (__global short)Op_ans8;
+      int Op_ans8 = ( *((__global unsigned char*) SrcSrcDt7)) - (*(((__global unsigned char*) dst_dsSrcDt16)));
+      *layerDstDt7 = (__global uchar)Op_ans8;
       if (gidx != (1024 + 1) / 2 - 1) {
-        int Op_ans9 = ( *((__global unsigned char*) dst_dsSrcDt13)) + (*(((__global unsigned char*) dst_dsSrcDt14)));
-        *layerDstDt6 = *(SrcSrcDt6) - (Op_ans9 + *(dst_dsSrcDt15) + *(dst_dsSrcDt16) + 2) / 4;
-        int Op_ans10 = ( *((__global unsigned char*) dst_dsSrcDt15)) + (*(((__global unsigned char*) dst_dsSrcDt16)));
+        int Op_ans9 = ( *((__global unsigned char*) dst_dsSrcDt14)) + (*(((__global unsigned char*) dst_dsSrcDt15)));
+        *layerDstDt6 = *(SrcSrcDt6) - (Op_ans9 + *(dst_dsSrcDt16) + *(dst_dsSrcDt17) + 2) / 4;
+        int Op_ans10 = ( *((__global unsigned char*) dst_dsSrcDt16)) + (*(((__global unsigned char*) dst_dsSrcDt17)));
         *layerDstDt8 = *(SrcSrcDt8) - (Op_ans10 + 1) / 2;
       }
       if (widthOdd == 0 && gidx == (1024 + 1) / 2 - 1) {
-        int Op_ans11 = ( *((__global unsigned char*) dst_dsSrcDt13)) + (*(((__global unsigned char*) dst_dsSrcDt15)));
-        *layerDstDt6 = *(SrcSrcDt6) - (Op_ans11 + 1) / 2;
-        int Op_ans12 = ( *((__global unsigned char*) SrcSrcDt8)) - (*(((__global unsigned char*) dst_dsSrcDt15)));
-        *layerDstDt8 = (__global short)Op_ans12;
+        int Op_ans11 = ( *((__global unsigned char*) dst_dsSrcDt14)) + (*(((__global unsigned char*) dst_dsSrcDt16)));
+        *layerDstDt6 = *(SrcSrcDt5) - (Op_ans11 + 1) / 2;
+        int Op_ans12 = ( *((__global unsigned char*) SrcSrcDt7)) - (*(((__global unsigned char*) dst_dsSrcDt16)));
+        *layerDstDt8 = (__global uchar)Op_ans12;
       }
     }
   }
