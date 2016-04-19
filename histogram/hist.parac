@@ -8,7 +8,7 @@
 
 void hist( parac_matrix unsigned char &in[M][N], parac_vector short &out[P] )
 {
-  iterator it(0:M:1; 0:N:1)
+  parac_iterator it(0:M:1; 0:N:1)
   {
     out[ in[itx][ity] ]++;
   }
@@ -20,8 +20,8 @@ void hist( parac_matrix unsigned char &in[M][N], parac_vector short &out[P] )
 int main()
 {
   int i, j;
-  unsigned char *input = (char*) malloc ( sizeof(unsigned char) * M * N );
-  short *hist = (short*) malloc ( sizeof( short) * P );
+  unsigned char *input = (unsigned char*) malloc ( sizeof(unsigned char) * M * N );
+  short *output = (short*) malloc ( sizeof( short) * P );
 
   for( i = 0; i < M; i++)
     for( j = 0; j < N; j++){
