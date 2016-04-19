@@ -36,8 +36,8 @@ int main()
     }
 #endif
 
-  parac_matrix unsigned char inputMat[M][N] = input;
-  parac_vector short outputVec[P] = output; 
+  parac_matrix unsigned char &inputMat[M][N] = input;
+  parac_vector short &outputVec[P] = output; 
 
   hist( inputMat, outputVec); 
 
