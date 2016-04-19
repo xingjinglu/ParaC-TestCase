@@ -1,0 +1,45 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define M 256 
+#define N 256
+
+#define P 256 // # of bin for histogram.
+
+void hist( parac_matrix unsigned char &in[M][N], parac_vector short &out[P] )
+{
+  iterator it(0:M:1; 0:N:1)
+  {
+    out[ in[itx][ity] ]++;
+  }
+
+  return;
+}
+
+
+int main()
+{
+  int i, j;
+  unsigned char *input = (char*) malloc ( sizeof(unsigned char) * M * N );
+  short *hist = (short*) malloc ( sizeof( short) * P );
+
+  for( i = 0; i < M; i++)
+    for( j = 0; j < N; j++){
+      input[i*M + j] = rand()%256;
+    }
+
+ #if 0
+  // Do computing.
+  for( i = 0; i < M; i++)
+    for( j = 0; j < N; j++){
+      hist[ input[i*M+j] ]++;
+    }
+#endif
+
+  parac_matrix unsigned char inputMat[M][N] = input;
+  parac_vector short outputVec[P] = output; 
+
+  hist( inputMat, outputVec); 
+
+  return 0;
+}
