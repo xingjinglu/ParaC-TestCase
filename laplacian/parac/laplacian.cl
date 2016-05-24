@@ -1,6 +1,7 @@
 /**************************************************/
 /* This file is generated automatically by clang. */
 /**************************************************/
+#pragma OPENCL EXTENSION cl_amd_printf : enable
 
 /* kernel function */
 __kernel void kernel_1(
@@ -23,7 +24,6 @@ __kernel void kernel_1(
   /* kernel thread ID */
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
-
   /* kernel boundary check */
   if ( gidx >= (1024/4) || gidy >= 1024 )
     return;

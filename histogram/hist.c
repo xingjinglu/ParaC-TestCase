@@ -49,7 +49,7 @@ int main() {
       input[i * 256 + j] = rand() % 256;
     }
   unsigned char (*inputMat)[256][256] = (unsigned char (*)[256][256])input;
-  short (*outputVec)[256] = output;
+  short (*outputVec)[256] = (short (*)[256]) output;
   hist(inputMat, outputVec);
   return 0;
 }

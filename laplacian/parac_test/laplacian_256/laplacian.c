@@ -218,6 +218,8 @@ int Laplacian(unsigned char (*Src)[256][256], short (*layer)[256][256]) {
           filter_horizonSrcStep = (filter_horizonSrcStep % PADDING < 16) ? ((filter_horizonSrcStep / PADDING+1) * PADDING) : ((filter_horizonSrcStep + PADDING) / PADDING+1) * PADDING;
           size_t filter_horizonSrcShift = filter_horizonSrcStep * PADDING_LINE;
           size_t filter_horizon_srcsz0Pad = filter_horizonSrcStep * (filter_horizonSrcHeight + (PADDING_LINE<<1));
+
+
           cl_mem filter_horizonsrcBuf = clCreateBuffer(g_context, CL_MEM_READ_ONLY, filter_horizon_srcsz0Pad, NULL, &status);
           checkErr(status, "clCreateBuffer");
           unsigned char *filter_horizonSrcBufH = (unsigned char*)malloc(filter_horizon_srcsz0Pad); 

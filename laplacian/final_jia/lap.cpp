@@ -573,15 +573,15 @@ int main(int argc,char* argv[])
         printf("round%d: %d %d\n",count,height,width);
 
 #ifdef TIMEDAY_PAR
-        printf("gettimeofday:\n%f\n%f\n%f\n",avg.time_filter_h,avg.time_down,avg.time_up);
+        printf("gettimeofday:\nhost_filter_h=%f\nhost_down=%f\nhost_up%f\n",avg.time_filter_h,avg.time_down,avg.time_up);
 #endif
 
 #ifdef EXE_PAR
-        printf("exetime:\n%f\n",avg.exe_time);
+        printf("exetime:\nexe = %f\n",avg.exe_time);
 #endif
 
 #ifdef KERNEL_PAR
-        printf("kerneltime:\n%f\n%f\n%f\n",avg.time_kernel_filter_h,avg.time_kernel_down,avg.time_kernel_up);
+        printf("kerneltime:\n kernel_fitler_h = %f\nkernel_down = %f\nkernel_up = %f\n\n",avg.time_kernel_filter_h,avg.time_kernel_down,avg.time_kernel_up);
 #endif
 
 #endif

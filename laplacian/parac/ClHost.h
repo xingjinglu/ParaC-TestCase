@@ -116,7 +116,7 @@ static inline int openCLCreate(const char* inputfile,char * remain)
   cl_device_id *device;
   cl_uint numPlatforms,numdevices;
 
-  status=clGetPlatformIDs(0,NULL,&numPlatforms);
+  status=clGetPlatformIDs( 0,NULL,&numPlatforms);
   checkErr(status,"clGetPlatformIDs()");
 
   if(numPlatforms>0){
@@ -146,7 +146,7 @@ static inline int openCLCreate(const char* inputfile,char * remain)
   g_context=clCreateContext(NULL,numdevices,device,NULL,NULL,&status);
   checkErr(status,"clCreateContext()");
 
-  g_queue=clCreateCommandQueue(g_context,device[0],CL_QUEUE_PROFILING_ENABLE,&status);
+  g_queue=clCreateCommandQueue(g_context,device[1],CL_QUEUE_PROFILING_ENABLE,&status);
   checkErr(status,"clCreateCommandQueue()");
 
   char *program_source=ReadSources((const char*)inputfile);
@@ -154,7 +154,7 @@ static inline int openCLCreate(const char* inputfile,char * remain)
   g_program=clCreateProgramWithSource(g_context,1,(const char**)&program_source,NULL,&status);
   checkErr(status,"clCreateProgramWithSource");
 
-  status=clBuildProgram(g_program,1,&device[0],remain,NULL,NULL);
+  status=clBuildProgram(g_program,1,&device[1],remain,NULL,NULL);
 
   if(status !=CL_SUCCESS)
   {
