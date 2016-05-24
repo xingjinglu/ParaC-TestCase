@@ -10,7 +10,9 @@ void hist( parac_matrix unsigned char &in[M][N], parac_vector short &out[P] )
 {
   parac_iterator it(0:M:1; 0:N:1)
   {
-    out[ in[itx][ity] ]++;
+    //out[ in[itx][ity] ]++;
+    unsigned char temp = in[itx][ity];
+    //out[ temp ]++;
   }
 
   return;
@@ -35,7 +37,6 @@ int main()
       hist[ input[i*M+j] ]++;
     }
 #endif
-
   parac_matrix unsigned char &inputMat[M][N] = input;
   parac_vector short &outputVec[P] = output; 
 
