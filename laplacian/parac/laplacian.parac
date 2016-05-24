@@ -65,46 +65,39 @@ int Laplacian(parac_matrix unsigned char &Src[M][N], parac_matrix unsigned char 
     
     parac_iterator it(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1)
     {
-      //int widthOdd = N - (halfWidth*2);
-      //int heightOdd = M - (halfHeight*2);
-      //第一行
-        if(itx == 0)
-        {
-            layer[0][ity*2] = Src[0][ity*2] - dst_ds[0][ity];
-            if(ity != (N+1)/2 -1)
-                layer[0][ity*2+1] =Src[0][ity*2+1]-(dst_ds[0][ity]+dst_ds[0][ity+1]+1)/2;
-            if(ity == (N+1)/2 -1 && widthOdd ==0)
-                layer[0][ity*2 + 1] = Src[0][ity*2 + 1] - dst_ds[0][ity];
+      if(itx == 0) // first line 
+      {
+        layer[0][ity*2] = Src[0][ity*2] - dst_ds[0][ity];
+        if(ity != (N+1)/2 -1)
+          layer[0][ity*2+1] =Src[0][ity*2+1]-(dst_ds[0][ity]+dst_ds[0][ity+1]+1)/2;
+        if(ity == (N+1)/2 -1 && widthOdd ==0)
+          layer[0][ity*2 + 1] = Src[0][ity*2 + 1] - dst_ds[0][ity];
+      }
+      if(heightOdd == 0 && itx == (M+1)/2-1) // Last line.
+      {
+        layer[M-1][ity*2] = Src[M-1][ity*2] - dst_ds[(M+1)/2-1][ity];
+        if(ity != (N+1)/2 -1)
+          layer[M-1][ity*2+1] = Src[M-1][ity*2+1] - (dst_ds[(M+1)/2-1][ity]+dst_ds[(M+1)/2-1][ity+1]+1)/2;
+        if(ity == (N+1)/2 -1 && widthOdd ==0)
+          layer[M-1][ity*2 + 1] = Src[M-1][ity*2 + 1] - dst_ds[M-1][ity];
+      }
+      if(itx!=0) // body
+      {
+        layer[2*itx-1][2*ity  ] = Src[2*itx-1][2*ity  ]-(dst_ds[itx-1][ity]+dst_ds[itx][ity]+1)/2;
+        layer[2*itx  ][2*ity  ] = Src[2*itx  ][2*ity  ]-dst_ds[itx][ity];
+
+        if(ity != (N+1)/2 -1)
+        {  
+          layer[2*itx-1][2*ity+1] = Src[2*itx-1][2*ity+1]-(dst_ds[itx-1][ity]+dst_ds[itx-1][ity+1]+dst_ds[itx][ity]+dst_ds[itx][ity+1]+2)/4;
+          layer[2*itx  ][2*ity+1] = Src[2*itx  ][2*ity+1]-(dst_ds[itx][ity]+dst_ds[itx][ity+1]+1)/2;
         }
-        //最后一行
-        if(heightOdd == 0 && itx == (M+1)/2-1)
+
+        if(widthOdd ==0 && ity == (N+1)/2 -1)
         {
-            layer[M-1][ity*2] = Src[M-1][ity*2] - dst_ds[(M+1)/2-1][ity];
-            if(ity != (N+1)/2 -1)
-                layer[M-1][ity*2+1] = Src[M-1][ity*2+1] - (dst_ds[(M+1)/2-1][ity]+dst_ds[(M+1)/2-1][ity+1]+1)/2;
-            if(ity == (N+1)/2 -1 && widthOdd ==0)
-                layer[M-1][ity*2 + 1] = Src[M-1][ity*2 + 1] - dst_ds[M-1][ity];
+          layer[2*itx-1][2*ity+1] = Src[2*itx-1][2*ity  ]-(dst_ds[itx-1][ity]+dst_ds[itx][ity]+1)/2;
+          layer[2*itx  ][2*ity+1] =  Src[2*itx  ][2*ity  ]-dst_ds[itx][ity];
         }
-        
-        //body
-        if(itx!=0)
-        {
-                       
-            layer[2*itx-1][2*ity  ] = Src[2*itx-1][2*ity  ]-(dst_ds[itx-1][ity]+dst_ds[itx][ity]+1)/2;
-            layer[2*itx  ][2*ity  ] = Src[2*itx  ][2*ity  ]-dst_ds[itx][ity];
-            
-            if(ity != (N+1)/2 -1)
-            {  
-               layer[2*itx-1][2*ity+1] = Src[2*itx-1][2*ity+1]-(dst_ds[itx-1][ity]+dst_ds[itx-1][ity+1]+dst_ds[itx][ity]+dst_ds[itx][ity+1]+2)/4;
-               layer[2*itx  ][2*ity+1] = Src[2*itx  ][2*ity+1]-(dst_ds[itx][ity]+dst_ds[itx][ity+1]+1)/2;
-            }
-            
-            if(widthOdd ==0 && ity == (N+1)/2 -1)
-            {
-                layer[2*itx-1][2*ity+1] = Src[2*itx-1][2*ity  ]-(dst_ds[itx-1][ity]+dst_ds[itx][ity]+1)/2;
-                layer[2*itx  ][2*ity+1] =  Src[2*itx  ][2*ity  ]-dst_ds[itx][ity];
-            }
-        }        
+      }        
     }
     
     return 0;

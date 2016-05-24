@@ -1,8 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define M 256 
-#define N 256
+#define M 1024
+#define N 1024
 
 
 int main()

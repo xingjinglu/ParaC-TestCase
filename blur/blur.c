@@ -354,7 +354,7 @@ void blur_conv(uint16_t (*in)[6408][4802], uint16_t (*intermediate)[6408][4802],
 
 int main() {
   char inputfile[] = "blur.cl";
-  char *remain = NULL;
+  char remain[] = "-I ./";
   if (-1 == openCLCreate(inputfile, remain)) {
     printf("openCL create fail !!!!!!");
     return 0;

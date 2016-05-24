@@ -22,10 +22,15 @@ __kernel void kernel_1(
   int dst_horizonDstShift)
 {
   /* kernel thread ID */
+
+  int width = get_global_size(0);
+  int height = get_global_size(1);
+  //if( height == 1024 )
+  //printf("width = %d, height = %d", width, height);
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
   /* kernel boundary check */
-  if ( gidx >= (1024/4) || gidy >= 1024 )
+  if ( gidx >= width || gidy >= height )
     return;
 
   /* kernel index calculation */
@@ -37,16 +42,40 @@ __kernel void kernel_1(
   __global unsigned char *filter_horizonSrcDt2 = filter_horizonSrc + filter_horizonSrcShift;
   __global unsigned char *dst_horizonDstDt1 = dst_horizonDst + dst_horizonDstIdx1;
 
+
+  int SrcBRIndex0 = SrcSrcShift + ((float)gidy) *SrcSrcStep;
+  int SrcBRIndex1 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1) *sizeof(unsigned char);
+  int SrcBRIndex8 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1024 - 1) *sizeof(unsigned char);
+  int SrcBRIndex6 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1024 - 2) *sizeof(unsigned char);
+  int SrcBRIndex10 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1024 - 3) *sizeof(unsigned char);
+  int SrcBRIndex7 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1024 - 4) *sizeof(unsigned char);
+  int SrcBRIndex2 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (2) *sizeof(unsigned char);
+  int SrcBRIndex3 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (3) *sizeof(unsigned char);
+ __global unsigned char * SrcDt0 = SrcSrc + SrcBRIndex0;
+    __global unsigned char * SrcDt1 = SrcSrc + SrcBRIndex1;
+    __global unsigned char * SrcDt8 = SrcSrc + SrcBRIndex8;
+    __global unsigned char * SrcDt6 = SrcSrc + SrcBRIndex6;
+    __global unsigned char * SrcDt10 = SrcSrc + SrcBRIndex10;
+    __global unsigned char * SrcDt7 = SrcSrc + SrcBRIndex7;
+    __global unsigned char * SrcDt2 = SrcSrc + SrcBRIndex2;
+    __global unsigned char * SrcDt3 = SrcSrc + SrcBRIndex3;
+
+
+
   /* kernel operation */
   {
          int filter_horizon[5];
     int4 Src;
-     int R2Next;
+     int R2Next, R3Next, R4Next, R5Next;
     int4 res1;
     if (gidx == 0 ){ 
+#if 0
     int4 filter_horizonMid0 = (convert_int4) (vload4(0, filter_horizonSrcDt2 + 0 * filter_horizonSrcStep + 0 + 0 * sizeof(unsigned char)));
      int filter_horizonMid1 = ( int) (*(filter_horizonSrcDt2 + 0 * filter_horizonSrcStep + 4 + 0 * sizeof(unsigned char)));
 
+#endif
+
+#if 0
     int SrcBRIndex0 = SrcSrcShift + ((float)gidy) *SrcSrcStep;
     int SrcBRIndex1 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1) *sizeof(unsigned char);
     int SrcBRIndex8 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1024 - 1) *sizeof(unsigned char);
@@ -64,40 +93,79 @@ __kernel void kernel_1(
     __global unsigned char * SrcDt2 = SrcSrc + SrcBRIndex2;
     __global unsigned char * SrcDt3 = SrcSrc + SrcBRIndex3;
 
-     int SrcPre0 = ( int) ((*SrcDt3) * 4 - (*SrcDt1) * 4 + (*SrcDt0) * 2 - (*SrcDt2));
-     int SrcPre1 = ( int) ((*SrcDt1) * 2 - (*SrcDt3));
-    int4 SrcMid0 = (convert_int4) (vload4(0, SrcSrcDt1 + 0 * SrcSrcStep + 0 + 2 * sizeof(unsigned char)));
+#endif
+
+    int4 SrcPreTemp = (convert_int4)(*(__global uchar4*)(SrcDt0));
+
+     //int SrcPre0 = ( int) ((*SrcDt3) * 4 - (*SrcDt1) * 4 + (*SrcDt0) * 2 - (*SrcDt2));
+     //int SrcPre1 = ( int) ((*SrcDt1) * 2 - (*SrcDt3));
+    int SrcPre0 = SrcPreTemp.s3*4 - SrcPreTemp.s1*4 + SrcPreTemp.s0*2 - SrcPreTemp.s2;
+    int SrcPre1 = SrcPreTemp.s1 * 2 - SrcPreTemp.s3;
+    int4 SrcMid0 = (convert_int4) (*(__global uchar4*)( SrcSrcDt1 + 0 * SrcSrcStep + 0 + 2 * sizeof(unsigned char)));
+    //int4 SrcMid0 = (convert_int4) (vload4(0, SrcSrcDt1 + 0 * SrcSrcStep + 0 + 2 * sizeof(unsigned char)));
     int2 SrcMid1 = (convert_int2) (vload2(0, SrcSrcDt1 + 0 * SrcSrcStep + 4 + 2 * sizeof(unsigned char)));
-    res1.s0 = filter_horizonMid0.s0 * SrcPre0;
-    res1.s0 += filter_horizonMid0.s1 * SrcPre1;
-    res1.s0 += filter_horizonMid0.s2 * SrcMid0.s0;
-    res1.s0 += filter_horizonMid0.s3 * SrcMid0.s1;
-    res1.s0 += filter_horizonMid1 * SrcMid0.s2;
 
-    res1.s1 = filter_horizonMid0.s0 * SrcPre1;
-    res1.s1 += filter_horizonMid0.s1 * SrcMid0.s0;
-    res1.s1 += filter_horizonMid0.s2 * SrcMid0.s1;
-    res1.s1 += filter_horizonMid0.s3 * SrcMid0.s2;
-    res1.s1 += filter_horizonMid1 * SrcMid0.s3;
+#if 0
+    res1.s0 =  SrcPre0;
+    res1.s0 += SrcPre1<<2;
+    res1.s0 += SrcMid0.s0<<2 + SrcMid0.s0<<1;
+    res1.s0 += SrcMid0.s1<<2;
+    res1.s0 += SrcMid0.s2;
+#endif
 
-    res1.s2 = filter_horizonMid0.s0 * SrcMid0.s0;
-    res1.s2 += filter_horizonMid0.s1 * SrcMid0.s1;
-    res1.s2 += filter_horizonMid0.s2 * SrcMid0.s2;
-    res1.s2 += filter_horizonMid0.s3 * SrcMid0.s3;
-    res1.s2 += filter_horizonMid1 * SrcMid1.s0;
+    //res1.s0 = SrcPre0 + SrcPre1<<2 + SrcMid0.s0 << 2 + SrcMid0.s0<<1 + SrcMid0.s1<<2 + SrcMid0.s2;
+    res1.s0 = mad24(SrcPre1,4, SrcPre0) + mad24(6, SrcMid0.s0, SrcMid0.s2) + mad24(SrcMid0.S1, 4, 8);
 
-    res1.s3 = filter_horizonMid0.s0 * SrcMid0.s1;
-    res1.s3 += filter_horizonMid0.s1 * SrcMid0.s2;
-    res1.s3 += filter_horizonMid0.s2 * SrcMid0.s3;
-    res1.s3 += filter_horizonMid0.s3 * SrcMid1.s0;
-    res1.s3 += filter_horizonMid1 * SrcMid1.s1;
+#if 0
+    res1.s1 = SrcPre1;
+    //res1.s1 += 4 * SrcMid0.s0;
+    //res1.s1 += 6 * SrcMid0.s1;
+    //res1.s1 += 4 * SrcMid0.s2;
+    res1.s1 += SrcMid0.s0 << 2;
+    res1.s1 += SrcMid0.s1 << 2 + SrcMid0.s1 << 1;
+    res1.s1 += SrcMid0.s2 << 2;
+    res1.s1 += SrcMid0.s3;
+#endif
+    //res1.s1 = SrcPre1 + SrcMid0.s0<<2 + SrcMid0.s1<<2 + SrcMid0.s1<<1 + SrcMid0.s2<< 2 + SrcMid0.s3;
+    res1.s1 = mad24(SrcMid0.s0, 4, SrcPre1) + mad24(6, SrcMid0.s1, SrcMid0.s3) + mad24(SrcMid0.s2, 4, 8);
+
+#if 0
+    res1.s2 = SrcMid0.s0;
+    //res1.s2 += 4 * SrcMid0.s1;
+    //res1.s2 += 6 * SrcMid0.s2;
+    //res1.s2 += 4 * SrcMid0.s3;
+    res1.s2 += SrcMid0.s1 << 2;
+    res1.s2 += SrcMid0.s2 << 2 + SrcMid0.s2<<1;;
+    res1.s2 += SrcMid0.s3 << 2;
+    res1.s2 += SrcMid1.s0;
+#endif
+  //res1.s2 = SrcMid0.s0  + SrcMid0.s1<<2 + SrcMid0.s2 <<2+SrcMid0.s2<<1 + SrcMid0.s3<<2 + SrcMid1.s0;
+    res1.s2 = mad24(SrcMid0.s1, 4, SrcMid0.s0) + mad24(6, SrcMid0.s2, SrcMid1.s0) + mad24(SrcMid0.s3, 4, 8);
+
+
+#if 0
+    res1.s3 = SrcMid0.s1;
+    //res1.s3 += 4 * SrcMid0.s2;
+    //res1.s3 += 6 * SrcMid0.s3;
+    //res1.s3 += 4 * SrcMid1.s0;
+    res1.s3 += SrcMid0.s2 << 2;
+    res1.s3 += SrcMid0.s3 << 2 + SrcMid0.s3<<1;;
+    res1.s3 += SrcMid1.s0 << 2;
+    res1.s3 +=  SrcMid1.s1;
+#endif
+    //res1.s3 = SrcMid0.s1 + SrcMid0.s2<<2 + SrcMid0.s3<<2 + SrcMid0.s3<<1 + SrcMid1.s0 + SrcMid1.s1;
+    res1.s3 = mad24(SrcMid0.s2, 4, SrcMid0.s1) + mad24(6, SrcMid0.s3, SrcMid1.s1) + mad24(SrcMid1.s0, 4, 8);
 
 
     }
     if (gidx == 255 ){ 
+#if 0
     int4 filter_horizonMid2 = (convert_int4) (vload4(0, filter_horizonSrcDt2 + 0 * filter_horizonSrcStep + 0 + 0 * sizeof(unsigned char)));
      int filter_horizonMid3 = ( int) (*(filter_horizonSrcDt2 + 0 * filter_horizonSrcStep + 4 + 0 * sizeof(unsigned char)));
 
+#endif
+
+#if 0
     int SrcBRIndex0 = SrcSrcShift + ((float)gidy) *SrcSrcStep;
     int SrcBRIndex1 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1) *sizeof(unsigned char);
     int SrcBRIndex8 = SrcSrcShift + ((float)gidy) *SrcSrcStep + (1024 - 1) *sizeof(unsigned char);
@@ -114,75 +182,162 @@ __kernel void kernel_1(
     __global unsigned char * SrcDt7 = SrcSrc + SrcBRIndex7;
     __global unsigned char * SrcDt2 = SrcSrc + SrcBRIndex2;
     __global unsigned char * SrcDt3 = SrcSrc + SrcBRIndex3;
+#endif
 
     int4 SrcMid2 = (convert_int4) (vload4(0, SrcSrcDt1 + 0 * SrcSrcStep + 0 + 0 * sizeof(unsigned char)));
     int2 SrcMid3 = (convert_int2) (vload2(0, SrcSrcDt1 + 0 * SrcSrcStep + 4 + 0 * sizeof(unsigned char)));
-     int SrcLat0 = ( int) ((*SrcDt6) * 2 - (*SrcDt7));
-     int SrcLat1 = ( int) ((*SrcDt7) * 4 - (*SrcDt6) * 4 + (*SrcDt8) * 2 - (*SrcDt10));
-    res1.s0 = filter_horizonMid2.s0 * SrcMid2.s0;
-    res1.s0 += filter_horizonMid2.s1 * SrcMid2.s1;
-    res1.s0 += filter_horizonMid2.s2 * SrcMid2.s2;
-    res1.s0 += filter_horizonMid2.s3 * SrcMid2.s3;
-    res1.s0 += filter_horizonMid3 * SrcMid3.s0;
+    int4 SrcLatTemp = (convert_int4)(*(__global uchar4*)(SrcDt6));
+    //int4 SrcPreTemp = (convert_int4)(*(__global uchar4*)(SrcDt0));
+     //int SrcLat0 = ( int) ((*SrcDt6) * 2 - (*SrcDt7));
+     //int SrcLat1 = ( int) ((*SrcDt7) * 4 - (*SrcDt6) * 4 + (*SrcDt8) * 2 - (*SrcDt10));
+    int SrcLat0 = SrcLatTemp.s0 * 2 - SrcLatTemp.s1;
+    int SrcLat1 = SrcLatTemp.s1* 4  - SrcLatTemp.s0 *4 + SrcLatTemp.s2*2 - SrcLatTemp.s3;
 
-    res1.s1 = filter_horizonMid2.s0 * SrcMid2.s1;
-    res1.s1 += filter_horizonMid2.s1 * SrcMid2.s2;
-    res1.s1 += filter_horizonMid2.s2 * SrcMid2.s3;
-    res1.s1 += filter_horizonMid2.s3 * SrcMid3.s0;
-    res1.s1 += filter_horizonMid3 * SrcMid3.s1;
 
-    res1.s2 = filter_horizonMid2.s0 * SrcMid2.s2;
-    res1.s2 += filter_horizonMid2.s1 * SrcMid2.s3;
-    res1.s2 += filter_horizonMid2.s2 * SrcMid3.s0;
-    res1.s2 += filter_horizonMid2.s3 * SrcMid3.s1;
-    res1.s2 += filter_horizonMid3 * SrcLat0;
 
-    res1.s3 = filter_horizonMid2.s0 * SrcMid2.s3;
-    res1.s3 += filter_horizonMid2.s1 * SrcMid3.s0;
-    res1.s3 += filter_horizonMid2.s2 * SrcMid3.s1;
-    res1.s3 += filter_horizonMid2.s3 * SrcLat0;
-    res1.s3 += filter_horizonMid3 * SrcLat1;
+#if 0
+    res1.s0 =  SrcMid2.s0;
+    //res1.s0 += 4 * SrcMid2.s1;
+    //res1.s0 += 6 * SrcMid2.s2;
+    //res1.s0 += 4 * SrcMid2.s3;
+    res1.s0 += SrcMid2.s1 << 2;
+    res1.s0 += SrcMid2.s2 << 2 + SrcMid2.s2<<1;
+    res1.s0 += SrcMid2.s3 << 2;
+    res1.s0 += SrcMid3.s0;
+#endif
+    res1.s0 = mad24(SrcMid2.s1, 4, SrcMid2.s0) + mad24(6, SrcMid2.s2, SrcMid3.s0) + mad24(SrcMid2.s3, 4, 8); 
+
+#if 0
+    res1.s1 =  SrcMid2.s1;
+    //res1.s1 += 4 * SrcMid2.s2;
+    //res1.s1 += 6 * SrcMid2.s3;
+    //res1.s1 += 4 * SrcMid3.s0;
+    res1.s1 += SrcMid2.s2 << 2;
+    res1.s1 += SrcMid2.s3 <<2 + SrcMid2.s3<<1;
+    res1.s1 += SrcMid3.s0 << 2;
+    res1.s1 +=  SrcMid3.s1;
+#endif
+    res1.s1 = mad24(SrcMid2.s2, 4, SrcMid2.s1) + mad24(6, SrcMid2.s3, SrcMid3.s1) + mad24(SrcMid3.s0, 4, 8);
+
+#if 0
+    res1.s2 =  SrcMid2.s2;
+    //res1.s2 += 4 * SrcMid2.s3;
+    //res1.s2 += 6 * SrcMid3.s0;
+    //res1.s2 += 4 * SrcMid3.s1;
+    res1.s2 += SrcMid2.s3 << 2;
+    res1.s2 += SrcMid3.s0 << 2 + SrcMid3.s0<<1;
+    res1.s2 +=  SrcMid3.s1 << 2;
+    res1.s2 += SrcLat0;
+#endif
+    res1.s2 = mad24(SrcMid2.s3, 4, SrcMid2.s2) + mad24(6, SrcMid3.s0, SrcLat0) + mad24(SrcMid3.s1, 4, 8);
+
+#if 0
+    res1.s3 =  SrcMid2.s3;
+    // res1.s3 += 4 * SrcMid3.s0;
+    // res1.s3 += 6 * SrcMid3.s1;
+    // res1.s3 += 4 * SrcLat0;
+    res1.s3 += SrcMid3.s0 << 2;
+    res1.s3 += SrcMid3.s1 << 2 + SrcMid3.s1<<1;
+    res1.s3 += SrcLat0 << 2;
+    res1.s3 += SrcLat1;
+#endif
+    res1.s3 = mad24(SrcMid3.s0, 4, SrcMid2.s3) + mad24(6, SrcMid3.s1, SrcLat1) + mad24(SrcLat0, 4, 8);
 
 
     }
     else if (gidx >= 1 && gidx <= 254) {
+#if 0
       filter_horizon[0] = ( int) (*((__global unsigned char*) ((__global char*) filter_horizonSrcDt2 + 0 + filter_horizonSrcStep * 0)));
       filter_horizon[1] = ( int) (*((__global unsigned char*) ((__global char*) filter_horizonSrcDt2 + 1 + filter_horizonSrcStep * 0)));
       filter_horizon[2] = ( int) (*((__global unsigned char*) ((__global char*) filter_horizonSrcDt2 + 2 + filter_horizonSrcStep * 0)));
       filter_horizon[3] = ( int) (*((__global unsigned char*) ((__global char*) filter_horizonSrcDt2 + 3 + filter_horizonSrcStep * 0)));
       filter_horizon[4] = ( int) (*((__global unsigned char*) ((__global char*) filter_horizonSrcDt2 + 4 + filter_horizonSrcStep * 0)));
+#endif
       Src = convert_int4(vload4(0, SrcSrcDt1 + 0 * SrcSrcStep + 4 * 0));
-      res1.s0 = filter_horizon[0] * Src.s0 + filter_horizon[1] * Src.s1 + filter_horizon[2] * Src.s2 + filter_horizon[3] * Src.s3;
+
+
+
+#if 1
+#if 0
       R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
-      res1.s0 += filter_horizon[4] * R2Next; 
-      res1.s1 = filter_horizon[0] * Src.s1 + filter_horizon[1] * Src.s2 + filter_horizon[2] * Src.s3;
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
-      res1.s1 += filter_horizon[3] * R2Next; 
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 1)));
-      res1.s1 += filter_horizon[4] * R2Next; 
-      res1.s2 = filter_horizon[0] * Src.s2 + filter_horizon[1] * Src.s3;
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
-      res1.s2 += filter_horizon[2] * R2Next; 
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 1)));
-      res1.s2 += filter_horizon[3] * R2Next; 
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 2)));
-      res1.s2 += filter_horizon[4] * R2Next; 
-      res1.s3 = filter_horizon[0] * Src.s3;
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
-      res1.s3 += filter_horizon[1] * R2Next; 
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 1)));
-      res1.s3 += filter_horizon[2] * R2Next; 
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 2)));
-      res1.s3 += filter_horizon[3] * R2Next; 
-      R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 3)));
-      res1.s3 += filter_horizon[4] * R2Next; 
+      R3Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 1)));
+      R4Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 2)));
+      R5Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 3)));
+#endif
+
+#if 0
+      R2Next = ( int) ( *( SrcSrcDt1 + 4 ));
+      R3Next = ( int) ( *( SrcSrcDt1 + 5 ));
+      R4Next = ( int) ( *( SrcSrcDt1 + 6 ));
+      R5Next = ( int) ( *( SrcSrcDt1 + 7 ));
+#endif
+      int4 RTemp = (convert_int4)(*((__global uchar4 *)(SrcSrcDt1+4)));
+#if 0
+      R2Next = RTemp.s0;
+      R3Next = RTemp.s1;
+      R4Next = RTemp.s2;
+      R5Next = RTemp.s3;
+#endif
+
+     
+
+      //res1.s0 =  Src.s0 + 4 * Src.s1 + 6 * Src.s2 + 4  * Src.s3;
+      //res1.s0 =  Src.s0 + Src.s1<<2 +  Src.s2<<2 + Src.s2<<1 + Src.s3<<2;
+      //R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
+      //res1.s0 +=   R2Next; 
+
+      res1.s0 = mad24(Src.s1, 4, Src.s0) + mad24(6, Src.s2, RTemp.s0) + mad24(Src.s3, 4, 8);
+
+      //res1.s1 =   Src.s1 + 4 * Src.s2 + 6 * Src.s3;
+      //res1.s1 =   Src.s1 +  Src.s2<<2 + Src.s3<<2 + Src.s3<<1;
+      //R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
+      //res1.s1 += 4 * R2Next; 
+      //res1.s1 +=  R2Next << 2; 
+      //R3Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 1)));
+      //res1.s1 +=  R3Next; 
+      res1.s1 = mad24(Src.s2, 4, Src.s1) + mad24(6, Src.s3, RTemp.s1) + mad24(RTemp.s0, 4, 8);
+
+      //res1.s2 =  Src.s2 + 4  * Src.s3;
+      //res1.s2 =  Src.s2 +  Src.s3<<2;
+      //R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
+      //res1.s2 +=  R2Next<<2 + R2Next<<1; 
+      //R3Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 1)));
+      //res1.s2 += 4 * R3Next; 
+      //res1.s2 +=  R3Next << 2; 
+      //R4Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 2)));
+      //res1.s2 += R4Next; 
+      res1.s2 = mad24(Src.s3, 4, Src.s2) + mad24(RTemp.s0, 6, R4Next) + mad24(RTemp.s1, 4, 8);
+
+
+      //res1.s3 =  Src.s3;
+      //R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 0)));
+      //R2Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + 4 )));
+      //res1.s3 += 4 * R2Next; 
+      //res1.s3 +=  R2Next << 2; 
+      //R3Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 1)));
+      //res1.s3 += 6 * R3Next; 
+      //res1.s3 +=  R3Next << 2 + R3Next<<1; 
+      //R4Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 2)));
+      //res1.s3 += 4 * R4Next; 
+      //res1.s3 +=  R4Next << 2; 
+      //R5Next = ( int) ( *((__global unsigned char*) ((__global char*) SrcSrcDt1 + SrcSrcStep * 0 + 4 * 1 + 3)));
+      //res1.s3 +=  R5Next; 
+      res1.s3 = mad24(RTemp.s0, 4, Src.s3) + mad24(6, RTemp.s1, RTemp.s3) + mad24(RTemp.s2, 4, 8);
+
+#endif
     }
+
     uchar4 temp0;
-    temp0 = convert_uchar4((res1 + 8) / 16);
+    //temp0 = convert_uchar4((res1 + 8) / 16);
+
+    temp0 = convert_uchar4(res1 / 16);
+#if 0
     *dst_horizonDstDt1 = temp0.s0;
     *(dst_horizonDstDt1 + 1) = temp0.s1;
     *(dst_horizonDstDt1 + 2) = temp0.s2;
     *(dst_horizonDstDt1 + 3) = temp0.s3;
+#endif
+    *((__global uchar4 *)(dst_horizonDstDt1)) = temp0;
   }
 
 }

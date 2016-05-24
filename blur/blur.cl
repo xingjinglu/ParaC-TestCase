@@ -1,3 +1,4 @@
+#include <ClHeader.cl> 
 /**************************************************/
 /* This file is generated automatically by clang. */
 /**************************************************/
