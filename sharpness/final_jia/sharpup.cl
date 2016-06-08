@@ -205,10 +205,43 @@ int downShift)
 
     int inputIndex,outputIndex,temp=8;
     uchar4 src1,src2,src3,src4;
-    
+
+
     inputIndex  = (mad24(gidy,stepwide,gidx)<<2) + shift; //gidy*stepwide*4+gidx*4++shift;
+    //__global unsigned char*  addr = pPadSrc + inputIndex;
+    //inputIndex = gidy*stepwide*4 + gidx*4 + shift;
     outputIndex = mad24(gidy,downStepwide,gidx) + downShift; //gidx+gidy*downStepwide+downShift;
-   
+    //outputIndex = gidx + gidy*downStepwide + downShift;
+
+#if 0
+    src1  = vload4(0, addr);
+    temp += src1.s0+src1.s1+src1.s2+src1.s3;
+
+    src2  = vload4(0, addr + stepwide);
+    //temp += src1.s0+src1.s1+src1.s2+src1.s3;
+    temp += src2.s0+src2.s1+src2.s2+src2.s3;
+
+    src3  = vload4(0, addr+2*stepwide);
+    //temp += src1.s0+src1.s1+src1.s2+src1.s3;
+    temp += src3.s0+src3.s1+src3.s2+src3.s3;
+
+    src4  = vload4(0, addr + 3*stepwide);
+    //temp += src1.s0+src1.s1+src1.s2+src1.s3;
+    temp += src4.s0+src4.s1+src4.s2+src4.s3;
+#endif
+
+#if 0
+    src1  = *((__global uchar4*)(pPadSrc+inputIndex));
+    temp += src1.s0+src1.s1+src1.s2+src1.s3;
+    src1  = *((__global uchar4*)(pPadSrc+inputIndex + stepwide));
+    temp += src1.s0+src1.s1+src1.s2+src1.s3;
+    src1  = *((__global uchar4*)(pPadSrc+inputIndex +2* stepwide));
+    temp += src1.s0+src1.s1+src1.s2+src1.s3;
+    src1  = *((__global uchar4*)(pPadSrc+inputIndex +3* stepwide));
+    temp += src1.s0+src1.s1+src1.s2+src1.s3;
+#endif
+
+#if 1
     src1  = *((__global uchar4*)(pPadSrc+inputIndex));
     temp += src1.s0+src1.s1+src1.s2+src1.s3;
 
@@ -220,6 +253,8 @@ int downShift)
 
     src4  = *((__global uchar4*)(pPadSrc+mad24(3,stepwide,inputIndex)));
     temp += src4.s0+src4.s1+src4.s2+src4.s3;
+
+#endif
 
     *(pDownTemp +outputIndex) = (uchar)(temp >> 4);
 }
@@ -256,6 +291,8 @@ int downShift)
     pDst3 = pDst2 + stepwide;
     pDst4 = pDst3 + stepwide;
 
+
+#if 1 
     *(pDst1)   = (unsigned char)(((a0)*(7/8.0)+(a1)*(1/8.0))*(7/8.0)+((b0)*(7/8.0)+(b1)*(1/8.0))*(1/8.0));
     *(pDst1+1) = (unsigned char)(((a0)*(5/8.0)+(a1)*(3/8.0))*(7/8.0)+((b0)*(5/8.0)+(b1)*(3/8.0))*(1/8.0));
     *(pDst1+2) = (unsigned char)(((a0)*(3/8.0)+(a1)*(5/8.0))*(7/8.0)+((b0)*(3/8.0)+(b1)*(5/8.0))*(1/8.0));
@@ -275,6 +312,63 @@ int downShift)
     *(pDst4+1) = (unsigned char)(((a0)*(5/8.0)+(a1)*(3/8.0))*(1/8.0)+((b0)*(5/8.0)+(b1)*(3/8.0))*(7/8.0));
     *(pDst4+2) = (unsigned char)(((a0)*(3/8.0)+(a1)*(5/8.0))*(1/8.0)+((b0)*(3/8.0)+(b1)*(5/8.0))*(7/8.0));
     *(pDst4+3) = (unsigned char)(((a0)*(1/8.0)+(a1)*(7/8.0))*(1/8.0)+((b0)*(1/8.0)+(b1)*(7/8.0))*(7/8.0));
+#endif
+
+#ifdef _OPT_LXJ 
+    float result0[4][4];
+    float *r00;
+    float *r01;
+    float *r02;
+    float *r03;
+    r00 = (float*)result0;
+    r01 = (float*)r00 + 4;
+    r02 = (float*)r01 + 4;
+    r03 = (float*)r02 + 4;
+
+    *r00 = (unsigned char)(((a0)*(7/8.0)+(a1)*(1/8.0))*(7/8.0)+((b0)*(7/8.0)+(b1)*(1/8.0))*(1/8.0));
+    *(r00 + 1) = (unsigned char)(((a0)*(5/8.0)+(a1)*(3/8.0))*(7/8.0)+((b0)*(5/8.0)+(b1)*(3/8.0))*(1/8.0));
+    *(r00 + 2) = (unsigned char)(((a0)*(3/8.0)+(a1)*(5/8.0))*(7/8.0)+((b0)*(3/8.0)+(b1)*(5/8.0))*(1/8.0));
+    *(r00 + 3) = (unsigned char)(((a0)*(1/8.0)+(a1)*(7/8.0))*(7/8.0)+((b0)*(1/8.0)+(b1)*(7/8.0))*(1/8.0));
+
+    *(r01)     = (unsigned char)(((a0)*(7/8.0)+(a1)*(1/8.0))*(5/8.0)+((b0)*(7/8.0)+(b1)*(1/8.0))*(3/8.0));
+    *(r01 + 1) = (unsigned char)(((a0)*(5/8.0)+(a1)*(3/8.0))*(5/8.0)+((b0)*(5/8.0)+(b1)*(3/8.0))*(3/8.0));
+    *(r01 + 2) = (unsigned char)(((a0)*(3/8.0)+(a1)*(5/8.0))*(5/8.0)+((b0)*(3/8.0)+(b1)*(5/8.0))*(3/8.0));
+    *(r01 + 3) = (unsigned char)(((a0)*(1/8.0)+(a1)*(7/8.0))*(5/8.0)+((b0)*(1/8.0)+(b1)*(7/8.0))*(3/8.0));
+
+    *(r02) = (unsigned char)(((a0)*(7/8.0)+(a1)*(1/8.0))*(3/8.0)+((b0)*(7/8.0)+(b1)*(1/8.0))*(5/8.0));
+    *(r02 + 1) = (unsigned char)(((a0)*(5/8.0)+(a1)*(3/8.0))*(3/8.0)+((b0)*(5/8.0)+(b1)*(3/8.0))*(5/8.0));
+    *(r02 + 2) = (unsigned char)(((a0)*(3/8.0)+(a1)*(5/8.0))*(3/8.0)+((b0)*(3/8.0)+(b1)*(5/8.0))*(5/8.0));
+    *(r02 + 3) = (unsigned char)(((a0)*(1/8.0)+(a1)*(7/8.0))*(3/8.0)+((b0)*(1/8.0)+(b1)*(7/8.0))*(5/8.0));
+
+    *(r03)     = (unsigned char)(((a0)*(7/8.0)+(a1)*(1/8.0))*(1/8.0)+((b0)*(7/8.0)+(b1)*(1/8.0))*(7/8.0));
+    *(r03 + 1) = (unsigned char)(((a0)*(5/8.0)+(a1)*(3/8.0))*(1/8.0)+((b0)*(5/8.0)+(b1)*(3/8.0))*(7/8.0));
+    *(r03 + 2) = (unsigned char)(((a0)*(3/8.0)+(a1)*(5/8.0))*(1/8.0)+((b0)*(3/8.0)+(b1)*(5/8.0))*(7/8.0));
+    *(r03 + 3) = (unsigned char)(((a0)*(1/8.0)+(a1)*(7/8.0))*(1/8.0)+((b0)*(1/8.0)+(b1)*(7/8.0))*(7/8.0));
+
+   *pDst1 = (uchar) (*r00);
+   *(pDst1+1 ) = (uchar) (*(r00+1));
+   *(pDst1+2 ) = (uchar) (*(r00+2));
+   *(pDst1+3 ) = (uchar) (*(r00+3));
+   
+   *pDst2 = (uchar) (*r01);
+   *(pDst2+1 ) = (uchar) (*(r01+1));
+   *(pDst2+2 ) = (uchar) (*(r01+2));
+   *(pDst2+3 ) = (uchar) (*(r01+3));
+
+   *pDst3 = (uchar) (*r02);
+   *(pDst3+1 ) = (uchar) (*(r02+1));
+   *(pDst3+2 ) = (uchar) (*(r02+2));
+   *(pDst3+3 ) = (uchar) (*(r02+3));
+
+   *pDst4 = (uchar) (*r03);
+   *(pDst4+1 ) = (uchar) (*(r03+1));
+   *(pDst4+2 ) = (uchar) (*(r03+2 ));
+   *(pDst4+3 ) = (uchar) (*(r03+3));
+
+#endif
+
+
+
 }
 
 //this one's input is short type, and have the count can be divided by 16.
