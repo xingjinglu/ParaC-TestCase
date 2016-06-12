@@ -20,12 +20,30 @@ __kernel void kernel_1(
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx >= 256 || gidy >= 256 )
+  if ( gidx >= 256| gidy >= 256 )
     return;
 
   /* kernel index calculation */
+#if 0
   int pImageSrcSrcIdx1 = pImageSrcSrcShift + ((float)gidy * 4) *pImageSrcSrcStep + ((float)gidx * 4) *sizeof(unsigned char);
   int pImageDstDstIdx1 = pImageDstDstShift + ((float)gidy * 1/4 * 4) *pImageDstDstStep + ((float)gidx * 1/4 * 4) *sizeof(unsigned char);
+#endif
+
+#if 0
+  int pImageSrcSrcIdx1 = pImageSrcSrcShift + (float)(gidy << 2) *pImageSrcSrcStep + (float)(gidx << 2) *sizeof(unsigned char);
+  int pImageDstDstIdx1 = pImageDstDstShift + ((float)gidy ) *pImageDstDstStep + ((float)gidx ) *sizeof(unsigned char);
+#endif
+
+#if 1
+  int pImageSrcSrcIdx1 = pImageSrcSrcShift + (mad24(gidy, pImageSrcSrcStep, gidx) << 2);
+  int pImageDstDstIdx1 = pImageDstDstShift + (mad24(gidy ,pImageDstDstStep, gidx)) ;
+#endif
+
+
+#if 0 // vector parallel.
+  int pImageSrcSrcIdx1 = pImageSrcSrcShift + (float)(gidy << 2) *pImageSrcSrcStep + (float)(gidx << 4) *sizeof(unsigned char);
+  int pImageDstDstIdx1 = pImageDstDstShift + ((float)gidy ) *pImageDstDstStep + ((float)(gidx << 2) ) *sizeof(unsigned char);
+#endif
 
   /* kernel operands */
   __global unsigned char *pImageSrcSrcDt1 = pImageSrcSrc + pImageSrcSrcIdx1;
@@ -33,21 +51,100 @@ __kernel void kernel_1(
 
   /* kernel operation */
   {
-        short _sum = 0;
-        uchar4 _rtemp0;
+#if 0
+    short _sum = 0;
+    uchar4 _rtemp0;
     __global uchar *_base = pImageSrcSrcDt1;
     _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
+    _sum  +=  _rtemp0.s0  + _rtemp0.s1  +  _rtemp0.s2 +_rtemp0.s3;
     _base = pImageSrcSrcDt1 + 1 * pImageSrcSrcStep;
     _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
+    _sum  +=  _rtemp0.s0 + _rtemp0.s1 + _rtemp0.s2 + _rtemp0.s3;
     _base = pImageSrcSrcDt1 + 2 * pImageSrcSrcStep;
     _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
+    _sum  +=  _rtemp0.s0 + _rtemp0.s1 + _rtemp0.s2 + _rtemp0.s3;
     _base = pImageSrcSrcDt1 + 3 * pImageSrcSrcStep;
     _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
-    *pImageDstDstDt1 = (_sum + 8) >> 4;
+    _sum  +=  _rtemp0.s0     +     _rtemp0.s1 + _rtemp0.s2 + _rtemp0.s3  ;
+    *pImageDstDstDt1 = _sum  >> 4;
+    //*pImageDstDstDt1 = (_sum + 8) >> 4;
+#endif
+
+#if 1 // opt-1: vload -> pointer
+
+    short _sum = 0;
+    uchar4 _rtemp0;
+    _rtemp0 = *((__global uchar4*)(pImageSrcSrcDt1));
+    _sum  =  _rtemp0.s0  + _rtemp0.s1  +  _rtemp0.s2 +_rtemp0.s3;
+
+    _rtemp0 = *((__global uchar4*)(pImageSrcSrcDt1 + pImageSrcSrcStep));
+    _sum  +=  _rtemp0.s0 + _rtemp0.s1 + _rtemp0.s2 + _rtemp0.s3;
+
+    _rtemp0 = *((__global uchar4*)(mad24(2, pImageSrcSrcStep, pImageSrcSrcDt1)));
+    _sum  +=  _rtemp0.s0 + _rtemp0.s1 + _rtemp0.s2 + _rtemp0.s3;
+
+    _rtemp0 = *((__global uchar4*)(mad24(3, pImageSrcSrcStep, pImageSrcSrcDt1)));
+    _sum  +=  _rtemp0.s0     +     _rtemp0.s1 + _rtemp0.s2 + _rtemp0.s3  ;
+    *pImageDstDstDt1 = (_sum + 8)  >> 4;
+#endif
+
+#if 0
+#if 0
+    int4 _sum = 0;
+    int16 _rtemp0, _rtemp1, _rtemp2, _rtemp3;
+    int16 _rtemp4;
+    _rtemp0 =convert_int16( *((__global uchar16*)(pImageSrcSrcDt1)));
+    _rtemp1 =convert_int16( *((__global uchar16*)(pImageSrcSrcDt1 + pImageSrcSrcStep)));
+    _rtemp2 = convert_int16(*((__global uchar16*)(mad24(2, pImageSrcSrcStep, pImageSrcSrcDt1))));
+    _rtemp3 = convert_int16(*((__global uchar16*)(mad24(3, pImageSrcSrcStep, pImageSrcSrcDt1))));
+
+    _rtemp4 =_rtemp0  +  _rtemp1 + _rtemp2 + _rtemp3;
+    //_rtemp4 =convert_int16(_rtemp0)  +  convert_int16(_rtemp1) +
+      convert_int16(_rtemp2)  + convert_int16(_rtemp3);
+    _sum.s0  =  _rtemp4.s0  + _rtemp4.s1  +  _rtemp4.s2 + _rtemp4.s3;
+    _sum.s1  =  _rtemp4.s4  + _rtemp4.s5  +  _rtemp4.s6 + _rtemp4.s7;
+    _sum.s2  =  _rtemp4.s8  + _rtemp4.s9  +  _rtemp4.sa + _rtemp4.sb;
+    _sum.s3  =  _rtemp4.sc  + _rtemp4.sd  +  _rtemp4.se + _rtemp4.sf;
+#endif
+
+#if 0
+    uchar16 _rtemp0, _rtemp1, _rtemp2, _rtemp3;
+    int4 _sum;
+    _rtemp0 = *((__global uchar16*)(pImageSrcSrcDt1));
+    _sum.s0  =  _rtemp0.s0  + _rtemp0.s1  +  _rtemp0.s2 +  _rtemp0.s3;
+    _sum.s1  =  _rtemp0.s4  + _rtemp0.s5  +  _rtemp0.s6 +  _rtemp0.s7;
+    _sum.s2  =  _rtemp0.s8  + _rtemp0.s9  +  _rtemp0.sa + _rtemp0.sb;
+    _sum.s3  =  _rtemp0.sc  + _rtemp0.sd  +  _rtemp0.se + _rtemp0.sf;
+
+    _rtemp1 = *((__global uchar16*)(pImageSrcSrcDt1 + pImageSrcSrcStep));
+    _sum.s0  +=  _rtemp1.s0  + _rtemp1.s1  +  _rtemp1.s2 + _rtemp1.s3;
+    _sum.s1  +=  _rtemp1.s4  + _rtemp1.s5  +  _rtemp1.s6 + _rtemp1.s7;
+    _sum.s2  +=  _rtemp1.s8  + _rtemp1.s9  +  _rtemp1.sa + _rtemp1.sb;
+    _sum.s3  +=  _rtemp1.sc  + _rtemp1.sd  +  _rtemp1.se + _rtemp1.sf;
+
+    _rtemp2 = *((__global uchar16*)(mad24(2, pImageSrcSrcStep, pImageSrcSrcDt1)));
+    _sum.s0  +=  _rtemp2.s0  + _rtemp2.s1  +  _rtemp2.s2 + _rtemp2.s3;
+    _sum.s1  +=  _rtemp2.s4  + _rtemp2.s5  +  _rtemp2.s6 + _rtemp2.s7;
+    _sum.s2  +=  _rtemp2.s8  + _rtemp2.s9  +  _rtemp2.sa + _rtemp2.sb;
+    _sum.s3  +=  _rtemp2.sc  + _rtemp2.sd  +  _rtemp2.se + _rtemp2.sf;
+
+    _rtemp3 = *((__global uchar16*)(mad24(3, pImageSrcSrcStep, pImageSrcSrcDt1)));
+    _sum.s0  +=  _rtemp3.s0  + _rtemp3.s1  +  _rtemp3.s2 + _rtemp3.s3;
+    _sum.s1  +=  _rtemp3.s4  + _rtemp3.s5  +  _rtemp3.s6 + _rtemp3.s7;
+    _sum.s2  +=  _rtemp3.s8  + _rtemp3.s9  +  _rtemp3.sa + _rtemp3.sb;
+    _sum.s3  +=  _rtemp3.sc  + _rtemp3.sd  +  _rtemp3.se + _rtemp3.sf;
+#endif
+
+    int4 temp;
+    temp = (_sum + 8) >> 4; 
+    *((__global uchar4*)(pImageDstDstDt1)) =convert_uchar4( temp);
+#if 0
+    *(pImageDstDstDt1+1) = temp.s1;
+    *(pImageDstDstDt1 + 2) = temp.s2;
+    *(pImageDstDstDt1 + 3) = temp.s3;
+#endif
+#endif
+
   }
 
 }
@@ -80,30 +177,44 @@ __kernel void kernel_2(
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
+  //printf("lid0 = %d, lid1 = %d, gidx = %d, gidy  = %d wid0 = %d, wid1 = %d\n",get_local_id(0), get_local_id(1), gidx, gidy, get_group_id(0), get_group_id(1) );
   if ( gidx >= 1 || gidy >= 256 )
     return;
-
+  //printf("lsize0 = %d, lsize1 = %d \n", get_local_size(0), get_local_size(1) );
+  //printf("gsize0 = %d, gsize1 = %d \n", get_global_size(0), get_global_size(1) );
+  //printf("lid0 = %d, lid1 = %d, gidx = %d, gidy  = %d wid0 = %d, wid1 = %d\n",get_local_id(0), get_local_id(1), gidx, gidy, get_group_id(0), get_group_id(1) );
   /* kernel index calculation */
+  // srcImage[itx1][0]
   int srcImageSrcIdx3 = srcImageSrcShift + ((float)gidy) *srcImageSrcStep;
   int srcImageSrcIdx4 = srcImageSrcShift + ((float)gidy) *srcImageSrcStep + (1024 / 4 - 1) *sizeof(unsigned char);
   int srcImageSrcIdx5 = srcImageSrcShift + ((float)gidy + 1) *srcImageSrcStep;
+  // else
   int srcImageSrcIdx6 = srcImageSrcShift + ((float)gidy + 1) *srcImageSrcStep + (1024 / 4 - 1) *sizeof(unsigned char);
+
+  // dstImage[it1x*4 + y][0]
   int dstImageDSIdx1 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep;
-  int dstImageDSIdx2 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + (1) *sizeof(unsigned char);
-  int dstImageDSIdx3 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
-  int dstImageDSIdx4 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
   int dstImageDSIdx5 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep;
+
+  // dstImage[it1x*4 + y][1]
+  int dstImageDSIdx2 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + (1) *sizeof(unsigned char);
   int dstImageDSIdx6 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + (1) *sizeof(unsigned char);
+
+  //  dstImage[it1x*4+y][M-1]
+  int dstImageDSIdx3 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
   int dstImageDSIdx7 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
-  int dstImageDSIdx8 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
   int dstImageDSIdx9 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
-  int dstImageDSIdx10 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
   int dstImageDSIdx11 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
+
+  //  dstImage[it1x*4+y][M-2]
+  int dstImageDSIdx4 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
+  int dstImageDSIdx8 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
+  int dstImageDSIdx10 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
   int dstImageDSIdx12 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
 
+
   /* kernel operands */
-  __global float *border_mp_0SrcDt1 = (__global char *)border_mp_0Src + border_mp_0SrcShift;
-  __global float *border_mp_1SrcDt2 = (__global char *)border_mp_1Src + border_mp_1SrcShift;
+ // __global float *border_mp_0SrcDt1 = (__global char *)border_mp_0Src + border_mp_0SrcShift;
+ // __global float *border_mp_1SrcDt2 = (__global char *)border_mp_1Src + border_mp_1SrcShift;
   __global unsigned char *srcImageSrcDt3 = srcImageSrc + srcImageSrcIdx3;
   __global unsigned char *srcImageSrcDt4 = srcImageSrc + srcImageSrcIdx4;
   __global unsigned char *srcImageSrcDt5 = srcImageSrc + srcImageSrcIdx5;
@@ -121,71 +232,123 @@ __kernel void kernel_2(
   __global unsigned char *dstImageDSDt11 = dstImageDS + dstImageDSIdx11;
   __global unsigned char *dstImageDSDt12 = dstImageDS + dstImageDSIdx12;
 
+
+
+      uchar srcImageSrcDt3Temp = *srcImageSrcDt3;
+      uchar srcImageSrcDt4Temp = *srcImageSrcDt4;
+      uchar srcImageSrcDt5Temp = *srcImageSrcDt5;
+      uchar srcImageSrcDt6Temp = *srcImageSrcDt6;
+
+
   /* kernel operation */
   {
-    if (gidy == 1024 / 4 - 1) {
-             *dstImageDSDt1 = *srcImageSrcDt3;
-                   *dstImageDSDt5 = *srcImageSrcDt3;
-                   *dstImageDSDt2 = *srcImageSrcDt3;
-                   *dstImageDSDt6 = *srcImageSrcDt3;
-                   *dstImageDSDt4 = *srcImageSrcDt4;
-                   *dstImageDSDt8 = *srcImageSrcDt4;
-                   *dstImageDSDt10 = *srcImageSrcDt4;
-                   *dstImageDSDt12 = *srcImageSrcDt4;
-                   *dstImageDSDt3 = *srcImageSrcDt4;
-                   *dstImageDSDt7 = *srcImageSrcDt4;
-                   *dstImageDSDt9 = *srcImageSrcDt4;
-                   *dstImageDSDt11 = *srcImageSrcDt4;
-          } else {
+    if (gidy == 255) {
+      //uchar srcImageSrcDt3Temp = *srcImageSrcDt3;
+      //uchar srcImageSrcDt4Temp = *srcImageSrcDt4;
+      *dstImageDSDt1 = srcImageSrcDt3Temp;
+      *dstImageDSDt5 = srcImageSrcDt3Temp;
+      *dstImageDSDt2 = srcImageSrcDt3Temp;
+      *dstImageDSDt6 = srcImageSrcDt3Temp;
+
+      *((__global uchar2*)(dstImageDSDt3)) = (srcImageSrcDt4Temp, srcImageSrcDt4Temp);
+      *((__global uchar2*)(dstImageDSDt7)) = (srcImageSrcDt4Temp, srcImageSrcDt4Temp);
+      *((__global uchar2*)(dstImageDSDt9)) = (srcImageSrcDt4Temp, srcImageSrcDt4Temp);
+      *((__global uchar2*)(dstImageDSDt11)) = (srcImageSrcDt4Temp, srcImageSrcDt4Temp);
+
+          } 
+
+    else {
+      //float border_mp_1Result1 [4][1] ;
+
+      // unroll
+      // border_mp_1 * srcImage[it1x+1][0];
+      float4 Temp1, Temp0;
+     //uchar srcImageSrcDt5Temp = *(srcImageSrcDt5);
+      Temp1.s0 = 0.0 * srcImageSrcDt5Temp; 
+      Temp1.s1 = 1/4.0f * srcImageSrcDt5Temp; 
+      Temp1.s2 = 2/4.0f * srcImageSrcDt5Temp; 
+      Temp1.s3 = 3/4.0f * srcImageSrcDt5Temp; 
+
+
+      // border_mp_0 * srcImage[it1x][0];
+      //float border_mp_0Result1 [4][1] ;
+      // unrolled.
+      //uchar srcImageSrcDt3Temp = *(srcImageSrcDt3);
+      Temp0.s0 = 1.0 * srcImageSrcDt3Temp; 
+      Temp0.s1 = 3/4.0f  * srcImageSrcDt3Temp; 
+      Temp0.s2 = 2/4.0f  * srcImageSrcDt3Temp; 
+      Temp0.s3 = 1/4.0f * srcImageSrcDt3Temp; 
+
+
+      // add 
+      //float border_mp_0Result1Result1[4][1];
+      float4 AddTemp0;
+      AddTemp0.s0 = Temp0.s0 + Temp1.s0;
+      AddTemp0.s1 = Temp0.s1 + Temp1.s1;
+      AddTemp0.s2 = Temp0.s2 + Temp1.s2;
+      AddTemp0.s3 = Temp0.s3 + Temp1.s3;
+
+      // dstImage[it1x*4:4:1][0] = add;
+      __global uchar* t1 = dstImageDSDt1;;
+#if 0
+      *((__global uchar2*)(dstImageDSDt1)) = ( AddTemp0.s0, AddTemp0.s0);
+       *((__global uchar2*)(dstImageDSDt5)) = ( AddTemp0.s1, AddTemp0.s1);
+       *((__global uchar2*)(dstImageDSDt1 + 2*dstImageDSStep)) = ( AddTemp0.s2, AddTemp0.s2);
+       *((__global uchar2*)(dstImageDSDt1 + 3*dstImageDSStep)) = ( AddTemp0.s3, AddTemp0.s3);
+#endif
+      *((__global uchar2*)(t1)) = ( AddTemp0.s0, AddTemp0.s0);
+        t1 += dstImageDSStep;
+       *((__global uchar2*)(t1)) = ( AddTemp0.s1, AddTemp0.s1);
+        t1 += dstImageDSStep;
+       *((__global uchar2*)(t1)) = ( AddTemp0.s2, AddTemp0.s2);
+        t1 += dstImageDSStep;
+       *((__global uchar2*)(t1)) = ( AddTemp0.s3, AddTemp0.s3);
+
+
+       //float border_mp_1Result2 [4][1] ;
+       float4 Temp2, Temp3;
+       float4 AddTemp1;
+
+      //uchar srcImageSrcDt6Temp = *(srcImageSrcDt6);
+      Temp3 = (float4)(0.0, 1/4.0, 2/4.0, 3/4.0) * srcImageSrcDt6Temp;
+
+
+      //float border_mp_0Result2 [4][1] ;
+      //uchar srcImageSrcDt4Temp = *(srcImageSrcDt4);
+#if 0
+      Temp2.s0 = 1.0f * srcImageSrcDt4Temp; 
+      Temp2.s1 = 3/4.0f * srcImageSrcDt4Temp; 
+      Temp2.s2 = 2/4.0f * srcImageSrcDt4Temp; 
+      Temp2.s3 = 1/4.0f * srcImageSrcDt4Temp; 
+#endif
+      Temp2 = (float4)(1.0, 3/4.0, 2/4.0, 1/4.0) * srcImageSrcDt4Temp;
+
+      //float border_mp_0Result2Result1[4][1];
       
-      float border_mp_1Result1 [4][1] ;
-      for(int i = 0; i < 4 ; i++ ) 
-      for(int j = 0; j < 1 ; j++ ){ 
-      *( (float*)border_mp_1Result1 + i*1+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j * sizeof(float) )) * *(srcImageSrcDt5); 
-      }
-      
-      float border_mp_0Result1 [4][1] ;
-      for(int i = 0; i < 4 ; i++ ) 
-      for(int j = 0; j < 1 ; j++ ){ 
-      *( (float*)border_mp_0Result1 + i*1+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j * sizeof(float) )) * *(srcImageSrcDt3); 
-      }
-      
-      float border_mp_0Result1Result1[4][1];
-      *( (float*)border_mp_0Result1Result1 + 0) = *( (float*)border_mp_0Result1 + 0) + *( (float*) border_mp_1Result1 + 0);
-      *( (float*)border_mp_0Result1Result1 + 1) = *( (float*)border_mp_0Result1 + 1) + *( (float*) border_mp_1Result1 + 1);
-      *( (float*)border_mp_0Result1Result1 + 2) = *( (float*)border_mp_0Result1 + 2) + *( (float*) border_mp_1Result1 + 2);
-      *( (float*)border_mp_0Result1Result1 + 3) = *( (float*)border_mp_0Result1 + 3) + *( (float*) border_mp_1Result1 + 3);
-      
-      for(int i=0;i<4;i++)
-      *( (__global unsigned char*)( (__global char*)dstImageDSDt2 + i * dstImageDSStep) ) = *( (  float*)( ( char*)border_mp_0Result1Result1 + i * 1 * sizeof(float)) );
-      
-      for(int i=0;i<4;i++)
-      *( (__global unsigned char*)( (__global char*)dstImageDSDt1 + i * dstImageDSStep) ) = *( ( __global unsigned char*)( (__global char*)dstImageDSDt2 + i * dstImageDSStep) );
-            
-      float border_mp_1Result2 [4][1] ;
-      for(int i = 0; i < 4 ; i++ ) 
-      for(int j = 0; j < 1 ; j++ ){ 
-      *( (float*)border_mp_1Result2 + i*1+j) = *( (__global float*)((__global char*)border_mp_1SrcDt2+ i*border_mp_1SrcStep+j * sizeof(float) )) * *(srcImageSrcDt6); 
-      }
-      
-      float border_mp_0Result2 [4][1] ;
-      for(int i = 0; i < 4 ; i++ ) 
-      for(int j = 0; j < 1 ; j++ ){ 
-      *( (float*)border_mp_0Result2 + i*1+j) = *( (__global float*)((__global char*)border_mp_0SrcDt1+ i*border_mp_0SrcStep+j * sizeof(float) )) * *(srcImageSrcDt4); 
-      }
-      
-      float border_mp_0Result2Result1[4][1];
-      *( (float*)border_mp_0Result2Result1 + 0) = *( (float*)border_mp_0Result2 + 0) + *( (float*) border_mp_1Result2 + 0);
-      *( (float*)border_mp_0Result2Result1 + 1) = *( (float*)border_mp_0Result2 + 1) + *( (float*) border_mp_1Result2 + 1);
-      *( (float*)border_mp_0Result2Result1 + 2) = *( (float*)border_mp_0Result2 + 2) + *( (float*) border_mp_1Result2 + 2);
-      *( (float*)border_mp_0Result2Result1 + 3) = *( (float*)border_mp_0Result2 + 3) + *( (float*) border_mp_1Result2 + 3);
-      
-      for(int i=0;i<4;i++)
-      *( (__global unsigned char*)( (__global char*)dstImageDSDt3 + i * dstImageDSStep) ) = *( (  float*)( ( char*)border_mp_0Result2Result1 + i * 1 * sizeof(float)) );
-      
-      for(int i=0;i<4;i++)
-      *( (__global unsigned char*)( (__global char*)dstImageDSDt4 + i * dstImageDSStep) ) = *( ( __global unsigned char*)( (__global char*)dstImageDSDt3 + i * dstImageDSStep) );
-          }
+#if 0
+      AddTemp1.s0 = Temp2.s0 + Temp3.s0 ;
+      AddTemp1.s1 = Temp2.s1 + Temp3.s1 ;
+      AddTemp1.s2 = Temp2.s2 + Temp3.s2 ;
+      AddTemp1.s3 = Temp2.s3 + Temp3.s3 ;
+#endif
+      AddTemp1 = Temp2 + Temp3;
+
+      __global char*tt = dstImageDSDt3;
+#if 0
+      *( (__global uchar2*)( dstImageDSDt3 ) ) = (AddTemp1.s0, AddTemp1.s0);
+      *( (__global uchar2*)( dstImageDSDt3 +  dstImageDSStep) ) = (AddTemp1.s1, AddTemp1.s1);
+      *( (__global uchar2*)( dstImageDSDt3 + (dstImageDSStep<<1)) ) = (AddTemp1.s2, AddTemp1.s2);
+      *( (__global uchar2*)( dstImageDSDt3 + 3 * dstImageDSStep) ) = (AddTemp1.s3, AddTemp1.s3);
+#endif
+      *( (__global uchar2*)( tt ) ) = (AddTemp1.s0, AddTemp1.s0);
+      tt += dstImageDSStep;
+      *( (__global uchar2*)( tt) ) = (AddTemp1.s1, AddTemp1.s1);
+      tt += dstImageDSStep;
+      *( (__global uchar2*)( tt) ) = (AddTemp1.s2, AddTemp1.s2);
+      tt += dstImageDSStep;
+      *( (__global uchar2*)( tt) ) = (AddTemp1.s3, AddTemp1.s3);
+
+    }
   }
 
 }
@@ -388,6 +551,7 @@ __kernel void kernel_4(
        *(result0_2+1) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)));
        *(result0_2+2) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)));
        *(result0_2+3) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)));
+
        *(result0_3+0) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+0*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+0*mpSrcStep)));
        *(result0_3+1) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+1*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+1*mpSrcStep)));
        *(result0_3+2) = (float)(    (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+0+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+2*mpSrcStep)) +     (*( (__global float*)( (__global char*)mpSrcDt1+0* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+0*srcImageSrcStep) +     (*( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+3*mpSrcStep)) * *(srcImageSrcDt2+1+1*srcImageSrcStep) ))     * *( (__global float*)( (__global char*)mpSrcDt1+1* sizeof(float)+2*mpSrcStep)));

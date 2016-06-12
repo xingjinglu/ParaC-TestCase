@@ -1,0 +1,2 @@
+sharpness_opt1.cl: kernel_2 no local memory optimization.
+

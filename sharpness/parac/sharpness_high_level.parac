@@ -25,6 +25,7 @@ int DownScaleNewX16 (/*int M, int N, */parac_matrix unsigned char &pImageSrc[M][
 
 int UpScaleNewX16 (/*int M, int N, */parac_matrix unsigned char &srcImage[M/4][N/4], parac_matrix unsigned char &dstImage[M][N]){
 
+  // UpBorderCol.
   /*The first and last two columns*/
   parac_matrix float border_mp_0[4][1] = {1.0, 3/4.0f, 2/4.0f, 1/4.0f};
   parac_matrix float border_mp_1[4][1] = {0.0, 1/4.0f, 2/4.0f, 3/4.0f}; 
@@ -35,8 +36,13 @@ int UpScaleNewX16 (/*int M, int N, */parac_matrix unsigned char &srcImage[M/4][N
     {
       dstImage[it1x*4][0]   = srcImage[it1x][0];
       dstImage[it1x*4+1][0] = srcImage[it1x][0];
+      dstImage[it1x*4+2][0] = srcImage[it1x][0];
+      dstImage[it1x*4+3][0] = srcImage[it1x][0];
+
       dstImage[it1x*4][1]   = srcImage[it1x][0];
       dstImage[it1x*4+1][1] = srcImage[it1x][0];
+      dstImage[it1x*4+2][1] = srcImage[it1x][0];
+      dstImage[it1x*4+3][1] = srcImage[it1x][0];
 
       dstImage[it1x*4][M-2] = srcImage[it1x][M/4-1];
       dstImage[it1x*4+1][M-2] = srcImage[it1x][M/4-1];
@@ -62,20 +68,22 @@ int UpScaleNewX16 (/*int M, int N, */parac_matrix unsigned char &srcImage[M/4][N
   {
     if(it2y == N/4-1)
     {
-      dstImage[1][it2y*4] = srcImage[0][it2y];
       dstImage[0][it2y*4] = srcImage[0][it2y];
       dstImage[0][it2y*4+1] = srcImage[0][it2y];
-      dstImage[1][it2y*4+1] = srcImage[0][it2y];
-      dstImage[N-2][it2y*4] = srcImage[N/4-1][it2y];
-      dstImage[N-1][it2y*4] = srcImage[N/4-1][it2y];
-      dstImage[N-2][it2y*4+1] = srcImage[N/4-1][it2y];
-      dstImage[N-1][it2y*4+1] = srcImage[N/4-1][it2y];
 
+      dstImage[1][it2y*4] = srcImage[0][it2y];
+      dstImage[1][it2y*4+1] = srcImage[0][it2y];
+
+      dstImage[N-2][it2y*4] = srcImage[N/4-1][it2y];
+      dstImage[N-2][it2y*4+1] = srcImage[N/4-1][it2y];
+
+      dstImage[N-1][it2y*4] = srcImage[N/4-1][it2y];
+      dstImage[N-1][it2y*4+1] = srcImage[N/4-1][it2y];
     }
     else
     {
       dstImage[0][it2y*4:4:1]    = dstImage[1][it2y*4:4:1]   = srcImage[0][it2y]     * transe(border_mp_0) + srcImage[0][it2y+1]     * transe(border_mp_1); 
-    dstImage[N-2][it2y*4:4:1]  = dstImage[N-1][it2y*4:4:1] = srcImage[N/4-1][it2y] * transe(border_mp_0) + srcImage[N/4-1][it2y+1] * transe(border_mp_1);
+      dstImage[N-2][it2y*4:4:1]  = dstImage[N-1][it2y*4:4:1] = srcImage[N/4-1][it2y] * transe(border_mp_0) + srcImage[N/4-1][it2y+1] * transe(border_mp_1);
 
     }		
   }

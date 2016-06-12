@@ -26,6 +26,8 @@ __kernel void kernel_1(
   /* kernel index calculation */
   int pImageSrcSrcIdx1 = pImageSrcSrcShift + ((float)gidy * 4) *pImageSrcSrcStep + ((float)gidx * 4) *sizeof(unsigned char);
   int pImageDstDstIdx1 = pImageDstDstShift + ((float)gidy * 1/4 * 4) *pImageDstDstStep + ((float)gidx * 1/4 * 4) *sizeof(unsigned char);
+  //int pImageSrcSrcIdx1 = pImageSrcSrcShift + (gidy << 2 )* pImageSrcSrcStep + (gidx << 2);
+  //int pImageDstDstIdx1 = pImageDstDstShift + gidy  *pImageDstDstStep + gidx;
 
   /* kernel operands */
   __global unsigned char *pImageSrcSrcDt1 = pImageSrcSrc + pImageSrcSrcIdx1;
@@ -33,21 +35,24 @@ __kernel void kernel_1(
 
   /* kernel operation */
   {
-        short _sum = 0;
+        int _sum =  8;
         uchar4 _rtemp0;
     __global uchar *_base = pImageSrcSrcDt1;
+    _rtemp0 = vload4(0, pImageSrcSrcDt1);
+    _sum  +=  _rtemp0.s0 + _rtemp0.s1 +_rtemp0.s2 + _rtemp0.s3;
+
+    _base = pImageSrcSrcDt1 +  pImageSrcSrcStep;
     _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
-    _base = pImageSrcSrcDt1 + 1 * pImageSrcSrcStep;
-    _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
+    _sum  +=  _rtemp0.s0 + _rtemp0.s1 + _rtemp0.s2 + _rtemp0.s3;
+
     _base = pImageSrcSrcDt1 + 2 * pImageSrcSrcStep;
     _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
+    _sum  += _rtemp0.s0 + _rtemp0.s1 +_rtemp0.s2 + _rtemp0.s3;
+
     _base = pImageSrcSrcDt1 + 3 * pImageSrcSrcStep;
     _rtemp0 = vload4(0, _base);
-    _sum  +=     _rtemp0.s0     +     _rtemp0.s1     +     _rtemp0.s2     +     _rtemp0.s3     ;
-    *pImageDstDstDt1 = (_sum + 8) >> 4;
+    _sum  += _rtemp0.s0 + _rtemp0.s1 +_rtemp0.s2 + _rtemp0.s3;
+    *pImageDstDstDt1 = (uchar) (_sum >> 4);
   }
 
 }
@@ -96,14 +101,10 @@ __kernel void kernel_2(
   int dstImageDSIdx6 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + (1) *sizeof(unsigned char);
   int dstImageDSIdx7 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
   int dstImageDSIdx8 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
-  int dstImageDSIdx9 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep;
-  int dstImageDSIdx10 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1) *sizeof(unsigned char);
-  int dstImageDSIdx11 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
-  int dstImageDSIdx12 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
-  int dstImageDSIdx13 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep;
-  int dstImageDSIdx14 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + (1) *sizeof(unsigned char);
-  int dstImageDSIdx15 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
-  int dstImageDSIdx16 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
+  int dstImageDSIdx9 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
+  int dstImageDSIdx10 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
+  int dstImageDSIdx11 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + (1024 - 1) *sizeof(unsigned char);
+  int dstImageDSIdx12 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + (1024 - 2) *sizeof(unsigned char);
 
   /* kernel operands */
   __global float *border_mp_0SrcDt1 = (__global char *)border_mp_0Src + border_mp_0SrcShift;
@@ -124,30 +125,22 @@ __kernel void kernel_2(
   __global unsigned char *dstImageDSDt10 = dstImageDS + dstImageDSIdx10;
   __global unsigned char *dstImageDSDt11 = dstImageDS + dstImageDSIdx11;
   __global unsigned char *dstImageDSDt12 = dstImageDS + dstImageDSIdx12;
-  __global unsigned char *dstImageDSDt13 = dstImageDS + dstImageDSIdx13;
-  __global unsigned char *dstImageDSDt14 = dstImageDS + dstImageDSIdx14;
-  __global unsigned char *dstImageDSDt15 = dstImageDS + dstImageDSIdx15;
-  __global unsigned char *dstImageDSDt16 = dstImageDS + dstImageDSIdx16;
 
   /* kernel operation */
   {
     if (gidy == 1024 / 4 - 1) {
              *dstImageDSDt1 = *srcImageSrcDt3;
                    *dstImageDSDt5 = *srcImageSrcDt3;
-                   *dstImageDSDt9 = *srcImageSrcDt3;
-                   *dstImageDSDt13 = *srcImageSrcDt3;
                    *dstImageDSDt2 = *srcImageSrcDt3;
                    *dstImageDSDt6 = *srcImageSrcDt3;
-                   *dstImageDSDt10 = *srcImageSrcDt3;
-                   *dstImageDSDt14 = *srcImageSrcDt3;
                    *dstImageDSDt4 = *srcImageSrcDt4;
                    *dstImageDSDt8 = *srcImageSrcDt4;
+                   *dstImageDSDt10 = *srcImageSrcDt4;
                    *dstImageDSDt12 = *srcImageSrcDt4;
-                   *dstImageDSDt16 = *srcImageSrcDt4;
                    *dstImageDSDt3 = *srcImageSrcDt4;
                    *dstImageDSDt7 = *srcImageSrcDt4;
+                   *dstImageDSDt9 = *srcImageSrcDt4;
                    *dstImageDSDt11 = *srcImageSrcDt4;
-                   *dstImageDSDt15 = *srcImageSrcDt4;
           } else {
       
       float border_mp_1Result1 [4][1] ;
