@@ -17,11 +17,13 @@ __kernel void kernel_1(
   int pImageDstDstShift)
 {
   /* kernel thread ID */
+  int width = get_global_size(0); // 256
+  int height = get_global_size(1); // 256
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx >= 256| gidy >= 256 )
+  if ( gidx >= (width) | gidy >= (height) )
     return;
 
   /* kernel index calculation */
@@ -174,27 +176,36 @@ __kernel void kernel_2(
   int dstImageDSShift)
 {
   /* kernel thread ID */
+  int width = get_global_size(0); // 2
+  int height = get_global_size(1); // 256
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
   //printf("lid0 = %d, lid1 = %d, gidx = %d, gidy  = %d wid0 = %d, wid1 = %d\n",get_local_id(0), get_local_id(1), gidx, gidy, get_group_id(0), get_group_id(1) );
-  if ( gidx >=2 || gidy >= 256 )
+  //if ( gidx >=2 || gidy >= 256 )
+  if ( gidx >=2 || gidy >= height )
     return;
   /* kernel index calculation */
   // srcImage[itx1][0], srcImage[it1x][M/4-1].
-  int srcImageSrcIdx1 = srcImageSrcShift + ((float)gidy) * srcImageSrcStep + gidx * (1024/4-1);  
+  //int srcImageSrcIdx1 = srcImageSrcShift + ((float)gidy) * srcImageSrcStep + gidx * (1024/4-1);  
+  int srcImageSrcIdx1 = srcImageSrcShift + ((float)gidy) * srcImageSrcStep + gidx * (height-1);   // ?
 
   // srcImage[it1x+1][0], [it1x+1][M/4-1].
-  int srcImageSrcIdx2 = srcImageSrcShift + ((float)gidy + 1) *srcImageSrcStep + gidx * (1024/4-1);
+  //int srcImageSrcIdx2 = srcImageSrcShift + ((float)gidy + 1) *srcImageSrcStep + gidx * (1024/4-1);
+  int srcImageSrcIdx2 = srcImageSrcShift + ((float)gidy + 1) *srcImageSrcStep + gidx * (height-1);
 
   
   // dstImage[it1x*4 + y][M-2], [it1x*4+y][0]
   // + 1 ---> 1, M-1
-  int dstImageDSIdx1 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + gidx *(1024-2);
-  int dstImageDSIdx2 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + gidx *(1024-2);
-  int dstImageDSIdx3 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + gidx *(1024-2);
-  int dstImageDSIdx4 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + gidx *(1024-2);
+  //int dstImageDSIdx1 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + gidx *(1024-2);
+  //int dstImageDSIdx2 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + gidx *(1024-2);
+  //int dstImageDSIdx3 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + gidx *(1024-2);
+  //int dstImageDSIdx4 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + gidx *(1024-2);
+  int dstImageDSIdx1 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + gidx *(height*4-2);
+  int dstImageDSIdx2 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + gidx *(height*4-2);
+  int dstImageDSIdx3 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + gidx *(height*4-2);
+  int dstImageDSIdx4 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + gidx *(height*4-2);
 
 
 
@@ -217,7 +228,9 @@ __kernel void kernel_2(
 
   /* kernel operation */
   {
-    if ( gidy == 255 ) {
+    //if ( gidy == 255 ) 
+    if ( gidy == height-1) 
+    {
       // dstImage[it1x*4+ y][0], [it1x*4+y][1]; 
       *((__global uchar2*)(dstImageDSDt1)) = (srcImageSrcDt1Temp, srcImageSrcDt1Temp);
       *((__global uchar2*)(dstImageDSDt2)) = (srcImageSrcDt1Temp, srcImageSrcDt1Temp);
@@ -285,27 +298,32 @@ __kernel void kernel_3(
   int dstImageDSShift)
 {
   /* kernel thread ID */
+  int height = get_global_size(1); //  2
+  int width = get_global_size(0); // 256
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidy >= 256 )
+  //if ( gidy >= 256 )
+  if ( gidy >= width )
     return;
 
   /* kernel index calculation */
   int srcImageSrcIdx3 = srcImageSrcShift + ((float)gidx) *sizeof(unsigned char);
   int srcImageSrcIdx4;
-  int srcImageSrcIdx5 = srcImageSrcShift + (1024 / 4 - 1) *srcImageSrcStep + ((float)gidx) *sizeof(unsigned char);
-  int srcImageSrcIdx6 = srcImageSrcShift + (1024 / 4 - 1) *srcImageSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
+  //int srcImageSrcIdx5 = srcImageSrcShift + (1024 / 4 - 1) *srcImageSrcStep + ((float)gidx) *sizeof(unsigned char);
+  int srcImageSrcIdx5 = srcImageSrcShift + (width - 1) *srcImageSrcStep + ((float)gidx) *sizeof(unsigned char);
+  //int srcImageSrcIdx6 = srcImageSrcShift + (1024 / 4 - 1) *srcImageSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
+  int srcImageSrcIdx6 = srcImageSrcShift + (width - 1) *srcImageSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
   int dstImageDSIdx1;
   int dstImageDSIdx2;
   int dstImageDSIdx3;
   int dstImageDSIdx4;
 
-  int dstImageDSIdx5 = dstImageDSShift + (1024 - 1) *dstImageDSStep + ((float)gidx * 4) *sizeof(unsigned char);
-  int dstImageDSIdx6 = dstImageDSShift + (1024 - 1) *dstImageDSStep + ((float)gidx * 4 + 1) *sizeof(unsigned char);
-  int dstImageDSIdx7 = dstImageDSShift + (1024 - 2) *dstImageDSStep + ((float)gidx * 4) *sizeof(unsigned char);
-  int dstImageDSIdx8 = dstImageDSShift + (1024 - 2) *dstImageDSStep + ((float)gidx * 4 + 1) *sizeof(unsigned char);
+  int dstImageDSIdx5 = dstImageDSShift + (width*4 - 1) *dstImageDSStep + ((float)gidx * 4) *sizeof(unsigned char);
+  int dstImageDSIdx6 = dstImageDSShift + (width*4 - 1) *dstImageDSStep + ((float)gidx * 4 + 1) *sizeof(unsigned char);
+  int dstImageDSIdx7 = dstImageDSShift + (width*4 - 2) *dstImageDSStep + ((float)gidx * 4) *sizeof(unsigned char);
+  int dstImageDSIdx8 = dstImageDSShift + (width*4 - 2) *dstImageDSStep + ((float)gidx * 4 + 1) *sizeof(unsigned char);
 
   /* kernel operands */
   __global unsigned char *srcImageSrcDt3 = srcImageSrc + srcImageSrcIdx3;
@@ -352,7 +370,8 @@ __kernel void kernel_3(
     //uchar srcImageSrcDt4Temp = *srcImageSrcDt4;
     //uchar srcImageSrcDt6Temp = *srcImageSrcDt6;
 
-    if (gidx == 1024 / 4 - 1) {
+    if (gidx == width - 1) 
+    {
       
       *((__global uchar2*)(dstImageDSDt3)) = (Temp.s0, Temp.s0);
       *((__global uchar2*)(dstImageDSDt2)) = (Temp.s0, Temp.s0);
@@ -447,11 +466,13 @@ __kernel void kernel_4(
   int dstImageDstShift)
 {
   /* kernel thread ID */
+  int width = get_global_size(0);
+  int height = get_global_size(1);
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx >= 255 || gidy >= 255 )
+  if ( gidx >= (width-1) || gidy >= (height -1) )
     return;
 
   /* kernel index calculation */
@@ -561,11 +582,13 @@ __kernel void kernel_5(
   int pEdgeDstShift)
 {
   /* kernel thread ID */
+  int width = get_global_size(0); // 256
+  int height = get_global_size(1); // 1024
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx >= 256 || gidy >= 1024 )
+  if ( gidx >= width || gidy >= height )
     return;
 
   /* kernel index calculation */
@@ -608,7 +631,7 @@ Addr += yPlaneSrcStep;
       Next3 = (int) (*((__global uchar*)(Addr + 5 )));
 
 
-      if ( gidy == 0 ||  gidy == 1024 - 1 ){
+      if ( gidy == 0 ||  gidy == height - 1 ){
         *((__global short4*)( pEdgeDstDt1)) = (short4)0;
       }
      else
@@ -675,7 +698,7 @@ Addr += yPlaneSrcStep;
        {
          edgeV = convert_short4(abs(res) + abs(res2));
          edgeV.s0 = select((int)edgeV.s0, 0, gidx == 0 );
-         edgeV.s3 = select((int)edgeV.s3, 0, gidx == 255 );
+         edgeV.s3 = select((int)edgeV.s3, 0, gidx == (width-1) );
 
          *((__global short4*)( (global uchar*)pEdgeDstDt1)) = edgeV;
        }
@@ -738,7 +761,7 @@ Addr += yPlaneSrcStep;
       res2 += 0 * yPlane[1]; 
       res2 += 1 * yPlane[2]; 
     }
-    if (gidy == 0 || (gidx) == 0 || gidy == 1024 - 1 || gidx == 1024 - 1)
+    if (gidy == 0 || (gidx) == 0 || gidy == height - 1 || gidx == height - 1)
       *pEdgeDstDt1 = 0;
     else
       *pEdgeDstDt1 = abs(res2) + abs(res1);
@@ -758,6 +781,8 @@ __kernel void kernel_6(
   __local unsigned int * _ltmp0)
 {
   /* kernel thread ID */
+  int width = get_global_size(0); // 256
+  int height = get_global_size(1); // 1024
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
   const int lidx = get_local_id(0);
@@ -865,11 +890,13 @@ __kernel void kernel_7(
   int dstDstShift)
 {
   /* kernel thread ID */
+  int width = get_global_size(0);
+  int height = get_global_size(1);
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx >= (1024/4) || gidy >= 1024 )
+  if ( gidx >= (width) || gidy >= height )
     return;
 
   /* kernel index calculation */

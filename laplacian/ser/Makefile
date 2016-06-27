@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -O 
+CFLAGS = -O3
 INCS = -I/opt/AMDAPP/include
 LIBS = -L/usr/lib
 laplacian: laplacian.o

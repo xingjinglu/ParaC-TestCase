@@ -6,10 +6,10 @@
 #include"ClHost.h"
 #include<stdlib.h>
 
-#define ROWS 1024
-#define COLS 1024
-#define M 1024
-#define N 1024
+//#define ROWS 1024
+//#define COLS 1024
+//#define M 1024
+//#define N 1024
 
 #define MIN2(a,b)  ((a)<(b) ? (a):(b))
 #define MAX2(a,b)  ((a)>(b) ? (a):(b))
@@ -118,173 +118,181 @@ inline void freeu(unsigned char **p)
 
 
 //M is height, N is width
-int DownScaleNewX16(unsigned char (*pImageSrc)[1024][1024], unsigned char (*pImageDst)[1024 / 4][1024 / 4]) 
+int DownScaleNewX16(int height, int width, unsigned char *pImageSrc1, unsigned char *pImageDst1) 
 {
 
-    unsigned char **yPlane=allocu(1024,1024);
-    unsigned char** yPlaneDown=allocu(256,256);
+  unsigned char (*pImageSrc)[height][width] = (unsigned char(*)[height][width])(pImageSrc1);
+  unsigned char (*pImageDst)[height / 4][width / 4] = (unsigned char(*)[height/4][width/4])(pImageDst1);
 
-    // Verify correctness. 
-    for(int i=0;i<1024;i++)
-        for(int j=0;j<1024;j++)
-            yPlane[i][j]=((unsigned char*)pImageSrc)[i*1024+j];
-    DownScaleNewX16_cpu(yPlane,256, 256,  yPlaneDown);
+  unsigned char **yPlane=allocu(height,width);
+  unsigned char **yPlaneDown=allocu(height/4,width/4);
 
+  // Verify correctness. 
+#ifdef _VERIFY
+  for(int i = 0; i < height; i++)
+    for(int j = 0; j < width; j++)
+      yPlane[i][j]=((unsigned char*)pImageSrc)[i*width+j];
+  DownScaleNewX16_cpu(yPlane, height/4, width/4,  yPlaneDown);
+#endif
+
+
+  {
+#ifdef TIME_PROF
+    tem = 0, tem1 = 0;;
+#endif
+    for(int i = 0; i< 20; i++)
     {
-#ifdef TIME_PROF
-        tem = 0, tem1 = 0;;
-#endif
-        for(int i = 0; i< 20; i++)
-        {
-            size_t pImageSrcSrcWidth = 1024;
-            size_t pImageSrcSrcHeight = 1024;
-            size_t pImageSrc_srcsz = sizeof(unsigned char);
-            size_t pImageSrcSrcStep = pImageSrcSrcWidth * pImageSrc_srcsz;
-            pImageSrcSrcStep = (pImageSrcSrcStep % PADDING < 16) ? ((pImageSrcSrcStep / PADDING+1) * PADDING) : ((pImageSrcSrcStep + PADDING) / PADDING+1) * PADDING;
-            size_t pImageSrcSrcShift = pImageSrcSrcStep * PADDING_LINE;
-            size_t pImageSrc_srcsz0Pad = pImageSrcSrcStep * (pImageSrcSrcHeight + (PADDING_LINE<<1));
+      size_t pImageSrcSrcWidth = width;
+      size_t pImageSrcSrcHeight = height;
+      size_t pImageSrc_srcsz = sizeof(unsigned char);
+      size_t pImageSrcSrcStep = pImageSrcSrcWidth * pImageSrc_srcsz;
+      pImageSrcSrcStep = (pImageSrcSrcStep % PADDING < 16) ? ((pImageSrcSrcStep / PADDING+1) * PADDING) : ((pImageSrcSrcStep + PADDING) / PADDING+1) * PADDING;
+      size_t pImageSrcSrcShift = pImageSrcSrcStep * PADDING_LINE;
+      size_t pImageSrc_srcsz0Pad = pImageSrcSrcStep * (pImageSrcSrcHeight + (PADDING_LINE<<1));
 
-            unsigned char *pImageSrcSrcBufH = (unsigned char*)malloc(pImageSrc_srcsz0Pad); 
-            //------ Padding time--------
+      unsigned char *pImageSrcSrcBufH = (unsigned char*)malloc(pImageSrc_srcsz0Pad); 
+      //------ Padding time--------
 #ifdef TIME_PROF
-  //gettimeofday(&time0,NULL);
+      //gettimeofday(&time0,NULL);
 #endif
-            for(int i = 0; i < pImageSrcSrcHeight; i++){
-              memcpy( (char*)pImageSrcSrcBufH+ (i + PADDING_LINE) * pImageSrcSrcStep, (char*)pImageSrc+ i * pImageSrcSrcWidth* sizeof(unsigned char), pImageSrcSrcWidth * sizeof(unsigned char) );
-            }
+      for(int i = 0; i < pImageSrcSrcHeight; i++){
+        memcpy( (char*)pImageSrcSrcBufH+ (i + PADDING_LINE) * pImageSrcSrcStep, (char*)pImageSrc+ i * pImageSrcSrcWidth* sizeof(unsigned char), pImageSrcSrcWidth * sizeof(unsigned char) );
+      }
 #ifdef TIME_PROF
-  //gettimeofday(&time0_1,NULL);
+      //gettimeofday(&time0_1,NULL);
 #endif
 
-            cl_mem pImageSrcsrcBuf = clCreateBuffer(g_context, CL_MEM_READ_ONLY, pImageSrc_srcsz0Pad, NULL, &status);
-            checkErr(status, "clCreateBuffer");
-            status = clEnqueueWriteBuffer(g_queue, pImageSrcsrcBuf, CL_TRUE, 0,pImageSrc_srcsz0Pad,pImageSrcSrcBufH, 0, NULL, NULL);
-            checkErr(status, "clWriteBuffer");
+      cl_mem pImageSrcsrcBuf = clCreateBuffer(g_context, CL_MEM_READ_ONLY, pImageSrc_srcsz0Pad, NULL, &status);
+      checkErr(status, "clCreateBuffer");
+      status = clEnqueueWriteBuffer(g_queue, pImageSrcsrcBuf, CL_TRUE, 0,pImageSrc_srcsz0Pad,pImageSrcSrcBufH, 0, NULL, NULL);
+      checkErr(status, "clWriteBuffer");
 
 #ifdef TIME_PROF
-  //gettimeofday(&time1,NULL); // buffer_init = time1 - time0_1;
+      //gettimeofday(&time1,NULL); // buffer_init = time1 - time0_1;
 #endif
 
-            /*--------------- Downscale time.-----------------*/
-            size_t global_work_size[2];
-            cl_event event_kernel;
-            cl_kernel kernel_1 = clCreateKernel(g_program, "kernel_1", &status);
-            checkErr(status, "clCreateKernel for kernel_1");
-            global_work_size[0] = 256;
-            global_work_size[1] = 256;
+      /*--------------- Downscale time.-----------------*/
+      size_t global_work_size[2];
+      cl_event event_kernel;
+      cl_kernel kernel_1 = clCreateKernel(g_program, "kernel_1", &status);
+      checkErr(status, "clCreateKernel for kernel_1");
+      //global_work_size[0] = 256;
+      //global_work_size[1] = 256;
+      global_work_size[0] = width/4;
+      global_work_size[1] = height/4;
 
-            size_t local_work_size[2];
-            local_work_size[0] = 16;
-            local_work_size[1] = 4;
+      size_t local_work_size[2];
+      local_work_size[0] = 16;
+      local_work_size[1] = 4;
 
-            status = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), (void *)&pImageSrcsrcBuf);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 1, sizeof(int), (void *)&pImageSrcSrcWidth);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 2, sizeof(int), (void *)&pImageSrcSrcHeight);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 3, sizeof(int), (void *)&pImageSrcSrcStep);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 4, sizeof(int), (void *)&pImageSrcSrcShift);
-            checkErr(status, "clSetKernelArg");
-                       size_t pImageDstDstWidth = 256;
-            size_t pImageDstDstHeight = 256;
-            size_t pImageDst_dstsz = sizeof(unsigned char);
-            size_t Readsize = pImageDstDstWidth * pImageDstDstHeight * pImageDst_dstsz;
+      status = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), (void *)&pImageSrcsrcBuf);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 1, sizeof(int), (void *)&pImageSrcSrcWidth);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 2, sizeof(int), (void *)&pImageSrcSrcHeight);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 3, sizeof(int), (void *)&pImageSrcSrcStep);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 4, sizeof(int), (void *)&pImageSrcSrcShift);
+      checkErr(status, "clSetKernelArg");
+      size_t pImageDstDstWidth = width/4;
+      size_t pImageDstDstHeight = height/4;
+      size_t pImageDst_dstsz = sizeof(unsigned char);
+      size_t Readsize = pImageDstDstWidth * pImageDstDstHeight * pImageDst_dstsz;
 #if 0  // padding off.
-            size_t pImageDstDstStep = pImageDstDstWidth * pImageDst_dstsz;
-            size_t pImageDstDstShift = 0;
-            size_t pImageDst_dstsz0Pad = pImageDstDstStep * pImageDstDstHeight;
+      size_t pImageDstDstStep = pImageDstDstWidth * pImageDst_dstsz;
+      size_t pImageDstDstShift = 0;
+      size_t pImageDst_dstsz0Pad = pImageDstDstStep * pImageDstDstHeight;
 #endif
 #if 1  // padding on.
-            size_t pImageDstDstStep = pImageDstDstWidth * pImageDst_dstsz;
-            pImageDstDstStep = (pImageDstDstStep % PADDING < 16) ? ((pImageDstDstStep / PADDING+1) * PADDING) : ((pImageDstDstStep + PADDING) / PADDING+1) * PADDING;
-            size_t pImageDstDstShift = pImageDstDstStep * PADDING_LINE;
-            size_t pImageDst_dstsz0Pad = pImageDstDstStep * (pImageDstDstHeight + (PADDING_LINE<<1));
+      size_t pImageDstDstStep = pImageDstDstWidth * pImageDst_dstsz;
+      pImageDstDstStep = (pImageDstDstStep % PADDING < 16) ? ((pImageDstDstStep / PADDING+1) * PADDING) : ((pImageDstDstStep + PADDING) / PADDING+1) * PADDING;
+      size_t pImageDstDstShift = pImageDstDstStep * PADDING_LINE;
+      size_t pImageDst_dstsz0Pad = pImageDstDstStep * (pImageDstDstHeight + (PADDING_LINE<<1));
 #endif
 
-            cl_mem pImageDstdstBuf = clCreateBuffer(g_context, CL_MEM_READ_WRITE, pImageDst_dstsz0Pad, NULL, &status);
-            checkErr(status, "clCreateBuffer");
+      cl_mem pImageDstdstBuf = clCreateBuffer(g_context, CL_MEM_READ_WRITE, pImageDst_dstsz0Pad, NULL, &status);
+      checkErr(status, "clCreateBuffer");
 
 
 #if 1 // padding on, not need.
-            unsigned char *pImageDstDstBufH = (unsigned char*)malloc(pImageDst_dstsz0Pad); 
-            for(int i = 0; i < pImageDstDstHeight; i++){
-                memcpy( (char*)pImageDstDstBufH+ (i + PADDING_LINE) * pImageDstDstStep,(char*)pImageDst + i * pImageDstDstWidth* sizeof(unsigned char),pImageDstDstWidth* sizeof(unsigned char) );
-            }
+      unsigned char *pImageDstDstBufH = (unsigned char*)malloc(pImageDst_dstsz0Pad); 
+      for(int i = 0; i < pImageDstDstHeight; i++){
+        memcpy( (char*)pImageDstDstBufH+ (i + PADDING_LINE) * pImageDstDstStep,(char*)pImageDst + i * pImageDstDstWidth* sizeof(unsigned char),pImageDstDstWidth* sizeof(unsigned char) );
+      }
 #endif
-            status = clSetKernelArg(kernel_1, 5, sizeof(cl_mem), (void *)&pImageDstdstBuf);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 6, sizeof(int), (void *)&pImageDstDstWidth);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 7, sizeof(int), (void *)&pImageDstDstHeight);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 8, sizeof(int), (void *)&pImageDstDstStep);
-            checkErr(status, "clSetKernelArg");
-            status = clSetKernelArg(kernel_1, 9, sizeof(int), (void *)&pImageDstDstShift);
-            checkErr(status, "clSetKernelArg");
-            //status = clSetKernelArg(kernel_1, 10, sizeof(unsigned int) * local_work_size[0] * local_work_size[1], NULL);
-            //checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 5, sizeof(cl_mem), (void *)&pImageDstdstBuf);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 6, sizeof(int), (void *)&pImageDstDstWidth);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 7, sizeof(int), (void *)&pImageDstDstHeight);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 8, sizeof(int), (void *)&pImageDstDstStep);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_1, 9, sizeof(int), (void *)&pImageDstDstShift);
+      checkErr(status, "clSetKernelArg");
+      //status = clSetKernelArg(kernel_1, 10, sizeof(unsigned int) * local_work_size[0] * local_work_size[1], NULL);
+      //checkErr(status, "clSetKernelArg");
 
 
-            status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
-            checkErr(status, "clEnqueueNDRangeKernel");
-            status = clFinish(g_queue);
-            checkErr(status,"clFinish of kernel_1");
+      status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
+      checkErr(status, "clEnqueueNDRangeKernel");
+      status = clFinish(g_queue);
+      checkErr(status,"clFinish of kernel_1");
 
 #ifdef TIME_PROF
-            gettimeofday(&t12,NULL);
-            tem+=(double)(t12.tv_usec-t11.tv_usec)*0.001+(t12.tv_sec-t11.tv_sec)*1000;
-            clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &startTime, NULL);
-            clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endTime, NULL);
-            tem1 += (endTime - startTime)/1000.0;
+      gettimeofday(&t12,NULL);
+      tem+=(double)(t12.tv_usec-t11.tv_usec)*0.001+(t12.tv_sec-t11.tv_sec)*1000;
+      clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &startTime, NULL);
+      clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endTime, NULL);
+      tem1 += (endTime - startTime)/1000.0;
 #endif
 
-             // Tobe opt.
+      // Tobe opt.
 #if 0 // pading off
-            status = clEnqueueReadBuffer(g_queue, pImageDstdstBuf, CL_TRUE, 0,pImageDst_dstsz0Pad,pImageDstDstBufH, 0, NULL, NULL);
-            checkErr(status,"clEnqueueReadBuffer");
-            for(int i = 0; i < pImageDstDstHeight; i++){
-                memcpy( (char*)pImageDst+ i *pImageDstDstWidth* sizeof(unsigned char),(char*) pImageDstDstBufH+ i  * pImageDstDstStep,pImageDstDstWidth* sizeof(unsigned char) );
-            }
+      status = clEnqueueReadBuffer(g_queue, pImageDstdstBuf, CL_TRUE, 0,pImageDst_dstsz0Pad,pImageDstDstBufH, 0, NULL, NULL);
+      checkErr(status,"clEnqueueReadBuffer");
+      for(int i = 0; i < pImageDstDstHeight; i++){
+        memcpy( (char*)pImageDst+ i *pImageDstDstWidth* sizeof(unsigned char),(char*) pImageDstDstBufH+ i  * pImageDstDstStep,pImageDstDstWidth* sizeof(unsigned char) );
+      }
 #endif
 
 #if 1 // Padding on.
-            status = clEnqueueReadBuffer(g_queue, pImageDstdstBuf, CL_TRUE, 0,pImageDst_dstsz0Pad,pImageDstDstBufH, 0, NULL, NULL);
-            checkErr(status,"clEnqueueReadBuffer");
-            for(int i = 0; i < pImageDstDstHeight; i++){
-                memcpy( (char*)pImageDst+ i *pImageDstDstWidth* sizeof(unsigned char),(char*) pImageDstDstBufH+ (i + PADDING_LINE)* pImageDstDstStep,pImageDstDstWidth* sizeof(unsigned char) );
-            }
+      status = clEnqueueReadBuffer(g_queue, pImageDstdstBuf, CL_TRUE, 0,pImageDst_dstsz0Pad,pImageDstDstBufH, 0, NULL, NULL);
+      checkErr(status,"clEnqueueReadBuffer");
+      for(int i = 0; i < pImageDstDstHeight; i++){
+        memcpy( (char*)pImageDst+ i *pImageDstDstWidth* sizeof(unsigned char),(char*) pImageDstDstBufH+ (i + PADDING_LINE)* pImageDstDstStep,pImageDstDstWidth* sizeof(unsigned char) );
+      }
 #endif
-        }
-
     }
+
+  }
 
 #if TIME_PROF
-    total.down_time = tem / 20.0;
-    total.kernel_down = double(tem1 / 20000.0);
-    //printf("Total: Down = %f ms\n",tem/20);
+  total.down_time = tem / 20.0;
+  total.kernel_down = double(tem1 / 20000.0);
+  //printf("Total: Down = %f ms\n",tem/20);
 #endif
 
-   // Correctness verify.
-    for(int i = 0; i < 256; i++)
+#ifdef _VERIFY
+  // Correctness verify.
+  for(int i = 0; i < (height/4); i++)
+  {
+    for(int j = 0; j < (width/4); j++)
     {
-        for(int j = 0; j < 256; j++)
-        {
-            if(yPlaneDown[i][j] !=((unsigned char*) pImageDst)[i* 256 +j])
-            {
-                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneDown[i][j], (int)((unsigned char*) pImageDst)[i* 256 +j]);
-                printf("%u ",yPlaneDown[i][j]);
+      if(yPlaneDown[i][j] !=((unsigned char*) pImageDst)[i* (width/4) +j])
+      {
+        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneDown[i][j], (int)(((unsigned char*) pImageDst)[i* (width/4) +j]));
+        abort();
 
-
-                abort();
-
-            }
-        }
-        //printf("\n");
-
+      }
     }
-    printf("down success\n");
+    //printf("\n");
+
+  }
+  printf("down success\n");
+#endif
+
 }
 
 
@@ -466,17 +474,21 @@ int UpScaleNewX16_cpu(unsigned char** srcImage,int height,int width ,unsigned ch
 
 
 
-int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (*dstImage)[1024][1024]) 
+int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char *dstImage1) 
 {
+  unsigned char (*srcImage)[height / 4][width / 4] = (unsigned char(*)[height/4][width/4])(srcImage1);
+  unsigned char (*dstImage)[height][width] = (unsigned char(*)[height][width])(dstImage1);
 
-  unsigned char **yPlane=allocu(256,256);
-  unsigned char** yPlaneUp=allocu(1024,1024);
+  unsigned char **yPlane=allocu(height/4,width/4);
+  unsigned char** yPlaneUp=allocu(height, width);
 
+#ifdef _VERIFY
   // correctness verification.
-  for(int i=0;i<256;i++)
-    for(int j=0;j<256;j++)
-      yPlane[i][j]=((unsigned char*)srcImage)[i*256+j];
-  UpScaleNewX16_cpu(yPlane,256, 256, yPlaneUp);
+  for(int i=0; i < height/4; i++)
+    for(int j=0; j < width/4; j++)
+      yPlane[i][j]=((unsigned char*)srcImage)[i*(width/4)+j];
+  UpScaleNewX16_cpu(yPlane, height/4, width/4, yPlaneUp);
+#endif
 
   float border_mp_0[4][1] = { 1., 3 / 4.f, 2 / 4.f, 1 / 4.f };
   float border_mp_1[4][1] = { 0., 1 / 4.f, 2 / 4.f, 3 / 4.f };
@@ -488,8 +500,8 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
 #endif
     for(int i = 0; i< 20 ; i++)
     {
-      size_t srcImageSrcWidth = 256;
-      size_t srcImageSrcHeight = 256;
+      size_t srcImageSrcWidth = width/4;
+      size_t srcImageSrcHeight = height/4;
       size_t srcImage_srcsz = sizeof(unsigned char);
       size_t srcImageSrcStep = srcImageSrcWidth * srcImage_srcsz;
       srcImageSrcStep = (srcImageSrcStep % PADDING < 16) ? ((srcImageSrcStep / PADDING+1) * PADDING) : ((srcImageSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -541,8 +553,8 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       status = clEnqueueWriteBuffer(g_queue, border_mp_1srcBuf, CL_TRUE, 0,border_mp_1_srcsz0Pad,border_mp_1SrcBufH, 0, NULL, NULL);
       checkErr(status, "clWriteBuffer");
 
-      size_t dstImageDSWidth = 1024;
-      size_t dstImageDSHeight = 1024;
+      size_t dstImageDSWidth = width;
+      size_t dstImageDSHeight = height;
       size_t dstImage_dssz = sizeof(unsigned char);
       size_t Readsize = dstImageDSWidth * dstImageDSHeight * dstImage_dssz;
       size_t dstImageDSStep = dstImageDSWidth * dstImage_dssz;
@@ -565,10 +577,13 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       cl_event event_kernel;
       cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
       checkErr(status, "clCreateKernel for kernel_2");
+      //global_work_size[0] = 2;
+      //global_work_size[1] = 256;
       global_work_size[0] = 2;
-      global_work_size[1] = 256;
+      global_work_size[1] = height/4;
       local_work_size[0] = 64;
       local_work_size[1] = 1;
+
       status = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), (void *)&srcImagesrcBuf);
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_2, 1, sizeof(int), (void *)&srcImageSrcWidth);
@@ -611,7 +626,7 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       status = clSetKernelArg(kernel_2, 19, sizeof(int), (void *)&dstImageDSShift);
       checkErr(status, "clSetKernelArg");
 
-      //            status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      //status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
       status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
 
       checkErr(status, "clEnqueueNDRangeKernel");
@@ -641,50 +656,39 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
   total.kernel_up_col = (double)(tem1 / 20000.0);
 #endif
 
-#ifdef VERIFY  
-//#if 0
-
-  for(int i = 0; i < 1022; i++)
+#ifdef _VERIFY1
+  for(int i = 0; i < (height-2); i++)
   {
     for(int j = 0; j < 2; j++)
     {
       //if(i == 1020)
-      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* 1024 +j])
+      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* width +j])
       {
-        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* 1024 +j]);
+        printf("First Two UpCol: i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* width +j]);
         //printf("%u ",yPlaneDown[i][j]);
-
-
         abort();
-
       }
     }
     //printf("\n");
 
   }
 
-  for(int i = 0; i < 1022; i++)
+  for(int i = 0; i < (height-2); i++)
   {
-    for(int j = 1022; j < 1024; j++)
+    for(int j = (width-2); j < width; j++)
     {
       //if(i == 1020)
-      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* 1024 +j])
+      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* width +j])
       {
-        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* 1024 +j]);
+        printf("Last UpCol: i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* width +j]);
         //printf("%u ",yPlaneDown[i][j]);
-
-
         abort();
-
       }
     }
     //printf("\n");
-
   }
   printf("up col success\n");
 #endif
-
-  //printf("up col success\n");
 
   {
 #ifdef TIME_PROF
@@ -708,8 +712,10 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       status = clEnqueueWriteBuffer(g_queue, border_mp_0srcBuf, CL_TRUE, 0,border_mp_0_srcsz0Pad,border_mp_0SrcBufH, 0, NULL, NULL);
       checkErr(status, "clWriteBuffer");
 
-      size_t srcImageSrcWidth = 256;
-      size_t srcImageSrcHeight = 256;
+      //size_t srcImageSrcWidth = 256;
+      //size_t srcImageSrcHeight = 256;
+      size_t srcImageSrcWidth = width/4;
+      size_t srcImageSrcHeight = height/4;
       size_t srcImage_srcsz = sizeof(unsigned char);
       size_t srcImageSrcStep = srcImageSrcWidth * srcImage_srcsz;
       srcImageSrcStep = (srcImageSrcStep % PADDING < 16) ? ((srcImageSrcStep / PADDING+1) * PADDING) : ((srcImageSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -738,8 +744,8 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
         memcpy( (char*)border_mp_1SrcBufH+ (i + PADDING_LINE) * border_mp_1SrcStep, (char*)border_mp_1+ i * border_mp_1SrcWidth* sizeof(float), border_mp_1SrcWidth * sizeof(float) );
       }
 
-      size_t dstImageDSWidth = 1024;
-      size_t dstImageDSHeight = 1024;
+      size_t dstImageDSWidth = width;
+      size_t dstImageDSHeight = height;
       size_t dstImage_dssz = sizeof(unsigned char);
       size_t Readsize = dstImageDSWidth * dstImageDSHeight * dstImage_dssz;
       size_t dstImageDSStep = dstImageDSWidth * dstImage_dssz;
@@ -764,7 +770,9 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       cl_event event_kernel;
       cl_kernel kernel_3 = clCreateKernel(g_program, "kernel_3", &status);
       checkErr(status, "clCreateKernel for kernel_3");
-      global_work_size[0] = 256;
+      //global_work_size[0] = 256;
+      //global_work_size[1] = 2;
+      global_work_size[0] = width/4;
       global_work_size[1] = 2;
       local_work_size[0] = 64;
       local_work_size[1] = 1;
@@ -838,14 +846,16 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
   total.kernel_up_row = double(tem1 / 20000.0);
 #endif
 
-  for(int i = 0; i < 1022; i++)
+
+#ifdef _VERIFY
+  for(int i = 0; i < (height-2); i++)
   {
     for(int j = 0; j < 2; j++)
     {
       //if(i == 1020)
-      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* 1024 +j])
+      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* width +j])
       {
-        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* 1024 +j]);
+        printf("UpRow: i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* width +j]);
         //printf("%u ",yPlaneDown[i][j]);
 
 
@@ -854,17 +864,15 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       }
     }
     //printf("\n");
-
   }
-
-  for(int i = 0; i < 1022; i++)
+  for(int i = 0; i < (height -2); i++)
   {
-    for(int j = 1022; j < 1024; j++)
+    for(int j = (width-2); j < width; j++)
     {
       //if(i == 1020)
-      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* 1024 +j])
+      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* width +j])
       {
-        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* 1024 +j]);
+        printf("UpRow: i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* width +j]);
         //printf("%u ",yPlaneDown[i][j]);
 
 
@@ -873,36 +881,34 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       }
     }
     //printf("\n");
-
   }
+
 
   for(int i = 0; i < 2; i++)
   {
-    for(int j = 0; j < 1024; j++)
+    for(int j = 0; j < width; j++)
     {
       //if(i == 1020)
-      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* 1024 +j])
+      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* width +j])
       {
-        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* 1024 +j]);
+        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* width +j]);
         //printf("%u ",yPlaneDown[i][j]);
-
-
         abort();
 
       }
     }
     //printf("\n");
-
   }
 
-  for(int i = 1022; i < 1024; i++)
+
+  for(int i = (height-2); i < height; i++)
   {
-    for(int j = 0; j < 1024; j++)
+    for(int j = 0; j < width; j++)
     {
       //if(i == 1020)
-      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* 1024 +j])
+      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* width +j])
       {
-        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* 1024 +j]);
+        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* width +j]);
         //printf("%u ",yPlaneDown[i][j]);
 
 
@@ -914,6 +920,7 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
 
   }
   //printf("up row success\n");
+#endif
 
 
   float mp[4][2] = { 7 / 8.0f, 1 / 8.0f, 5 / 8.0f, 3 / 8.0f, 3 / 8.0f, 5 / 8.0f, 1 / 8.0f, 7 / 8.0f };
@@ -924,8 +931,11 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
 #endif
     for(int i = 0; i< 20; i++)
     {
-      size_t srcImageSrcWidth = 256;
-      size_t srcImageSrcHeight = 256;
+      //size_t srcImageSrcWidth = 256;
+      //size_t srcImageSrcHeight = 256;
+      size_t srcImageSrcWidth = width/4;
+      size_t srcImageSrcHeight = height/4;
+
       size_t srcImage_srcsz = sizeof(unsigned char);
       size_t srcImageSrcStep = srcImageSrcWidth * srcImage_srcsz;
       srcImageSrcStep = (srcImageSrcStep % PADDING < 16) ? ((srcImageSrcStep / PADDING+1) * PADDING) : ((srcImageSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -961,8 +971,10 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       checkErr(status, "clCreateKernel for kernel_4");
 
       gettimeofday(&t11,NULL);
-      global_work_size[0] = 256;
-      global_work_size[1] = 256;
+      //global_work_size[0] = 256;
+      //global_work_size[1] = 256;
+      global_work_size[0] = width/4;
+      global_work_size[1] = height/4;
       status = clSetKernelArg(kernel_4, 0, sizeof(cl_mem), (void *)&srcImagesrcBuf);
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_4, 1, sizeof(int), (void *)&srcImageSrcWidth);
@@ -983,8 +995,8 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_4, 9, sizeof(int), (void *)&mpSrcShift);
       checkErr(status, "clSetKernelArg");
-      size_t dstImageDstWidth = 1024;
-      size_t dstImageDstHeight = 1024;
+      size_t dstImageDstWidth = width;
+      size_t dstImageDstHeight = height;
       size_t dstImage_dstsz = sizeof(unsigned char);
       size_t Readsize = dstImageDstWidth * dstImageDstHeight * dstImage_dstsz;
       size_t dstImageDstStep = dstImageDstWidth * dstImage_dstsz;
@@ -1039,14 +1051,15 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
   total.kernel_up = (double)(tem1 / 20000.0);
 #endif
 
-  for(int i = 0; i < 1024; i++)
+#ifdef _VERIFY
+  for(int i = 0; i < height; i++)
   {
-    for(int j = 0; j < 1024; j++)
+    for(int j = 0; j < width; j++)
     {
       //if(i == 1020)
-      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* 1024 +j])
+      if(yPlaneUp[i][j] !=((unsigned char*) dstImage)[i* width +j])
       {
-        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* 1024 +j]);
+        printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)yPlaneUp[i][j], (int)((unsigned char*) dstImage)[i* width +j]);
         //printf("%u ",yPlaneDown[i][j]);
 
 
@@ -1057,7 +1070,8 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
     //printf("\n");
 
   }
-  //printf("up success\n");
+  printf("up success\n");
+#endif
 }
 
 void Sharpness_cpu(unsigned char** yPlane,unsigned char** yPlaneCSER,int width,int height,MMC_CSE_PARAMETER_PUBLIC* cseParamPublic,unsigned char** dstImage, short **pEdge)
@@ -1217,26 +1231,31 @@ void Sharpness_cpu(unsigned char** yPlane,unsigned char** yPlaneCSER,int width,i
 }
 
 
-void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[1024][1024], unsigned char (*dst)[1024][1024], MMC_CSE_PARAMETER_PUBLIC &cseParamPublic) {
+void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPlaneCSER1, unsigned char *dst3, MMC_CSE_PARAMETER_PUBLIC &cseParamPublic) 
+{
+  unsigned char (*yPlane)[height][width] = (unsigned char(*)[height][width])(yPlane1);;
+  unsigned char (*yPlaneCSER)[height][width] = (unsigned char(*)[height][width])(yPlaneCSER1);
+  unsigned char (*dst)[height][width] = (unsigned char(*)[height][width])(dst3);
 
-    short** pEdge1=allocs(1024,1024);
-
-    unsigned char **src=allocu(1024,1024);
-    unsigned char **srcCSER=allocu(1024,1024);
-    unsigned char **dst1=allocu(1024,1024);
+    short** pEdge1=allocs(height,width);
+    unsigned char **src=allocu(height,width);
+    unsigned char **srcCSER=allocu(height,width);
+    unsigned char **dst1=allocu(height,width);
     //unsigned char** yPlaneUp=allocu(1024,1024);
 
-    for(int i=0;i<1024;i++)
-        for(int j=0;j<1024;j++)
+#ifdef _VERIFY 
+    for(int i=0;i<height;i++)
+        for(int j=0;j<width;j++)
         {
-            src[i][j]=((unsigned char*)yPlane)[i*1024+j];
-            srcCSER[i][j]= ((unsigned char*)yPlaneCSER)[i*1024+j]; 
+            src[i][j]=((unsigned char*)yPlane)[i*width+j];
+            srcCSER[i][j]= ((unsigned char*)yPlaneCSER)[i*width+j]; 
         }
 
     printf("ss\n");
-    Sharpness_cpu(src, srcCSER,1024,1024,&cseParamPublic, dst1, pEdge1);
+    Sharpness_cpu(src, srcCSER,height,width,&cseParamPublic, dst1, pEdge1);
+#endif
 
-    unsigned short pEdge[1024][1024];
+    unsigned short pEdge[height][width];
     char gx[3][3] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
     char gy[3][3] = { 1, 2, 1, 0, 0, 0, -1, -2, -1 };
 
@@ -1247,8 +1266,8 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
         for(int i = 0; i< 20; i++)
         {
 
-            size_t yPlaneSrcWidth = 1024;
-            size_t yPlaneSrcHeight = 1024;
+            size_t yPlaneSrcWidth = width;
+            size_t yPlaneSrcHeight = height;
             size_t yPlane_srcsz = sizeof(unsigned char);
             size_t yPlaneSrcStep = yPlaneSrcWidth * yPlane_srcsz;
             yPlaneSrcStep = (yPlaneSrcStep % PADDING < 16) ? ((yPlaneSrcStep / PADDING+1) * PADDING) : ((yPlaneSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -1302,8 +1321,10 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
             cl_event event_kernel;
             cl_kernel kernel_5 = clCreateKernel(g_program, "kernel_5", &status);
             checkErr(status, "clCreateKernel for kernel_5");
-            global_work_size[0] = 256;
-            global_work_size[1] = 1024;
+            //global_work_size[0] = 256;
+            //global_work_size[1] = 1024; //
+            global_work_size[0] = width/4;
+            global_work_size[1] = height; //
             //local_work_size[0] = 256;
             //local_work_size[1] = 1;
             status = clSetKernelArg(kernel_5, 0, sizeof(cl_mem), (void *)&yPlanesrcBuf);
@@ -1336,8 +1357,8 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
             checkErr(status, "clSetKernelArg");
             status = clSetKernelArg(kernel_5, 14, sizeof(int), (void *)&gySrcShift);
             checkErr(status, "clSetKernelArg");
-            size_t pEdgeDstWidth = 1024;
-            size_t pEdgeDstHeight = 1024;
+            size_t pEdgeDstWidth = width;
+            size_t pEdgeDstHeight = height;
             size_t pEdge_dstsz = sizeof(unsigned short);
             size_t Readsize = pEdgeDstWidth * pEdgeDstHeight * pEdge_dstsz;
             size_t pEdgeDstStep = pEdgeDstWidth * pEdge_dstsz;
@@ -1391,14 +1412,15 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
 
 #endif
 
-    for(int i = 0; i < 1024; i++)
+#ifdef _VERIFY
+    for(int i = 0; i <height ; i++)
     {
-        for(int j = 0; j < 1024; j++)
+        for(int j = 0; j < height; j++)
         {
             //if(i == 1020)
-            if(pEdge1[i][j] !=((unsigned short*) pEdge)[i* 1024 +j])
+            if(pEdge1[i][j] !=((unsigned short*) pEdge)[i* width +j])
             {
-                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)pEdge1[i][j], (int)((unsigned short*) pEdge)[i* 1024 +j]);
+                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)pEdge1[i][j], (int)((unsigned short*) pEdge)[i* width +j]);
                 //printf("%u ",yPlaneDown[i][j]);
 
 
@@ -1410,6 +1432,9 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
 
     }
     //printf("Sobel success\n");
+
+ #endif
+   
     //unsigned short item;
     int* item= (int *)malloc(sizeof(4));;
     {
@@ -1417,8 +1442,8 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
         for(int i = 0; i < 20; i++)
         {
 
-            size_t pEdgeSrcWidth = 1024;
-            size_t pEdgeSrcHeight = 1024;
+            size_t pEdgeSrcWidth = width;
+            size_t pEdgeSrcHeight = height;
             size_t pEdge_srcsz = sizeof(unsigned short);
             size_t pEdgeSrcStep = pEdgeSrcWidth * pEdge_srcsz;
             pEdgeSrcStep = (pEdgeSrcStep % PADDING < 16) ? ((pEdgeSrcStep / PADDING+1) * PADDING) : ((pEdgeSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -1440,8 +1465,10 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
             checkErr(status, "clCreateKernel for kernel_6");
             
             gettimeofday(&t11,NULL);
-            global_work_size[0] = 256;
-            global_work_size[1] = 1024;
+            //global_work_size[0] = 256;
+            //global_work_size[1] = 1024;
+            global_work_size[0] = width/4;
+            global_work_size[1] = height;
             size_t local_work_size[2];
             local_work_size[0] = 16;
             local_work_size[1] = 16;
@@ -1493,7 +1520,7 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
     // printf("total: mean = %f ms\n",tem/20);
 #endif
 
-    short mean = (item[0]+ 1024*512) / (1024 * 1024);;
+    short mean = (item[0]+ height*(width/2)) / (height * width);;
 
     //printf("sum1 = %d, mean1 = %d\n", item[0], mean);
 
@@ -1519,8 +1546,8 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
         for(int i = 0; i< 20; i++)
         {
 
-            size_t yPlaneSrcWidth = 1024;
-            size_t yPlaneSrcHeight = 1024;
+            size_t yPlaneSrcWidth = width;
+            size_t yPlaneSrcHeight = height;
             size_t yPlane_srcsz = sizeof(unsigned char);
             size_t yPlaneSrcStep = yPlaneSrcWidth * yPlane_srcsz;
             yPlaneSrcStep = (yPlaneSrcStep % PADDING < 16) ? ((yPlaneSrcStep / PADDING+1) * PADDING) : ((yPlaneSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -1535,8 +1562,8 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
             status = clEnqueueWriteBuffer(g_queue, yPlanesrcBuf, CL_TRUE, 0,yPlane_srcsz0Pad,yPlaneSrcBufH, 0, NULL, NULL);
             checkErr(status, "clWriteBuffer");
 
-            size_t yPlaneCSERSrcWidth = 1024;
-            size_t yPlaneCSERSrcHeight = 1024;
+            size_t yPlaneCSERSrcWidth = width;
+            size_t yPlaneCSERSrcHeight = height;
             size_t yPlaneCSER_srcsz = sizeof(unsigned char);
             size_t yPlaneCSERSrcStep = yPlaneCSERSrcWidth * yPlaneCSER_srcsz;
             yPlaneCSERSrcStep = (yPlaneCSERSrcStep % PADDING < 16) ? ((yPlaneCSERSrcStep / PADDING+1) * PADDING) : ((yPlaneCSERSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -1551,8 +1578,8 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
             status = clEnqueueWriteBuffer(g_queue, yPlaneCSERsrcBuf, CL_TRUE, 0,yPlaneCSER_srcsz0Pad,yPlaneCSERSrcBufH, 0, NULL, NULL);
             checkErr(status, "clWriteBuffer");
 
-            size_t pEdgeSrcWidth = 1024;
-            size_t pEdgeSrcHeight = 1024;
+            size_t pEdgeSrcWidth = width;
+            size_t pEdgeSrcHeight = height;
             size_t pEdge_srcsz = sizeof(unsigned short);
             size_t pEdgeSrcStep = pEdgeSrcWidth * pEdge_srcsz;
             pEdgeSrcStep = (pEdgeSrcStep % PADDING < 16) ? ((pEdgeSrcStep / PADDING+1) * PADDING) : ((pEdgeSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -1573,8 +1600,10 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
             cl_event event_kernel;
             cl_kernel kernel_7 = clCreateKernel(g_program, "kernel_7", &status);
             checkErr(status, "clCreateKernel for kernel_7");
-            global_work_size[0] = 256;
-            global_work_size[1] = 1024;
+            //global_work_size[0] = 256;
+            //global_work_size[1] = 1024;
+            global_work_size[0] = width/4;
+            global_work_size[1] = height;
             status = clSetKernelArg(kernel_7, 0, sizeof(cl_mem), (void *)&yPlanesrcBuf);
             checkErr(status, "clSetKernelArg");
             status = clSetKernelArg(kernel_7, 1, sizeof(int), (void *)&yPlaneSrcWidth);
@@ -1611,8 +1640,8 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
             checkErr(status, "clSetKernelArg");
             status = clSetKernelArg(kernel_7, 17, sizeof(float), (void *)&m2);
             checkErr(status, "clSetKernelArg");
-            size_t dstDstWidth = 1024;
-            size_t dstDstHeight = 1024;
+            size_t dstDstWidth = width;
+            size_t dstDstHeight = height;
             size_t dst_dstsz = sizeof(unsigned char);
             size_t Readsize = dstDstWidth * dstDstHeight * dst_dstsz;
             size_t dstDstStep = dstDstWidth * dst_dstsz;
@@ -1666,14 +1695,15 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
 
 #endif
 
-    for(int i = 0; i < 1024; i++)
+#ifdef _VERIFY
+    for(int i = 0; i < height; i++)
     {
-        for(int j = 0; j < 1024; j++)
+        for(int j = 0; j < width; j++)
         {
             //if(i == 1020)
-            if(abs(dst1[i][j] -((unsigned char*) dst)[i* 1024 +j]) > 1)
+            if(abs(dst1[i][j] -((unsigned char*) dst)[i* width +j]) > 1)
             {
-                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)dst1[i][j], (int)((unsigned char*) dst)[i* 1024 +j]);
+                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)dst1[i][j], (int)((unsigned char*) dst)[i* width +j]);
                 //printf("%u ",yPlaneDown[i][j]);
 
 
@@ -1685,49 +1715,57 @@ void Sharpness(unsigned char (*yPlane)[1024][1024], unsigned char (*yPlaneCSER)[
 
     }
     printf("all success\n");
+#endif
+
 }
 
 
 
-void sharpness_total(unsigned char (*yPlane)[1024][1024], unsigned char (*dst)[1024][1024]) 
+void sharpness_total(int height, int width, unsigned char *yPlane1, unsigned char *dst1) 
 {
-    MMC_CSE_PARAMETER_PUBLIC cseParamPublic;
-    cseParamPublic.cutoff2 = 256.F;
-    cseParamPublic.cutoff3Coef = 1.F;
-    cseParamPublic.cutoffCoef = 1.F;
-    cseParamPublic.peak = 2.F;
-    unsigned char yPlaneCSER[1024][1024];
-    unsigned char yPlaneDown[1024 / 4][1024 / 4];
-    DownScaleNewX16(yPlane, &yPlaneDown);
-    UpScaleNewX16(&yPlaneDown, &yPlaneCSER);
-    Sharpness(yPlane, &yPlaneCSER, dst, cseParamPublic);
+  unsigned char (*yPlane)[height][width] = (unsigned char(*)[height][width])(yPlane1); 
+  unsigned char (*dst)[height][width] = (unsigned char(*)[height][width])(dst1);
+  MMC_CSE_PARAMETER_PUBLIC cseParamPublic;
+  cseParamPublic.cutoff2 = 256.F;
+  cseParamPublic.cutoff3Coef = 1.F;
+  cseParamPublic.cutoffCoef = 1.F;
+  cseParamPublic.peak = 2.F;
+
+  unsigned char yPlaneCSER[height][width];
+  unsigned char yPlaneDown[height / 4][width / 4];
+  DownScaleNewX16(height, width, (unsigned char*)yPlane, (unsigned char*)(&yPlaneDown[0][0]));
+  //UpScaleNewX16(&yPlaneDown, &yPlaneCSER);
+  UpScaleNewX16(height, width, (unsigned char*) (&yPlaneDown[0][0]), (unsigned char*)(&yPlaneCSER[0][0]));
+  Sharpness(height, width, (unsigned char*) yPlane, (unsigned char*)(&yPlaneCSER[0][0]), dst1, cseParamPublic);
 }
 
 
 
 int main() {
-    char *inputfile = "sharpness_opt.cl";
+    char *inputfile = "sharpness_opt_lxj_256.cl";
     char *remain = NULL;
     if (-1 == openCLCreate(inputfile, remain)) {
         printf("openCL create fail !!!!!!");
         return 0;
     }
-    int width = 1024, height = 1024;
+    int width = 256, height = 256;
+    //int width = 512, height = 512; 
     unsigned char *src_data = (unsigned char *)malloc(sizeof(unsigned char) * width * height);
     unsigned char *dst_data = (unsigned char *)malloc(sizeof(unsigned char) * width * height);
     for (int i = 0; i < width * height; i++) {
         src_data[i] = rand() % 100 + 1;
     }
 
-    unsigned char (*yPlane)[1024][1024] = (unsigned char (*)[1024][1024])src_data;
-    unsigned char (*dst)[1024][1024] = (unsigned char (*)[1024][1024])dst_data;
+    unsigned char (*yPlane)[height][width] = (unsigned char (*)[height][width])src_data;
+    unsigned char (*dst)[height][width] = (unsigned char (*)[height][width])dst_data;
 
 #ifdef TIME_PROF
     //total = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 #endif
-    sharpness_total(yPlane, dst);
+    sharpness_total(height, width,(unsigned char*) yPlane,(unsigned char*) dst);
 
-    sharpness_total(yPlane, dst);
+    //sharpness_total(yPlane, dst);
+    sharpness_total(height, width, (unsigned char*) yPlane,(unsigned char*) dst);
 
 
 

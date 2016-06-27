@@ -529,9 +529,8 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
     }
 
     printf("up-col : %f ms\n",tem/20);
-
-    /*
-
+   
+#if 0
        for(int i = 0; i < 1022; i++)
        {
        for(int j = 0; j < 2; j++)
@@ -569,7 +568,7 @@ int UpScaleNewX16(unsigned char (*srcImage)[1024 / 4][1024 / 4], unsigned char (
     //printf("\n");
 
     }
-    */
+#endif
     printf("up col success\n");
 
     {

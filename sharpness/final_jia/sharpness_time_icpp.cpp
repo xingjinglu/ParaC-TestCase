@@ -334,8 +334,8 @@ void all_Sharpness(unsigned char* yuvfile,int height,int width,unsigned char * y
   gettimeofday(&time0_1,NULL);
 #endif
   
-  //cl_mem pad_yPlane0Buffer = clCreateBuffer(g_context,CL_MEM_ALLOC_HOST_PTR, sz0Pad,NULL,&status);
-  cl_mem pad_yPlane0Buffer = clCreateBuffer(g_context,CL_MEM_READ_WRITE, sz0Pad,NULL,&status);
+  cl_mem pad_yPlane0Buffer = clCreateBuffer(g_context, CL_MEM_ALLOC_HOST_PTR, sz0Pad,NULL,&status);
+  //cl_mem pad_yPlane0Buffer = clCreateBuffer(g_context,CL_MEM_READ_WRITE, sz0Pad,NULL,&status);
 	cl_mem yPlaneCSERBuffer  = clCreateBuffer(g_context,CL_MEM_READ_WRITE,sz0Pad,NULL,&status);
 	cl_mem yPlaneDownBuffer  = clCreateBuffer(g_context,CL_MEM_READ_WRITE,sz1,NULL,&status);
 	cl_mem cacheBuffer       = clCreateBuffer(g_context,CL_MEM_READ_WRITE,sz0Pad,NULL,&status);
