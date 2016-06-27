@@ -14,7 +14,7 @@
 #define MEAN_THREADS_NUMBER_X 16 
 #define MEAN_THREADS_NUMBER_Y 16 
 
-//#define TIME_PAR
+#define TIME_PAR
 
 #ifdef TIME_PAR
 #define TIMEDAY_PAR
@@ -743,7 +743,7 @@ void cpu_sharpness(int height, int width, unsigned char * blabla);
 
 int main(int argc,char* argv[])
 {
-    int height=16,width=16;
+    int height=1024,width=1024;
     
     for(int count=0; count<=0; count++)
     {
