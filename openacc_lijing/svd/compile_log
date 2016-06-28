@@ -1,0 +1,117 @@
+sign(double):
+     49, Generating acc routine seq
+         Generating Tesla code
+svd(double *, double *, double *, double *):
+    109, Generating copy(A_H[:131072],V_H[:131072])
+         Generating copyin(rotate_col_idx[:256])
+         Generating create(ci[:131072],cj[:65536],vi[:65536],vj[:65536],value[:])
+         Generating copyout(B_H[:131072],S_H[:256])
+    111, Loop not vectorized/parallelized: too deeply nested
+    117, Generating copy(pass[:1])
+    123, Accelerator kernel generated
+         Generating Tesla code
+        127, #pragma acc loop gang /* blockIdx.x */
+        140, #pragma acc loop vector(128) /* threadIdx.x */
+        148, #pragma acc loop vector(128) /* threadIdx.x */
+        156, #pragma acc loop vector(128) /* threadIdx.x */
+        164, #pragma acc loop vector(128) /* threadIdx.x */
+        176, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for real1,imag1
+        195, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result1
+        202, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result2
+        209, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result3
+        216, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result4
+        232, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result5
+        239, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result6
+        246, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result7
+        253, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for result8
+        268, #pragma acc loop vector(128) /* threadIdx.x */
+        281, #pragma acc loop vector(128) /* threadIdx.x */
+        294, #pragma acc loop vector(128) /* threadIdx.x */
+        307, #pragma acc loop vector(128) /* threadIdx.x */
+    127, Loop not vectorized/parallelized: contains call
+    140, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+         Loop unrolled 16 times
+         Generated 8 prefetches in scalar loop
+    148, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+         Loop unrolled 16 times
+         Generated 8 prefetches in scalar loop
+    156, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+         Loop unrolled 16 times
+         Generated 8 prefetches in scalar loop
+    164, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+         Loop unrolled 16 times
+         Generated 8 prefetches in scalar loop
+    176, Loop is parallelizable
+         Loop not fused: different controlling conditions
+         Generated an alternate version of the loop
+         Generated vector sse code for the loop
+         Generated 4 prefetch instructions for the loop
+    195, Loop is parallelizable
+         Loop not fused: function call before adjacent loop
+         4 loops fused
+         Generated an alternate version of the loop
+         Generated vector sse code for the loop
+         Generated 4 prefetch instructions for the loop
+    202, Loop is parallelizable
+    209, Loop is parallelizable
+    216, Loop is parallelizable
+    232, Loop is parallelizable
+         Loop not fused: function call before adjacent loop
+         4 loops fused
+         Generated an alternate version of the loop
+         Generated vector sse code for the loop
+         Generated 4 prefetch instructions for the loop
+    239, Loop is parallelizable
+    246, Loop is parallelizable
+    253, Loop is parallelizable
+    268, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+    281, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+    294, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+    307, Loop is parallelizable
+         Loop not vectorized: data dependency
+    331, Accelerator kernel generated
+         Generating Tesla code
+        335, #pragma acc loop gang /* blockIdx.x */
+        339, #pragma acc loop vector(128) /* threadIdx.x */
+        349, #pragma acc loop vector(128) /* threadIdx.x */
+             Sum reduction generated for real,imag
+    335, Loop not fused: no successor loop
+    339, Loop is parallelizable
+         Loop not fused: dependence chain to sibling loop
+         Loop not vectorized: data dependency
+         Loop unrolled 16 times
+         Generated 8 prefetches in scalar loop
+    349, Loop is parallelizable
+         Generated an alternate version of the loop
+         Generated vector sse code for the loop
+         Generated 2 prefetch instructions for the loop
+    362, Accelerator kernel generated
+         Generating Tesla code
+        366, #pragma acc loop gang, vector(128) collapse(2) /* blockIdx.x threadIdx.x */
+        368,   /* blockIdx.x threadIdx.x collapsed */
+    366, Loop not fused: no successor loop
+    368, Loop not vectorized: data dependency
+         Loop unrolled 4 times

@@ -1,0 +1,66 @@
+----Hist(8192*8192)----
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+Hist exe time OPENACC:	319.091000 ms
+Hist exe time OPENACC:	87.960000 ms
+Hist exe time OPENACC:	98.347000 ms
+Hist exe time OPENACC:	95.157000 ms
+Hist exe time OPENACC:	88.236000 ms
+Hist exe time OPENACC:	88.083000 ms
+Hist exe time OPENACC:	88.819000 ms
+Hist exe time OPENACC:	89.124000 ms
+Hist exe time OPENACC:	98.460000 ms
+Hist exe time OPENACC:	94.807000 ms
+OK
+----Hist(8192*8192)----
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+Hist exe time OPENACC:	216.293000 ms
+Hist exe time OPENACC:	85.894000 ms
+Hist exe time OPENACC:	86.110000 ms
+Hist exe time OPENACC:	86.208000 ms
+Hist exe time OPENACC:	85.921000 ms
+Hist exe time OPENACC:	86.078000 ms
+Hist exe time OPENACC:	86.002000 ms
+Hist exe time OPENACC:	86.249000 ms
+Hist exe time OPENACC:	85.908000 ms
+Hist exe time OPENACC:	85.917000 ms
+OK
+----Hist(8192*8192)----
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+Hist exe time OPENACC:	224.232000 ms
+Hist exe time OPENACC:	88.281000 ms
+Hist exe time OPENACC:	98.113000 ms
+Hist exe time OPENACC:	98.348000 ms
+Hist exe time OPENACC:	89.188000 ms
+Hist exe time OPENACC:	99.414000 ms
+Hist exe time OPENACC:	88.028000 ms
+Hist exe time OPENACC:	88.946000 ms
+Hist exe time OPENACC:	87.927000 ms
+Hist exe time OPENACC:	98.149000 ms
+OK

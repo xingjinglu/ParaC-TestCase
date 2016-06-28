@@ -1,0 +1,333 @@
+15
+laplacian: 8192x8192
+Total: 2245.14 ms
+Row_padding: 53.01 ms
+Row_filter: 48.49 ms
+Column_padding: 52.48 ms
+Column_filter: 680.64 ms
+DownSample: 11.32 ms
+UpSample: 37.88 ms
+Cut: 1361.31 ms
+
+15
+laplacian: 8192x8192
+Total: 904.14 ms
+Row_padding: 39.82 ms
+Row_filter: 44.83 ms
+Column_padding: 39.44 ms
+Column_filter: 676.12 ms
+DownSample: 10.04 ms
+UpSample: 34.31 ms
+Cut: 59.58 ms
+
+15
+laplacian: 8192x8192
+Total: 902.88 ms
+Row_padding: 39.75 ms
+Row_filter: 44.59 ms
+Column_padding: 39.20 ms
+Column_filter: 676.70 ms
+DownSample: 10.04 ms
+UpSample: 34.28 ms
+Cut: 58.31 ms
+
+15
+laplacian: 8192x8192
+Total: 902.98 ms
+Row_padding: 39.78 ms
+Row_filter: 44.70 ms
+Column_padding: 39.18 ms
+Column_filter: 676.45 ms
+DownSample: 10.04 ms
+UpSample: 34.48 ms
+Cut: 58.35 ms
+
+15
+laplacian: 8192x8192
+Total: 902.31 ms
+Row_padding: 39.79 ms
+Row_filter: 44.60 ms
+Column_padding: 39.19 ms
+Column_filter: 676.20 ms
+DownSample: 10.02 ms
+UpSample: 34.25 ms
+Cut: 58.26 ms
+
+15
+laplacian: 8192x8192
+Total: 902.29 ms
+Row_padding: 39.85 ms
+Row_filter: 44.39 ms
+Column_padding: 39.14 ms
+Column_filter: 676.20 ms
+DownSample: 10.02 ms
+UpSample: 34.44 ms
+Cut: 58.25 ms
+
+15
+laplacian: 8192x8192
+Total: 902.54 ms
+Row_padding: 39.74 ms
+Row_filter: 44.37 ms
+Column_padding: 39.17 ms
+Column_filter: 676.50 ms
+DownSample: 10.13 ms
+UpSample: 34.30 ms
+Cut: 58.33 ms
+
+15
+laplacian: 8192x8192
+Total: 902.91 ms
+Row_padding: 39.93 ms
+Row_filter: 44.53 ms
+Column_padding: 39.23 ms
+Column_filter: 676.28 ms
+DownSample: 10.04 ms
+UpSample: 34.50 ms
+Cut: 58.39 ms
+
+15
+laplacian: 8192x8192
+Total: 902.48 ms
+Row_padding: 39.85 ms
+Row_filter: 44.58 ms
+Column_padding: 39.21 ms
+Column_filter: 676.34 ms
+DownSample: 10.02 ms
+UpSample: 34.25 ms
+Cut: 58.23 ms
+
+15
+laplacian: 8192x8192
+Total: 901.96 ms
+Row_padding: 39.87 ms
+Row_filter: 44.49 ms
+Column_padding: 39.22 ms
+Column_filter: 675.43 ms
+DownSample: 10.03 ms
+UpSample: 34.47 ms
+Cut: 58.45 ms
+
+OK
+15
+laplacian: 8192x8192
+Total: 953.97 ms
+Row_padding: 53.00 ms
+Row_filter: 48.19 ms
+Column_padding: 52.54 ms
+Column_filter: 678.57 ms
+DownSample: 11.28 ms
+UpSample: 37.84 ms
+Cut: 72.55 ms
+
+15
+laplacian: 8192x8192
+Total: 900.55 ms
+Row_padding: 39.83 ms
+Row_filter: 44.35 ms
+Column_padding: 39.13 ms
+Column_filter: 674.54 ms
+DownSample: 10.21 ms
+UpSample: 34.22 ms
+Cut: 58.27 ms
+
+15
+laplacian: 8192x8192
+Total: 899.97 ms
+Row_padding: 39.69 ms
+Row_filter: 44.36 ms
+Column_padding: 39.28 ms
+Column_filter: 674.14 ms
+DownSample: 10.02 ms
+UpSample: 34.22 ms
+Cut: 58.27 ms
+
+15
+laplacian: 8192x8192
+Total: 900.44 ms
+Row_padding: 39.84 ms
+Row_filter: 44.36 ms
+Column_padding: 39.15 ms
+Column_filter: 674.39 ms
+DownSample: 10.20 ms
+UpSample: 34.24 ms
+Cut: 58.26 ms
+
+15
+laplacian: 8192x8192
+Total: 900.22 ms
+Row_padding: 39.70 ms
+Row_filter: 44.36 ms
+Column_padding: 39.27 ms
+Column_filter: 674.39 ms
+DownSample: 10.02 ms
+UpSample: 34.22 ms
+Cut: 58.27 ms
+
+15
+laplacian: 8192x8192
+Total: 900.22 ms
+Row_padding: 39.83 ms
+Row_filter: 44.30 ms
+Column_padding: 39.16 ms
+Column_filter: 673.96 ms
+DownSample: 10.20 ms
+UpSample: 34.31 ms
+Cut: 58.46 ms
+
+15
+laplacian: 8192x8192
+Total: 900.96 ms
+Row_padding: 39.82 ms
+Row_filter: 44.54 ms
+Column_padding: 39.36 ms
+Column_filter: 674.72 ms
+DownSample: 10.02 ms
+UpSample: 34.23 ms
+Cut: 58.26 ms
+
+15
+laplacian: 8192x8192
+Total: 900.16 ms
+Row_padding: 39.91 ms
+Row_filter: 44.46 ms
+Column_padding: 39.13 ms
+Column_filter: 673.69 ms
+DownSample: 10.20 ms
+UpSample: 34.48 ms
+Cut: 58.28 ms
+
+15
+laplacian: 8192x8192
+Total: 899.93 ms
+Row_padding: 39.70 ms
+Row_filter: 44.37 ms
+Column_padding: 39.26 ms
+Column_filter: 674.07 ms
+DownSample: 10.02 ms
+UpSample: 34.23 ms
+Cut: 58.28 ms
+
+15
+laplacian: 8192x8192
+Total: 900.11 ms
+Row_padding: 39.97 ms
+Row_filter: 44.45 ms
+Column_padding: 39.14 ms
+Column_filter: 673.88 ms
+DownSample: 10.19 ms
+UpSample: 34.24 ms
+Cut: 58.24 ms
+
+OK
+15
+laplacian: 8192x8192
+Total: 954.51 ms
+Row_padding: 53.14 ms
+Row_filter: 48.27 ms
+Column_padding: 52.53 ms
+Column_filter: 678.73 ms
+DownSample: 11.30 ms
+UpSample: 37.81 ms
+Cut: 72.73 ms
+
+15
+laplacian: 8192x8192
+Total: 900.38 ms
+Row_padding: 39.69 ms
+Row_filter: 44.52 ms
+Column_padding: 39.12 ms
+Column_filter: 674.43 ms
+DownSample: 10.02 ms
+UpSample: 34.25 ms
+Cut: 58.34 ms
+
+15
+laplacian: 8192x8192
+Total: 900.30 ms
+Row_padding: 39.72 ms
+Row_filter: 44.34 ms
+Column_padding: 39.13 ms
+Column_filter: 674.51 ms
+DownSample: 10.03 ms
+UpSample: 34.33 ms
+Cut: 58.24 ms
+
+15
+laplacian: 8192x8192
+Total: 900.41 ms
+Row_padding: 39.71 ms
+Row_filter: 44.56 ms
+Column_padding: 39.15 ms
+Column_filter: 674.30 ms
+DownSample: 10.01 ms
+UpSample: 34.24 ms
+Cut: 58.44 ms
+
+15
+laplacian: 8192x8192
+Total: 900.27 ms
+Row_padding: 39.79 ms
+Row_filter: 44.34 ms
+Column_padding: 39.13 ms
+Column_filter: 674.51 ms
+DownSample: 10.02 ms
+UpSample: 34.24 ms
+Cut: 58.23 ms
+
+15
+laplacian: 8192x8192
+Total: 900.49 ms
+Row_padding: 39.69 ms
+Row_filter: 44.64 ms
+Column_padding: 39.28 ms
+Column_filter: 674.06 ms
+DownSample: 10.02 ms
+UpSample: 34.23 ms
+Cut: 58.57 ms
+
+15
+laplacian: 8192x8192
+Total: 899.83 ms
+Row_padding: 39.62 ms
+Row_filter: 44.37 ms
+Column_padding: 39.07 ms
+Column_filter: 674.27 ms
+DownSample: 10.02 ms
+UpSample: 34.23 ms
+Cut: 58.24 ms
+
+15
+laplacian: 8192x8192
+Total: 900.59 ms
+Row_padding: 39.70 ms
+Row_filter: 44.88 ms
+Column_padding: 39.17 ms
+Column_filter: 674.22 ms
+DownSample: 10.01 ms
+UpSample: 34.24 ms
+Cut: 58.37 ms
+
+15
+laplacian: 8192x8192
+Total: 900.38 ms
+Row_padding: 39.70 ms
+Row_filter: 44.34 ms
+Column_padding: 39.10 ms
+Column_filter: 674.74 ms
+DownSample: 10.02 ms
+UpSample: 34.24 ms
+Cut: 58.25 ms
+
+15
+laplacian: 8192x8192
+Total: 900.33 ms
+Row_padding: 39.64 ms
+Row_filter: 44.57 ms
+Column_padding: 39.12 ms
+Column_filter: 674.37 ms
+DownSample: 10.03 ms
+UpSample: 34.23 ms
+Cut: 58.37 ms
+
+OK

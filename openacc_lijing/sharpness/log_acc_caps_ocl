@@ -1,0 +1,363 @@
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 890.10 ms
+DownScale: 3.67 ms
+UpScale: 7.92 ms
+Error: 4.71 ms
+Sobel: 8.12 ms
+Mean: 2.29 ms
+Sharp_Strength: 322.33 ms
+OverShoot: 279.83 ms
+Sharp_Cut: 3.90 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 631.40 ms
+DownScale: 1.42 ms
+UpScale: 3.02 ms
+Error: 4.29 ms
+Sobel: 6.67 ms
+Mean: 1.74 ms
+Sharp_Strength: 300.61 ms
+OverShoot: 279.32 ms
+Sharp_Cut: 3.43 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 630.27 ms
+DownScale: 1.42 ms
+UpScale: 3.02 ms
+Error: 4.28 ms
+Sobel: 6.72 ms
+Mean: 1.77 ms
+Sharp_Strength: 300.69 ms
+OverShoot: 278.75 ms
+Sharp_Cut: 3.65 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 630.32 ms
+DownScale: 1.42 ms
+UpScale: 3.02 ms
+Error: 4.26 ms
+Sobel: 6.69 ms
+Mean: 1.75 ms
+Sharp_Strength: 300.51 ms
+OverShoot: 279.62 ms
+Sharp_Cut: 3.67 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 630.32 ms
+DownScale: 1.42 ms
+UpScale: 3.02 ms
+Error: 4.21 ms
+Sobel: 6.74 ms
+Mean: 1.77 ms
+Sharp_Strength: 300.53 ms
+OverShoot: 279.03 ms
+Sharp_Cut: 3.61 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 629.82 ms
+DownScale: 1.43 ms
+UpScale: 3.01 ms
+Error: 4.25 ms
+Sobel: 6.78 ms
+Mean: 1.77 ms
+Sharp_Strength: 300.47 ms
+OverShoot: 278.74 ms
+Sharp_Cut: 3.40 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 629.31 ms
+DownScale: 1.43 ms
+UpScale: 3.01 ms
+Error: 4.19 ms
+Sobel: 6.76 ms
+Mean: 1.78 ms
+Sharp_Strength: 288.89 ms
+OverShoot: 289.81 ms
+Sharp_Cut: 3.67 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 629.84 ms
+DownScale: 1.43 ms
+UpScale: 3.02 ms
+Error: 4.30 ms
+Sobel: 6.72 ms
+Mean: 1.76 ms
+Sharp_Strength: 300.66 ms
+OverShoot: 279.38 ms
+Sharp_Cut: 3.37 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 631.09 ms
+DownScale: 1.42 ms
+UpScale: 3.02 ms
+Error: 4.30 ms
+Sobel: 6.67 ms
+Mean: 1.75 ms
+Sharp_Strength: 300.51 ms
+OverShoot: 279.54 ms
+Sharp_Cut: 3.87 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 629.08 ms
+DownScale: 1.43 ms
+UpScale: 3.11 ms
+Error: 4.44 ms
+Sobel: 6.79 ms
+Mean: 1.74 ms
+Sharp_Strength: 300.37 ms
+OverShoot: 278.72 ms
+Sharp_Cut: 3.77 ms
+
+OK
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 794.73 ms
+DownScale: 3.65 ms
+UpScale: 8.06 ms
+Error: 4.89 ms
+Sobel: 7.90 ms
+Mean: 2.28 ms
+Sharp_Strength: 331.50 ms
+OverShoot: 280.58 ms
+Sharp_Cut: 4.28 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 625.64 ms
+DownScale: 1.41 ms
+UpScale: 3.02 ms
+Error: 4.35 ms
+Sobel: 6.63 ms
+Mean: 1.73 ms
+Sharp_Strength: 300.40 ms
+OverShoot: 277.51 ms
+Sharp_Cut: 3.66 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 620.62 ms
+DownScale: 1.40 ms
+UpScale: 3.04 ms
+Error: 4.18 ms
+Sobel: 6.68 ms
+Mean: 1.71 ms
+Sharp_Strength: 296.84 ms
+OverShoot: 275.95 ms
+Sharp_Cut: 3.79 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 631.38 ms
+DownScale: 1.41 ms
+UpScale: 2.99 ms
+Error: 4.41 ms
+Sobel: 6.72 ms
+Mean: 1.69 ms
+Sharp_Strength: 297.02 ms
+OverShoot: 286.46 ms
+Sharp_Cut: 3.72 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 619.82 ms
+DownScale: 1.42 ms
+UpScale: 3.00 ms
+Error: 4.23 ms
+Sobel: 6.62 ms
+Mean: 1.70 ms
+Sharp_Strength: 296.87 ms
+OverShoot: 275.30 ms
+Sharp_Cut: 3.71 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 620.60 ms
+DownScale: 1.41 ms
+UpScale: 3.00 ms
+Error: 4.40 ms
+Sobel: 6.66 ms
+Mean: 1.70 ms
+Sharp_Strength: 297.05 ms
+OverShoot: 275.70 ms
+Sharp_Cut: 3.69 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 631.09 ms
+DownScale: 1.42 ms
+UpScale: 2.99 ms
+Error: 4.28 ms
+Sobel: 6.69 ms
+Mean: 1.70 ms
+Sharp_Strength: 296.95 ms
+OverShoot: 286.57 ms
+Sharp_Cut: 3.51 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 620.65 ms
+DownScale: 1.42 ms
+UpScale: 3.00 ms
+Error: 4.38 ms
+Sobel: 6.61 ms
+Mean: 1.66 ms
+Sharp_Strength: 296.86 ms
+OverShoot: 275.84 ms
+Sharp_Cut: 3.49 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 620.33 ms
+DownScale: 1.42 ms
+UpScale: 2.99 ms
+Error: 4.38 ms
+Sobel: 6.56 ms
+Mean: 1.70 ms
+Sharp_Strength: 296.64 ms
+OverShoot: 276.09 ms
+Sharp_Cut: 3.61 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 631.39 ms
+DownScale: 1.42 ms
+UpScale: 3.01 ms
+Error: 4.37 ms
+Sobel: 6.58 ms
+Mean: 1.70 ms
+Sharp_Strength: 297.05 ms
+OverShoot: 286.62 ms
+Sharp_Cut: 3.68 ms
+
+OK
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 806.58 ms
+DownScale: 3.65 ms
+UpScale: 8.03 ms
+Error: 4.76 ms
+Sobel: 7.95 ms
+Mean: 2.31 ms
+Sharp_Strength: 332.93 ms
+OverShoot: 289.30 ms
+Sharp_Cut: 4.10 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 633.97 ms
+DownScale: 1.40 ms
+UpScale: 2.99 ms
+Error: 4.29 ms
+Sobel: 6.68 ms
+Mean: 1.74 ms
+Sharp_Strength: 296.97 ms
+OverShoot: 286.08 ms
+Sharp_Cut: 3.85 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 623.01 ms
+DownScale: 1.40 ms
+UpScale: 2.99 ms
+Error: 4.43 ms
+Sobel: 6.62 ms
+Mean: 1.74 ms
+Sharp_Strength: 296.49 ms
+OverShoot: 275.90 ms
+Sharp_Cut: 3.45 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 625.61 ms
+DownScale: 1.41 ms
+UpScale: 2.99 ms
+Error: 4.30 ms
+Sobel: 6.60 ms
+Mean: 1.76 ms
+Sharp_Strength: 297.00 ms
+OverShoot: 276.01 ms
+Sharp_Cut: 3.68 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 623.05 ms
+DownScale: 1.41 ms
+UpScale: 2.99 ms
+Error: 4.33 ms
+Sobel: 6.71 ms
+Mean: 1.76 ms
+Sharp_Strength: 296.85 ms
+OverShoot: 275.32 ms
+Sharp_Cut: 3.62 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 621.94 ms
+DownScale: 1.41 ms
+UpScale: 2.99 ms
+Error: 4.27 ms
+Sobel: 6.66 ms
+Mean: 1.86 ms
+Sharp_Strength: 296.99 ms
+OverShoot: 276.13 ms
+Sharp_Cut: 3.49 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 625.07 ms
+DownScale: 1.43 ms
+UpScale: 2.99 ms
+Error: 4.43 ms
+Sobel: 6.65 ms
+Mean: 1.75 ms
+Sharp_Strength: 296.96 ms
+OverShoot: 276.28 ms
+Sharp_Cut: 3.44 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 622.83 ms
+DownScale: 1.40 ms
+UpScale: 2.98 ms
+Error: 4.32 ms
+Sobel: 6.59 ms
+Mean: 1.74 ms
+Sharp_Strength: 296.76 ms
+OverShoot: 275.71 ms
+Sharp_Cut: 3.31 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 634.23 ms
+DownScale: 1.41 ms
+UpScale: 2.98 ms
+Error: 4.31 ms
+Sobel: 6.58 ms
+Mean: 1.75 ms
+Sharp_Strength: 296.98 ms
+OverShoot: 286.51 ms
+Sharp_Cut: 3.70 ms
+
+4
+sharpness cpu(inline) Size: 8192x8192
+Total: 623.39 ms
+DownScale: 1.41 ms
+UpScale: 3.06 ms
+Error: 4.28 ms
+Sobel: 6.59 ms
+Mean: 1.73 ms
+Sharp_Strength: 296.82 ms
+OverShoot: 276.04 ms
+Sharp_Cut: 3.54 ms
+
+OK
