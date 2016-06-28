@@ -11,3 +11,8 @@
 3. --- parac_test ---
   The version test for Huawei Project ( I 2014) by Jia Haipeng.
 
+ 4. --- simd ---
+ 1) laplacian_x86.cpp by Li shigang & Caoting
+ 2) laplacian_x86_act.cpp by act group.
+
+
