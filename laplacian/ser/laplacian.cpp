@@ -18,9 +18,15 @@ static int PyramidFilter(unsigned char *pSrc,unsigned char *pDst,int width ,int 
   short * pSrc_padding = new short[(width +4)*(height+4)];
   memset(pSrc_padding, 0,(width +4) * (height+4)*sizeof(short));
   int test=0;
+<<<<<<< HEAD
+  gettimeofday(&start_cpu[0], NULL);
+
+  // step 1.1: Padding new buf: pSrc_padding.
+=======
 
   //------ Horizontal Filter ------	
   gettimeofday(&start_cpu[0], NULL);
+>>>>>>> rbackup
   for (h=2;h<height+2;h++)
   {
     *(pSrc_padding + h*(width+4) + 1) = (pSrc[(h-2)*width +1] * 2) - (pSrc[(h-2) * width + 3]);
@@ -34,6 +40,10 @@ static int PyramidFilter(unsigned char *pSrc,unsigned char *pDst,int width ,int 
       *(pSrc_padding +h*(width +4) +w + 2 ) = pSrc[(h-2)*width +w];
   }
 
+<<<<<<< HEAD
+  // step 1.2: Horizontal filter.  
+=======
+>>>>>>> rbackup
   unsigned char * pBufL_cp = new unsigned char[width * height];
   for(h=0;h<height;h++)
     for(w=0;w<width;w++)
@@ -46,9 +56,15 @@ static int PyramidFilter(unsigned char *pSrc,unsigned char *pDst,int width ,int 
     }
   gettimeofday(&end_cpu[0], NULL);	
 
+<<<<<<< HEAD
+  gettimeofday(&start_cpu[1], NULL);
+
+  // step 1.3. Padding new buf: pBufL_padding (alias to pSrc_padding).
+=======
 
   //------ Vertical Filter ------	
   gettimeofday(&start_cpu[1], NULL);
+>>>>>>> rbackup
   short*pBufL_padding = pSrc_padding;//use pSrc_padding again
   memset(pBufL_padding, 0,(width  +4)*(height+4) * sizeof(short));
 
@@ -68,6 +84,10 @@ static int PyramidFilter(unsigned char *pSrc,unsigned char *pDst,int width ,int 
       +((pBufL_cp[(height -1 )*(width) + w -2 ]) *2 ) -((pBufL_cp[(height - 3  )*(width)+w -2 ]));
   }
 
+<<<<<<< HEAD
+  // step 1.4. Vertical filter.
+=======
+>>>>>>> rbackup
   for(w=0;w<width;w++)
     for(h=0;h<height;h++)
     {
