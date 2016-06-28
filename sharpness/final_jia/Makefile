@@ -1,13 +1,31 @@
-all: sharpness sharpness_time sharpness_orig sharpness_icpp
+all: sharpness sharpness_time sharpness_orig icpp1024 icpp256 icpp512 icpp2048 icpp4096 opt256 opt512 opt1024 opt2048 opt4096
 sharpness:sharpup.cpp sharpup.cl
 	g++ -O3 -DTIME_PAR sharpup.cpp -o sharpness -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
 sharpness_time:sharpness_time.cpp sharpup.cl
 	g++ -O3 -DTIME_PROF sharpness_time.cpp -o sharpness_time -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
-sharpness_icpp:sharpness_time_icpp.cpp sharpup.cl
-	g++ -O3 -DTIME_PROF sharpness_time_icpp.cpp -o sharpness_icpp -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+icpp256:sharpness_time_icpp_256.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_time_icpp_256.cpp -o icpp256 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+icpp512:sharpness_time_icpp_512.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_time_icpp_512.cpp -o icpp512 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+icpp1024:sharpness_time_icpp_1024.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_time_icpp_1024.cpp -o icpp1024 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+icpp2048:sharpness_time_icpp_2048.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_time_icpp_2048.cpp -o icpp2048 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+icpp4096:sharpness_time_icpp_4096.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_time_icpp_4096.cpp -o icpp4096 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
 sharpness_orig:sharpness_orig.cpp sharpup_orig.cl
 	g++ -O3 -DTIME_PROF sharpness_orig.cpp -o sharpness_orig -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+opt256:sharpness_icpp_opt_256.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_icpp_opt_256.cpp -o opt256 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+opt512:sharpness_icpp_opt_512.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_icpp_opt_512.cpp -o opt512 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+opt1024:sharpness_icpp_opt_1024.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_icpp_opt_1024.cpp -o opt1024 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+opt2048:sharpness_icpp_opt_2048.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_icpp_opt_2048.cpp -o opt2048 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+opt4096:sharpness_icpp_opt_4096.cpp sharpup.cl
+	g++ -O3 -DTIME_PROF sharpness_icpp_opt_4096.cpp -o opt4096 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
 clean:
-	rm sharpness sharpness_time sharpness_orig
+	rm sharpness sharpness_time sharpness_orig icpp256 icpp512 icpp1024 icpp2048 icpp4096 opt256 opt512 opt1024 opt2048 opt4096
 	
 

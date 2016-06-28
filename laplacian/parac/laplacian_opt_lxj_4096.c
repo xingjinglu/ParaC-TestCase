@@ -53,7 +53,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 #endif
 
   unsigned char **dst_horizon = (unsigned char**)  malloc( sizeof(unsigned char) *Height* Width );
-  unsigned char **dst_vertical = (unsigned char**) malloc (sizeof(unsigned char) * Width * Width);
+  unsigned char **dst_vertical = (unsigned char**) malloc (sizeof(unsigned char) * Height * Width);
   unsigned char **dst_ds = (unsigned char**) malloc( sizeof( unsigned char) * ((Height + 1) / 2)* ((Width + 1) / 2));
 
 

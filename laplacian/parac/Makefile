@@ -14,7 +14,7 @@ laplacian_512:laplacian_opt_lxj_512.c laplacian_opt_lxj_512.cl
 laplacian_1024:laplacian_opt_lxj_1024.c laplacian_opt_lxj_1024.cl
 	g++ -O3  $(CFLAGS) laplacian_opt_lxj_1024.c -o laplacian_1024 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
 laplacian_2048:laplacian_opt_lxj_2048.c laplacian_opt_lxj_2048.cl
-	g++ -O0 -g  $(CFLAGS) laplacian_opt_lxj_2048.c -o laplacian_2048 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+	g++ -O3  $(CFLAGS) laplacian_opt_lxj_2048.c -o laplacian_2048 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
 laplacian_4096:laplacian_opt_lxj_4096.c laplacian_opt_lxj_4096.cl
 	g++ -O3  $(CFLAGS) laplacian_opt_lxj_4096.c -o laplacian_4096 -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
 clean:

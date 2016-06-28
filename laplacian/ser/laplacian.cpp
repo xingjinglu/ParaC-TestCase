@@ -214,7 +214,7 @@ static void CalcLaplacianLayer(signed short *pLaplacianLayer,unsigned char *pSrc
 
 int main(int argc, char** argv)
 {   
-#if 0
+#if 1
     if(argc < 2) {
       cout << "Please enter matrix size.\n"
            << "The format is: ./Laplacian height width.\n"
@@ -225,7 +225,7 @@ int main(int argc, char** argv)
     int height = atoi(argv[1]);
     int width = atoi(argv[2]);
 #endif
-    int height = 4096, width = 4096;
+    //int height = 4096, width = 4096;
     double duration_cpu;
     unsigned char * Source = new unsigned char[width * height];
     for(int i=0; i<height; i++)
