@@ -300,7 +300,7 @@ static void laplacian(unsigned char *pSrc, signed short *pLaplacianPyramid,int w
   shiftShort = stepwideShort<<1;
 	downshift = downstepwide << 1;
 
-/*******Start*******************************************/
+/******* kernel_1: PyramidFilter_padding *************/
    cl_event event_kernel;
    cl_int status;
 
@@ -372,12 +372,11 @@ static void laplacian(unsigned char *pSrc, signed short *pLaplacianPyramid,int w
   kernelTimeH = (endTime-startTime)/1000;
 #endif
  
- /********2*****************************************/
+ /******** kernel_2: VerticalFilterDownSample***********************/
   
   int upheight = (halfheight%4==0) ? (halfheight/4) : (halfheight/4+1);
   globalx = (halfwidth%LOCALSIZE_X==0) ? halfwidth : (halfwidth/LOCALSIZE_X+1)*LOCALSIZE_X;
   globaly = (upheight%LOCALSIZE_y==0) ? upheight : (upheight/LOCALSIZE_y+1)*LOCALSIZE_y;
-
   size_t global_size2[]={globalx,globaly}; 
   
 #ifdef TIMEDAY_PAR
@@ -386,7 +385,6 @@ static void laplacian(unsigned char *pSrc, signed short *pLaplacianPyramid,int w
 
   cl_kernel kernel_filter_v_downsample = clCreateKernel(g_program ,"PyramidFilter_vertical_downsample",&status);
 		checkErr(status,"clCreateKernel()");
-		
   status |=clSetKernelArg(kernel_filter_v_downsample,0,sizeof(cl_mem),(void*)&buffer_pBufL);
 	checkErr(status,"clSetKernelArg()");
 	status |=clSetKernelArg(kernel_filter_v_downsample,1,sizeof(cl_mem),(void*)&buffer_pDownsampleBuf);
@@ -397,7 +395,6 @@ static void laplacian(unsigned char *pSrc, signed short *pLaplacianPyramid,int w
   status |= clSetKernelArg(kernel_filter_v_downsample,5,sizeof(int),(void*)&downshift);
   status |= clSetKernelArg(kernel_filter_v_downsample,6,sizeof(int),(void*)&halfwidth);
   status |= clSetKernelArg(kernel_filter_v_downsample,7,sizeof(int),(void*)&halfheight);
-  
   status |=clEnqueueNDRangeKernel(g_queue,kernel_filter_v_downsample,2,NULL,global_size2,local_size,0,NULL,&event_kernel);
 	checkErr(status,"clEnqueueNDRangeKernel()");
 
@@ -415,11 +412,10 @@ static void laplacian(unsigned char *pSrc, signed short *pLaplacianPyramid,int w
   kernelTimeD = (endTime-startTime)/1000;
 #endif
 	
-   /********3***********************************************/
+   /********kernel_3: UpSample *********************/
  
   globalx = (halfwidth%LOCALSIZE_X==0) ? halfwidth : (halfwidth/LOCALSIZE_X+1)*LOCALSIZE_X;
   globaly = (halfheight%LOCALSIZE_y==0) ? halfheight : (halfheight/LOCALSIZE_y+1)*LOCALSIZE_y;
-
   size_t global_size3[]={globalx,globaly-1};
 
 #ifdef TIMEDAY_PAR
@@ -428,7 +424,6 @@ static void laplacian(unsigned char *pSrc, signed short *pLaplacianPyramid,int w
 
    cl_kernel kernel_upsample=clCreateKernel(g_program,"Upsample",&status);
    checkErr(status,"clCreateKernel()");
-
    status |= clSetKernelArg(kernel_upsample,0,sizeof(cl_mem),(void*)&buffer_pSrc_pad);
    status |= clSetKernelArg(kernel_upsample,1,sizeof(cl_mem),(void*)&buffer_pDownsampleBuf);
    status |= clSetKernelArg(kernel_upsample,2,sizeof(cl_mem),(void*)&buffer_pLaplacianPyramid);
@@ -455,7 +450,6 @@ static void laplacian(unsigned char *pSrc, signed short *pLaplacianPyramid,int w
   clGetEventProfilingInfo(event_kernel,CL_PROFILING_COMMAND_END,sizeof(cl_ulong),&endTime,NULL);
   kernelTimeUp = (endTime-startTime)/1000;
 #endif
-
 
    status=clEnqueueReadBuffer(g_queue,buffer_pLaplacianPyramid,CL_TRUE,0,szShort,Dst_padding,0,NULL,NULL);
 
