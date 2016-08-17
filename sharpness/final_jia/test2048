@@ -1,0 +1,19 @@
+Input: height = 2048 Width = 2048
+------Total time(ms)------
+down = 1.915450
+up_col = 0.359150
+up_row = 0.012950
+up = 0.344250
+sobel = 1.380550
+mean = 1.767150
+sharpness = 0.000000
+------Kernel time(ms)------
+down = 0.970800
+upcol = 0.010750
+uprow = 0.010750
+up = 0.079700
+sobel = 0.978850
+mean = 0.088050
+sharpness = 0.867400
+bingo
+

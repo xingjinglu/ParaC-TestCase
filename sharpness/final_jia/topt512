@@ -1,0 +1,19 @@
+Input: height = 512 Width = 512
+------Total time(ms)------
+down = 0.852550
+up_col = 0.314600
+up_row = 0.009650
+up = 0.418300
+sobel = 0.283150
+mean = 0.728050
+sharpness = 0.000000
+------Kernel time(ms)------
+down = 0.019050
+upcol = 0.015150
+uprow = 0.015150
+up = 0.017850
+sobel = 0.031950
+mean = 0.024500
+sharpness = 0.056150
+bingo
+
