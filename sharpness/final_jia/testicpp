@@ -1,0 +1,19 @@
+Input: height = 1024 Width = 1024
+------Total time(ms)------
+down = 1.123200
+up_col = 0.266750
+up_row = 0.011600
+up = 0.367100
+sobel = 0.644800
+mean = 1.213100
+sharpness = 0.000000
+------Kernel time(ms)------
+down = 0.379600
+upcol = 0.016100
+uprow = 0.016100
+up = 0.038850
+sobel = 0.380800
+mean = 0.045400
+sharpness = 0.392200
+bingo
+

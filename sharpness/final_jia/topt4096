@@ -1,0 +1,19 @@
+Input: height = 4096 Width = 4096
+------Total time(ms)------
+down = 0.833050
+up_col = 0.306800
+up_row = 0.009950
+up = 0.548900
+sobel = 0.922700
+mean = 2.604450
+sharpness = 0.000000
+------Kernel time(ms)------
+down = 0.131000
+upcol = 0.010250
+uprow = 0.010250
+up = 0.272050
+sobel = 0.648300
+mean = 0.286850
+sharpness = 1.221750
+bingo
+

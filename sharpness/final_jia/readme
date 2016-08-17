@@ -1,0 +1,5 @@
+1) sharpness_orig.cl: the cl written by jhp.
+2) sharpness_time_icpp.cpp: the version of fmr @ ICPP2015;
+3) sharpness_time.cpp: manual_opt based on the verson of fmr @ ICPP2015
+  rename: sharpness_icpp_opt_xxxx.cpp
+  a) clCrreateBuffer cl_ALLOC_HOST_PTR --> read_write...
