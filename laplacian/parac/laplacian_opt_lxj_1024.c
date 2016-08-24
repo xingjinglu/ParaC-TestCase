@@ -188,8 +188,10 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     cl_event event_kernel;
     cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
     checkErr(status, "clCreateKernel for kernel_2");
+    //global_work_size[0] = Height/2;
+    //global_work_size[1] = Width/2;
     global_work_size[0] = Height/2;
-    global_work_size[1] = Width/2;
+    global_work_size[1] = Width/8;
     size_t filter_verticalSrcWidth = 1;
     size_t filter_verticalSrcHeight = 5;
     size_t filter_vertical_srcsz = sizeof(unsigned char);

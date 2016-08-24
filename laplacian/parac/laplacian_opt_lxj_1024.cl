@@ -148,7 +148,7 @@ __kernel void kernel_2(
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx >= 128 || gidy >= 512 )
+  if ( gidx >= 512 || gidy >= 128 )
     return;
 
   /* kernel index calculation */
