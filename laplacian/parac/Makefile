@@ -1,4 +1,4 @@
-CFLAGS = -DTIME_PROF
+CFLAGS = -DTIME_PROF -D_VERIFY
 all: laplacian laplacian_time laplacian_opt laplacian_256 laplacian_512 laplacian_1024 laplacian_2048 laplacian_4096 
 #all: laplacian laplacian_time laplacian_opt laplacian_256 laplacian_1024  
 laplacian:laplacian.c laplacian.cl

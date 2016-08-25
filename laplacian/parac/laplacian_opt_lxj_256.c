@@ -26,6 +26,158 @@ struct TEST_TIME{
   double time_kernel_up;
 };
 
+static int PyramidFilterh(unsigned char *pSrc, unsigned char* pDst, int width, int height)
+{
+   int h, w;
+
+   for( h = 0; h < height; h++)
+   {
+     *(pDst + h * width) = ((short)pSrc[h*width]*2 - pSrc[h*width+1]*4 - pSrc[h*width+2] + pSrc[h*width+3]*4
+                + (pSrc[h*width+1]*2-pSrc[h*width+3])*4 
+                + pSrc[h*width]*6 
+                + pSrc[h*width+1]*4
+                + pSrc[h*width+2] + 8)>>4;
+        *(pDst+h*width+1)=((short)pSrc[h*width+1]*2-pSrc[h*width+3] 
+                + pSrc[h*width]*4
+                + pSrc[h*width+1]*6
+                + pSrc[h*width+2]*4
+                + pSrc[h*width+3] + 8)>>4;
+
+        *(pDst+(h+1)*width-2)=((short)pSrc[(h+1)*width-4]
+                + pSrc[(h+1)*width-3]*4
+                + pSrc[(h+1)*width-2]*6
+                + pSrc[(h+1)*width-1]*4
+                + pSrc[(h+1)*width-2]*2-pSrc[(h+1)*width-4] + 8)>>4;
+        *(pDst+(h+1)*width-1)=((short)pSrc[(h+1)*width-3]
+                + pSrc[(h+1)*width-2]*4
+                + pSrc[(h+1)*width-1]*6
+                + (pSrc[(h+1)*width-2]*2-pSrc[(h+1)*width-4])*4
+                + pSrc[(h+1)*width-1]*2-pSrc[(h+1)*width-2]*4-pSrc[(h+1)*width-3]+pSrc[(h+1)*width-4]*4 + 8)>>4;
+ 
+        for( w = 2; w < width-2; w++)
+        {
+            *(pDst+h*width+w) = ((short)pSrc[h*width+w-2] + pSrc[h*width+w-1]*4 + pSrc[h*width+w]*6 + pSrc[h*width+w+1]*4 + pSrc[h*width+w+2] + 8)>>4;
+        }
+
+   }
+
+}
+
+
+static void Downsample(unsigned char *pSrc ,unsigned  char *pDst ,int width ,int height)
+{
+    int h,w;
+    int halfWidth = (width +1)>>1;
+    int halfHeight = (height +1)>>1;
+    h=height;
+    for(w=0;w<halfWidth;w++)
+    {
+        // first line.
+        pDst[w]=(pSrc[w*2]*2-pSrc[width+w*2]*4-pSrc[2*width+w*2]+pSrc[3*width+w*2]*4
+                + (pSrc[width+w*2]*2-pSrc[3*width+w*2])*4
+                + pSrc[w*2]*6
+                + pSrc[width+w*2]*4
+                + pSrc[2*width+w*2] + 8)>>4;
+
+        // the last line.
+        if(height%2==0)
+        {
+            pDst[(halfHeight-1)*halfWidth+w]=(pSrc[(h-2)*width+w*2]*2-pSrc[(h-4)*width+w*2]
+                    + pSrc[(h-1)*width+w*2]*4
+                    + pSrc[(h-2)*width+w*2]*6
+                    + pSrc[(h-3)*width+w*2]*4
+                    + pSrc[(h-4)*width+w*2] + 8)>>4;
+        }
+        else
+        {
+            pDst[(halfHeight-1)*halfWidth+w]=(pSrc[(h-1)*width+w*2]*2-pSrc[(h-2)*width+w*2]*4-pSrc[(h-3)*width+w*2]+pSrc[(h-4)*width+w*2]*4
+                    + (pSrc[(h-2)*width+w*2]*2-pSrc[(h-4)*width+w*2])*4
+                    + pSrc[(h-1)*width+w*2]*6
+                    + pSrc[(h-2)*width+w*2]*4
+                    + pSrc[(h-3)*width+w*2] + 8)>>4;
+        }
+    }
+
+    for(w=0;w<halfWidth;w++)
+        for(h=1;h<halfHeight-1;h++)
+        {
+            pDst[h*halfWidth+w]=((short)pSrc[(h*2-2)*width+w*2] + pSrc[(h*2-1)*width+w*2]*4 + pSrc[h*2*width+w*2]*6 + pSrc[(h*2+1)*width+w*2]*4 + pSrc[(h*2+2)*width+w*2] + 8)>>4;
+
+        }
+
+}
+
+// down_cpu, layer, src_cpu
+static void UpsampleX4_reverse(unsigned char *pSrc ,unsigned char*pDst,unsigned char *Source,int width ,int height)
+{
+    int h,w;
+    int halfWidth=(width+1)>>1;
+    int halfHeight=(height+1)>>1;
+    int wodd=width%2;
+    int hodd=height%2;
+
+    //first row
+    for(w=0;w<halfWidth-1;w++)
+    {
+        pDst[w*2]=(unsigned char)(Source[w*2]-pSrc[w]);
+        pDst[w*2+1]=(unsigned char)(Source[w*2+1]-((pSrc[w]+pSrc[w+1]+1)>>1));
+    }
+    if(wodd==0)
+    {
+        pDst[width-2]=(unsigned char)(Source[width-2]-pSrc[halfWidth-1]);
+        pDst[width-1]=(unsigned char)(Source[width-1]-pSrc[halfWidth-1]);
+    }else
+        pDst[width-1]=(unsigned char)(Source[width-1]-pSrc[halfWidth-1]);
+
+    //last row
+    h=halfHeight;
+    if(hodd==0)
+    {
+        for(w=0;w<halfWidth-1;w++)
+        {
+            pDst[(h*2-1)*width+w*2]=(unsigned char)(Source[(h*2-1)*width+w*2]-pSrc[(h-1)*halfWidth+w]);
+            pDst[(h*2-1)*width+w*2+1]=(unsigned char)(Source[(h*2-1)*width+w*2+1]-((pSrc[(h-1)*halfWidth+w]+pSrc[(h-1)*halfWidth+w+1]+1)>>1));
+        }
+        if(wodd==0)
+        {
+            pDst[h*2*width-2]=(unsigned char)(Source[h*2*width-2]-pSrc[h*halfWidth-1]);
+            pDst[h*2*width-1]=(unsigned char)(Source[h*2*width-1]-pSrc[h*halfWidth-1]);
+        }else
+            pDst[h*2*width-1]=(unsigned char)(Source[h*2*width-1]-pSrc[h*halfWidth-1]);
+    }
+
+    //body
+    for(h=0; h<halfHeight-1; h++)
+    {
+        for(w=0; w<halfWidth-1; w++)
+        {
+            pDst[(h*2+1)*width+w*2]=(unsigned char)(Source[(h*2+1)*width+w*2]-((pSrc[h*halfWidth+w]+pSrc[(h+1)*halfWidth+w]+1)>>1));
+            pDst[(h*2+1)*width+w*2+1]=(unsigned char)(Source[(h*2+1)*width+w*2+1]-((pSrc[h*halfWidth+w]+pSrc[h*halfWidth+w+1]+pSrc[(h+1)*halfWidth+w]+pSrc[(h+1)*halfWidth+w+1]+2)>>2));
+
+            pDst[(h*2+2)*width+w*2]=(unsigned char)(Source[(h*2+2)*width+w*2]-pSrc[(h+1)*halfWidth+w]);
+            pDst[(h*2+2)*width+w*2+1]=(unsigned char)(Source[(h*2+2)*width+w*2+1]-((pSrc[(h+1)*halfWidth+w]+pSrc[(h+1)*halfWidth+w+1]+1)>>1));
+        }
+
+        if(wodd==0)
+        {
+          // Odd Line, 2046
+            pDst[(h*2+1)*width+ width-2]=(unsigned char)(Source[(h*2+1)*width + width-2]-((pSrc[(h+1)*halfWidth-1]+pSrc[(h+2)*halfWidth-1]+1)>>1));
+            // Odd Line, 2047
+            pDst[(h*2+1)*width + width-1]=(unsigned char)(Source[(h*2+1)*width+ width-1]-((pSrc[h*halfWidth+halfWidth-1]+pSrc[(h+1)*halfWidth + halfWidth-1]+1)>>1));
+
+            pDst[(h*2+2)*width + width-2]=(unsigned char)(Source[(h*2+2)*width +width-2]-pSrc[(h+2)*halfWidth-1]);
+            // Even Line, 2047
+            pDst[(h*2+2)*width + width-1]=(unsigned char)(Source[(h*2+2)*width +width-1]-pSrc[(h+2)*halfWidth-1]);
+        }else
+        {
+            pDst[(h*2+2)*width-1]=(unsigned char)(Source[(h*2+2)*width-1]-((pSrc[(h+1)*halfWidth-1]+pSrc[(h+2)*halfWidth-1]+1)>>1));
+            pDst[(h*2+3)*width-1]=(unsigned char)(Source[(h*2+3)*width-1]-pSrc[(h+2)*halfWidth-1]);
+        }
+    }
+}
+
+
+
 
 #ifdef TIME_PROF
 TEST_TIME Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1) 
@@ -46,12 +198,34 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 
   unsigned char filter_horizon[1][5] = { 1, 4, 6, 4, 1 };
   unsigned char filter_vertical[5][1] = { 1, 4, 6, 4, 1 };
+ #if 0
   unsigned char dst_horizon[Height][Width];
   unsigned char dst_vertical[Width][Width];
   unsigned char dst_ds[(Height + 1) / 2][(Width + 1) / 2];
+#endif
+
+  unsigned char **dst_horizon = (unsigned char**)  malloc( sizeof(unsigned char) *Height * Width );
+  unsigned char **dst_vertical = (unsigned char**) malloc (sizeof(unsigned char) *Height * Width);
+  unsigned char **dst_ds = (unsigned char**) malloc( sizeof( unsigned char) * ((Height + 1) / 2)* ((Width + 1) / 2));
+
+#ifdef _VERIFY
+// For correct verify.
+   unsigned char *src_cpu= (unsigned char *)malloc(Height *Width  *sizeof(unsigned char));
+  unsigned char *filter_cpu= (unsigned char *)malloc(Height * Width*sizeof(unsigned char));
+  unsigned char *down_cpu= (unsigned char *)malloc(((Height+1)/2) *((Width+1)/2) *sizeof(unsigned char));
+  unsigned char *laplacian_cpu= (unsigned char *)malloc(Height * Width * sizeof(unsigned char));
+
+// For correct verify.
+    for(int i=0;i<Height;i++)
+      for(int j=0;j<Width;j++)
+        *(src_cpu+i*Width+j)= ((unsigned char*)Src)[i*Width+j];
+    PyramidFilterh(src_cpu,filter_cpu, Height, Width);
+#endif
 
 
+   // kernel_1;
   {
+  
     size_t global_work_size[2];
     size_t transe;
 
@@ -179,17 +353,74 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     clReleaseMemObject(dst_horizondstBuf);
 #endif
 
+// verify the result.
+#if 0
+    for(int i = 0; i < 10; i++)
+    {
+      for(int j = 0; j < 10; j++)
+      {
+        //if(filter_cpu[i*1024+j] !=((unsigned char*) dst_horizon)[i* 1024 +j])
+        {
+          //   printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*1024+j], (int)((unsigned char*) dst_horizon)[i* 256 +j]);
+          printf("%d ", src_cpu[i*2048+j]);
+        }
+      }
+      printf("\n");
+    }
+#endif
+
+
+#ifdef _VERIFY
+    for(int i = 0; i < Height; i++)
+    {
+      for(int j = 0; j < Width; j++)
+      {
+        if(filter_cpu[i*Width+j] !=((unsigned char*) dst_horizon)[i* Width +j])
+        {
+          printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*Width+j], (int)((unsigned char*) dst_horizon)[i*Width +j]);
+          //printf("%u ",yPlaneDown[i][j]);
+          abort();
+        }
+      }
+      //printf("\n");
+    }
+    printf("filter success\n");
+#endif
+
   }
 
   /*********Column Filter + Downsample**********************/ 
   {
+    // Verify.
+#ifdef _VERIFY
+    Downsample(filter_cpu, down_cpu, Height, Width); 
+#endif
+     
+#if 0
+    printf("input-L0 for Downsample: ");
+    for( int i = 0; i < 4; i++){
+      printf(" %d = %d, ", i, filter_cpu[i]);
+    }
+    printf("\n input-L1");
+    for( int i = 0; i < 4; i++){
+      printf(" %d = %d, ", i, filter_cpu[i+2048]);
+    }
+    printf("\n input-L2");
+    for( int i = 0; i < 4; i++){
+      printf(" %d = %d, ", i, filter_cpu[i+4096]);
+    }
+    printf("\n");
+#endif
+
     size_t global_work_size[2];
     size_t transe;
     cl_event event_kernel;
     cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
     checkErr(status, "clCreateKernel for kernel_2");
-    global_work_size[0] = Height/2;
-    global_work_size[1] = Width/2;
+   // global_work_size[0] = Height/2;
+    //global_work_size[1] = Width/2;
+    global_work_size[0] = Width/8; // Horizon vector parallel.
+    global_work_size[1] = Height/2;
     size_t filter_verticalSrcWidth = 1;
     size_t filter_verticalSrcHeight = 5;
     size_t filter_vertical_srcsz = sizeof(unsigned char);
@@ -299,12 +530,48 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     clReleaseMemObject(filter_verticalsrcBuf);
     clReleaseMemObject(dst_horizonsrcBuf);
 #endif
+
+#ifdef _VERIFY 
+#if 0
+    for(int i = Height; i < Height; i++)
+    {
+      for(int j = 0; j < 10; j++)
+      {
+        //if(filter_cpu[i*1024+j] !=((unsigned char*) dst_horizon)[i* 1024 +j])
+        {
+          //   printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*1024+j], (int)((unsigned char*) dst_horizon)[i* 256 +j]);
+          printf("%d ", (int)filter_cpu[i*Width+j]);
+        }
+      }
+      printf("\n");
+    }
+#endif
+
+    for(int i = 0; i < Height/2; i++)
+    {
+      for(int j = 0; j < Width/2; j++)
+      {
+        if(down_cpu[i*(Width/2)+j] !=((unsigned char*) dst_ds)[i* (Width/2) +j])
+        {
+          printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)down_cpu[i*(Width/2)+j], (int)((unsigned char*) dst_ds)[i* (Width/2) +j]);
+          //printf("%u ",yPlaneDown[i][j]);
+          abort();
+        }
+      }
+      //printf("\n");
+    }
+    printf("down success\n");
+#endif
+
   }
+#ifdef _VERIFY
+  UpsampleX4_reverse(down_cpu, laplacian_cpu, src_cpu, Width, Height);
+#endif
+
   int halfWidth = Width / 2;
   int halfHeight = Height / 2;
   int widthOdd = Width - (halfWidth * 2);
   int heightOdd = Height - (halfHeight * 2);
-
 
   /************Upsample + calculation******************************/
   {
@@ -328,8 +595,8 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     }
 
 
-    size_t dst_dsSrcWidth = Width;
-    size_t dst_dsSrcHeight = Height;
+    size_t dst_dsSrcWidth = Width/2;
+    size_t dst_dsSrcHeight = Height/2;
     size_t dst_ds_srcsz = sizeof(unsigned char);
     size_t dst_dsSrcStep = dst_dsSrcWidth * dst_ds_srcsz;
     dst_dsSrcStep = (dst_dsSrcStep % PADDING < 16) ? ((dst_dsSrcStep / PADDING+1) * PADDING) : ((dst_dsSrcStep + PADDING) / PADDING+1) * PADDING;
@@ -433,6 +700,34 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     clReleaseMemObject(dst_dssrcBuf);
 #endif
 
+
+#ifdef _VERIFY
+#if 0
+    for(int i = 0; i < 1; i++){
+      for(int j = 0; j < 16; j++){
+        //if(filter_cpu[i*1024+j] !=((unsigned char*) dst_horizon)[i* 1024 +j])
+        {
+          //   printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*1024+j], (int)((unsigned char*) dst_horizon)[i* 256 +j]);
+          printf("%d ", (int)laplacian_cpu[i*Width+j]);
+        }
+      }
+      printf("\n");
+    }
+#endif
+
+    for(int i = 0; i < Height; i++){
+        for(int j = 0; j < Width; j++){
+            if((unsigned char)(laplacian_cpu[i*Width+j]) !=(unsigned char)(layer1[i* Width +j]) ){
+                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(unsigned char)laplacian_cpu[i*Width+j], (unsigned char)(layer1[i*Width +j]) );
+                //printf("%u ",yPlaneDown[i][j]);
+                abort();
+            }
+        }
+        //printf("\n");
+    }
+    printf("all success\n");
+#endif
+
   }
 
 
@@ -468,19 +763,17 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 
 
 int main() {
-  char inputfile[] = "laplacian_opt_lxj_256.cl";
+  char inputfile[] = "laplacian_opt_lxj_512.cl";
   char *remain = NULL;
-  int height = 256, width = 256;
-  //int height = 1024, width = 1024;
+  //int height = 256, width = 256;
+  int height = 512, width = 512;
 
   //for( int count = 0; count < 3; count++)
   {
-
     if (-1 == openCLCreate(inputfile, remain)) {
       printf("openCL create fail !!!!!!");
       return 0;
     }
-
 
     unsigned char *src_data = (unsigned char *)malloc(sizeof(unsigned char) * height * width);
     unsigned char *dst_data = (unsigned char *)malloc(sizeof(unsigned char) * height * width);
@@ -501,6 +794,8 @@ int main() {
     for (int i = 0; i < width * height; i++) {
       src_data[i] = rand() % 100 + 1;
     }
+    //printf("intput: 0 = %d, 1 = %d, 2 = %d, 3 = %d, 4 = %d \n", src_data[0], src_data[1], src_data[2], src_data[3], src_data[4]);
+
 #ifdef TIME_PROF
     struct TEST_TIME temp = Laplacian(height, width, (unsigned char*) src, (unsigned char*) Layer);
 #endif
