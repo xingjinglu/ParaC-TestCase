@@ -1,5 +1,4 @@
 #include <stdlib.h>
-
 #define ROWS 1024
 #define COLS 1024
 #define M 1024
