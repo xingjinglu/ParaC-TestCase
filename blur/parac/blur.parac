@@ -1,0 +1,114 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdint.h>
+
+#define WIDTH 4802 
+#define HEIGHT  6408
+
+#if 1
+blur_ser( short *input, short *resultx, short *resulty)
+{
+  int i, j;
+
+  // x-axis.
+    for( i = 1; i < (HEIGHT-1); i++)
+      for( j = 0; j < WIDTH-1; j++){
+      resultx[i*WIDTH+j] = ( input[(i-1)*WIDTH+j] + input[i*WIDTH+j] + input[(i+1)*WIDTH+j] )/3; 
+    }
+
+    for( i = 0; i < HEIGHT-1; i++)
+      for( j = 1; j < WIDTH-1; j++){
+        resulty[i*WIDTH+j] = ( resultx[i*WIDTH+j-1] + resultx[i*WIDTH+j] + resultx[i*WIDTH+j+1] )/3;
+      }
+
+}
+#endif
+
+#if 0
+void blur(parac_matrix short &in[HEIGHT][WIDTH], 
+    parac_matrix short &intermediate[HEIGHT][WIDTH], 
+    parac_matrix short &out[HEIGHT][WIDTH] )
+{
+  parac_iterator it(iter_element; 0:HEIGHT:1; 1:WIDTH-1:1 ){
+    intermediate[itx][ity] = (in[itx-1][ity] + in[itx][ity] + in[itx+1][ity])/3;
+  }
+
+  parac_iterator it1(iter_element; 1:HEIGHT-1:1; 0:WIDTH:1 ){
+    out[it1x][it1y] = (in[it1x-1][it1y] + in[it1x][it1y] + in[it1x][it1y+1])/3;
+  }
+
+}
+#endif
+
+void blur_conv(parac_matrix short &in[HEIGHT][WIDTH], 
+    parac_matrix short &intermediate[HEIGHT][WIDTH], 
+    parac_matrix short &out[HEIGHT][WIDTH] )
+{
+  parac_matrix short filter_h[1][3] = {1, 1, 1};
+  parac_matrix short filter_v[3][1] = {1, 1, 1};
+
+  parac_iterator it(iter_element; 1:HEIGHT-1:1; 1:WIDTH-1:1 )
+  {
+    intermediate[itx][ity] = convolution(filter_v, in[itx-1:3:1][ity])/3;
+  }
+
+  parac_iterator it1(iter_element; 1:HEIGHT-1:1; 1:WIDTH-1:1 )
+  {
+    out[it1x][it1y] = convolution(filter_h, intermediate[it1x][it1y-1:3:1])/3;
+  }
+
+
+
+}
+
+
+
+int main()
+{
+ short *input = (short *) malloc( sizeof(short) * WIDTH*HEIGHT );
+ short *meta = (short *) malloc( sizeof(short) *WIDTH *HEIGHT );
+ short *output = (short *) malloc( sizeof(short) * WIDTH*HEIGHT );
+
+ //short *input_cpu = (short *) malloc( sizeof(short) * WIDTH*HEIGHT );
+ short *outputx_cpu = (short *) malloc( sizeof(short) *WIDTH *HEIGHT );
+ short *outputy_cpu = (short *) malloc( sizeof(short) * WIDTH*HEIGHT );
+
+ for( int i = 0; i < HEIGHT; i++)
+   for(int j = 0; j < WIDTH; j++)
+   input[i*WIDTH+j] = rand()%256;
+
+ parac_matrix short &src[HEIGHT][WIDTH] = input;
+ parac_matrix short &intermediate[HEIGHT][WIDTH] = meta;
+ parac_matrix short &dst[HEIGHT][WIDTH] = output;
+
+#ifdef _VERIFY
+ blur_ser(input, outputx_cpu, outputy_cpu);
+#endif
+
+ blur_conv(src, intermediate, dst);
+
+#ifdef _VERIFY
+
+
+for(int i = 1; i < HEIGHT-1; i++)
+  for( int j = 1; j < WIDTH-1; j++){
+    if( meta[i*WIDTH+j] != outputx_cpu[i*WIDTH+j] ){
+      printf("kernel_1: %d, %d, %d, %d \n", i, j, meta[i*WIDTH+j], outputy_cpu[i*WIDTH+j]);
+      abort();
+    }
+  }
+
+
+
+
+for(int i = 1; i < HEIGHT-1; i++)
+  for( int j = 1; j < WIDTH-1; j++){
+    if(output[i*WIDTH+j] != outputy_cpu[i*WIDTH+j]){
+      printf("kernel_2: %d, %d, %d, %d \n", i, j, output[i*WIDTH+j], outputy_cpu[i*WIDTH+j]);
+      abort();
+    }
+  }
+#endif
+
+
+}
