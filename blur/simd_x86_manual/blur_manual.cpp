@@ -31,6 +31,7 @@ void Normal_blur(int x, int y, int *temp, int *output){
       *(output + i*y + j) = ( *(temp + (i-1)*y + j) + *(temp + i*y + j) + *(temp + (i+1)*y + j) ) / 3;
     }
   }
+
   for(j = 0; j < y; j++){
     *(output + j) = *(temp + j);
     *(output + y*(x-1) + j) = *(output + y*(x-1) + j);
