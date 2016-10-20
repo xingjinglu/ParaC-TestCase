@@ -1,0 +1,109 @@
+/*
+  Copyright (c) 2016.
+  All rights reserved.
+
+  Written and provided by: 
+  Xingjing Lu, ICT, CAS.
+
+  Based the unsharp_mask_polymage_native.cpp, which is written by
+  Ravi Teja Mullapudi, Vinay Vasisa, Uday Bondhugula.
+  
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <cmath>
+#include <string.h>
+
+#define M 2048
+#define N 2048
+#define O 3
+#define PADM 2052
+#define PADN 2052
+
+
+  void 
+pipeline_mask(int R, int C, float threshold, float weight,
+    parac_matrix float& img[R][C], 
+    parac_matrix float &ghost[R][C] )
+{
+ 
+  parac_matrix float blurx[M][PADN];
+  parac_matrix float blury[M][N];
+  parac_matrix float sharpen[M][N];
+
+  parac_matrix float filterx[5][1] = {0.0625f, 0.25f, 0.375f, 0.25f, 0.0625f};
+  parac_matrix float filtery[1][5] = {0.0625f, 0.25f, 0.375f, 0.25f, 0.0625f};
+
+  parac_iterator(iter_element; 2:2049:1; 0:2051:1){
+    blurx[itx-2][ity] = convolution(img[itx-2:5:1][ity], filterX);
+  }
+
+  parac_iterator(iter_element; 2:2049:1; 2:2049:1){
+    blury[itx-2][ity-2] = convolution(blurx[itx-2][ity-2:5:1], fitery);
+  }
+
+
+  parac_iterator(iter_element; 2:2049:1; 2:2049:1){
+    sharpen[itx-2][ity-2] = img[itx][ity] * (1+weight)
+      - blury[itx-2][ity-2]*weight;
+
+    float _ct0 = img[itx][ity];
+    flaot _ct1 = sharpen[itx-2][ity-2];
+    float _ct2 =(std::abs( img[itx][ity] - blury[itx-2][ity-2]) < threshold)? _ct0:_ct1;
+    mask[itx-2][ity-2] = _ct2;
+
+  }
+
+#if 0
+  parac_iterator(iter_element; 2:2049:1; 2:2049:1){
+    float _ct0 = img[itx][ity];
+    flaot _ct1 = sharpen[itx-2][ity-2];
+    float _ct2 =(std::abs( img[itx][ity] - blury[itx-2][ity-2]) < threshold)? _ct0:_ct1;
+    mask[itx-2][ity-2] = _ct2;
+  }
+#endif
+
+}
+
+
+int main()
+{
+  int nruns = 6, rows = 0, cols = 0, c = 0, channel = 3;
+  int row_base, col_base;
+  float *image, *image_ghost, *res;
+  float threshold = 0.000001;
+  int weight = 4;
+
+  image = (float*) malloc( sizeof(float)*M*N);
+  res = (float*) malloc( sizeof(float)*M*N);
+  rows = M;
+  cols = N;
+  channel = O;
+  
+  // get image roi, not needed.
+  row_base = (M - rows)/2;
+  col_base = (N - cols)/2;
+
+  // create ghost zones.
+ int total_pad = 4;
+ image_ghost = (float*) malloc ( sizeof(float) * (rows+4) * (cols+4) );
+   for( int i = 0; i < M; i++){
+     memcpy( image_ghost + (i+2)*(cols+4) + 2, image+i*cols, cols );
+   }
+
+
+ // init data of image.
+  for( int i = 0; i < M; i++ )
+    for( int j = 0; j < N; j++ ){
+      image[i*cols+j] = (float)(rand()%255);
+      image_ghost[i*(cols+4)+j+2] =  image[i*cols+j];
+    }
+
+
+  pipeline_mask(cols, rows, threshold, weight, image_ghost, res);
+
+
+  return 0;
+}
