@@ -1,0 +1,5 @@
+1) The bilateral_omp.cpp and bilateral_ser.cpp are both based the baliteral_grid_polymage_native.cpp;
+   its performance is worse than the baleral_grid_polymage.cpp.
+
+2) 
+
