@@ -609,7 +609,8 @@ void all_Sharpness(unsigned char* yuvfile,int height,int width,unsigned char * y
   cl_kernel meanKernel=clCreateKernel(program,"mean",&status);
   checkErr(status,"clCreateKernel() for meanLocalCombine");
 
-  cl_mem pMidEdgeBuffer=clCreateBuffer(g_context,CL_MEM_ALLOC_HOST_PTR,sizeof(unsigned int),NULL,&status);
+  //cl_mem pMidEdgeBuffer=clCreateBuffer(g_context,CL_MEM_ALLOC_HOST_PTR,sizeof(unsigned int),NULL,&status);
+  cl_mem pMidEdgeBuffer=clCreateBuffer(g_context,CL_MEM_READ_WRITE,sizeof(unsigned int),NULL,&status);
   checkErr(status,"clCreateBuffer() for pEdgeBuffer");
 
   const void * local = NULL;

@@ -119,19 +119,16 @@ static void UpsampleX4_reverse(unsigned char *pSrc ,unsigned char *pDst,int widt
   unsigned char *pDstL1;
 
   gettimeofday(&start_cpu[3], NULL);	
-  if(heightOdd ==0)
+  if(heightOdd ==0) // First row.
   {
-
     pSrcL0 = pSrc + (halfWidth + widthOdd )*(halfHeight -1);
     pDstL0 = pDst + width*(height -1);
-
     *(pDstL0 ++) =pSrcL0[0];
     for(x=1;x<halfWidth+widthOdd;x++)
     {
       *(pDstL0 ++) = (pSrcL0[x-1] + pSrcL0[x] +1)>>1;
       *(pDstL0 ++) = pSrcL0[x];
     }
-
     if(widthOdd ==0)
     {
       *(pDstL0 ++) = pSrcL0[halfWidth-1];

@@ -601,8 +601,10 @@ void all_Sharpness(unsigned char* yuvfile,int height,int width,unsigned char * y
   /********3.mean***********************************************/
   gettimeofday(&time6,NULL);
   short mean;
-  local_work_size[0]=MEAN_THREADS_NUMBER_X;
-  local_work_size[1]=MEAN_THREADS_NUMBER_Y;
+  //local_work_size[0]=MEAN_THREADS_NUMBER_X;
+  //local_work_size[1]=MEAN_THREADS_NUMBER_Y;
+  local_work_size[0]=128;
+  local_work_size[1]=2;
   global_work_size[0]=upMultiple(width,local_work_size[0]*4)*local_work_size[0];
   global_work_size[1]=upMultiple(height,local_work_size[1])*local_work_size[1];
 

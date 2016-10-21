@@ -8,10 +8,27 @@ High level version with ParaC.
 3) Opt manual by lxj: laplacian_time_opt.c laplacian_opt_lxj.cl
 4) opt by lxj and paramerterized for input, like 256, 1024.
 2.1 The correction version ParaC code.
-laplacian_opt_lxj_2048.c (.cl)
+2.1.1 laplacian_opt_lxj_2048.c (.cl)
 kernel_1: vector parallelizing, *4;
 kernel_2: vector parallelizing on gidx direction, *4;
 kernel_3: Extract load/store outof if block; result stored in register;
+
+2.1.2  LDS opt on kernel_2
+laplacian_opt_lds_1024.cl/c
+kernel_2: lds opt.
+
+
+2.1.3 Vector parallel on Vertical direction 
+kernel_2: vect parallelizing on the Vertical direction.
+The Jia Haipeng version.
+
+2.1.4 remove bank confilicts for LDS opt of kernel_2
+laplaian_opt_lds_optbank_1024.c
+
+Result: not work, because when remove store conflicts, there are still read conflicts, 
+  and the performance get worse.
+
+
 
 
 3. --- parac_test ---

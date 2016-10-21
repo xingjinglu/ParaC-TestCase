@@ -2,8 +2,20 @@
 #include<stdlib.h>
 #include<stdint.h>
 
-#define WIDTH 4802 
 #define HEIGHT  6408
+#define WIDTH 4802 
+//#define WIDTH  62
+//#define HEIGHT  88
+//#define WIDTH  602
+//#define HEIGHT  808
+//#define WIDTH  1026
+//#define HEIGHT  1024
+//#define WIDTH  2050
+//#define HEIGHT  2048
+//#define WIDTH  3074
+//#define HEIGHT  3072
+//#define WIDTH  4098
+//#define HEIGHT  4096
 
 #if 1
 blur_ser( short *input, short *resultx, short *resulty)
@@ -12,30 +24,14 @@ blur_ser( short *input, short *resultx, short *resulty)
 
   // x-axis.
     for( i = 1; i < (HEIGHT-1); i++)
-      for( j = 0; j < WIDTH-1; j++){
+      for( j = 1; j < (WIDTH-1); j++){
       resultx[i*WIDTH+j] = ( input[(i-1)*WIDTH+j] + input[i*WIDTH+j] + input[(i+1)*WIDTH+j] )/3; 
     }
 
-    for( i = 0; i < HEIGHT-1; i++)
+    for( i = 1; i < HEIGHT-1; i++)
       for( j = 1; j < WIDTH-1; j++){
         resulty[i*WIDTH+j] = ( resultx[i*WIDTH+j-1] + resultx[i*WIDTH+j] + resultx[i*WIDTH+j+1] )/3;
       }
-
-}
-#endif
-
-#if 0
-void blur(parac_matrix short &in[HEIGHT][WIDTH], 
-    parac_matrix short &intermediate[HEIGHT][WIDTH], 
-    parac_matrix short &out[HEIGHT][WIDTH] )
-{
-  parac_iterator it(iter_element; 0:HEIGHT:1; 1:WIDTH-1:1 ){
-    intermediate[itx][ity] = (in[itx-1][ity] + in[itx][ity] + in[itx+1][ity])/3;
-  }
-
-  parac_iterator it1(iter_element; 1:HEIGHT-1:1; 0:WIDTH:1 ){
-    out[it1x][it1y] = (in[it1x-1][it1y] + in[it1x][it1y] + in[it1x][it1y+1])/3;
-  }
 
 }
 #endif
@@ -74,8 +70,11 @@ int main()
  short *outputy_cpu = (short *) malloc( sizeof(short) * WIDTH*HEIGHT );
 
  for( int i = 0; i < HEIGHT; i++)
-   for(int j = 0; j < WIDTH; j++)
-   input[i*WIDTH+j] = rand()%256;
+   for(int j = 0; j < WIDTH; j++){
+     input[i*WIDTH+j] = rand()%256;
+     meta [i*WIDTH+j] = 0;
+     outputx_cpu[i*WIDTH+j] = 0;
+   }
 
  parac_matrix short &src[HEIGHT][WIDTH] = input;
  parac_matrix short &intermediate[HEIGHT][WIDTH] = meta;
@@ -88,26 +87,25 @@ int main()
  blur_conv(src, intermediate, dst);
 
 #ifdef _VERIFY
+ for(int i = 1; i < HEIGHT-1; i++)
+   for( int j = 1; j < WIDTH-1; j++){
+     if( abs(meta[i*WIDTH+j] - outputx_cpu[i*WIDTH+j]) > 1 ){
+       printf("kernel_1: %d, %d, ocl=%d, ser=%d \n", i, j, meta[i*WIDTH+j], outputx_cpu[i*WIDTH+j]);
+       abort();
+     }
+   }
+
+ printf("kernel_1 succeed! \n");
 
 
-for(int i = 1; i < HEIGHT-1; i++)
-  for( int j = 1; j < WIDTH-1; j++){
-    if( meta[i*WIDTH+j] != outputx_cpu[i*WIDTH+j] ){
-      printf("kernel_1: %d, %d, %d, %d \n", i, j, meta[i*WIDTH+j], outputy_cpu[i*WIDTH+j]);
-      abort();
-    }
-  }
-
-
-
-
-for(int i = 1; i < HEIGHT-1; i++)
-  for( int j = 1; j < WIDTH-1; j++){
-    if(output[i*WIDTH+j] != outputy_cpu[i*WIDTH+j]){
-      printf("kernel_2: %d, %d, %d, %d \n", i, j, output[i*WIDTH+j], outputy_cpu[i*WIDTH+j]);
-      abort();
-    }
-  }
+ for(int i = 1; i < HEIGHT-1; i++)
+   for( int j = 1; j < WIDTH-1; j++){
+     if( abs(output[i*WIDTH+j] - outputy_cpu[i*WIDTH+j]) > 1 ){
+       printf("kernel_2: %d, %d, ocl=%d, ser=%d \n", i, j, output[i*WIDTH+j], outputy_cpu[i*WIDTH+j]);
+       abort();
+     }
+   }
+ printf("kernel_2 succeed! \n");
 #endif
 
 
