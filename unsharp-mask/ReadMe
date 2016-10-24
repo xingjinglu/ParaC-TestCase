@@ -1,0 +1,4 @@
+1) unsharpmask_ser_gray.cpp and unsharp_mask_ser.cpp are both based on the 
+unsharp_mask_polymage.cpp.
+Opt: thread parallel and vector and tiling.
+
