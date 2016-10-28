@@ -1,0 +1,5 @@
+#rm unsharp_gpu;
+g++ halide_unsharp_gpu.cpp -g -std=c++11 -I ../../build/include -I ../../tools  -I ../surpport/ -L ../../build/bin -lHalide `libpng-config --cflags --ldflags` -lpthread -ldl -o unsharp_gpu;
+LD_LIBRARY_PATH=../../build/bin/;  ./unsharp_gpu
+
+
