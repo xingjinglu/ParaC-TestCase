@@ -25,12 +25,11 @@
 
   void 
 pipeline_mask(int R, int C, float threshold, float weight,
-    parac_matrix float& img[R][C], 
-    parac_matrix float &ghost[R][C],
+    parac_matrix float &img[PADM][PADN], 
+    parac_matrix float &mask[M][N],
     parac_matrix float &blurx[M][PADN],
     parac_matrix float &blury[M][N],
-    parac_matrix float &sharpen[M][N],
-    parac_matrix float &mask[M][N]
+    parac_matrix float &sharpen[M][N]
     )
 {
  
@@ -38,7 +37,6 @@ pipeline_mask(int R, int C, float threshold, float weight,
   parac_matrix float blurx[M][PADN];
   parac_matrix float blury[M][N];
   parac_matrix float sharpen[M][N];
-  parac_matrix float mask[M][N];
 #endif
 
   parac_matrix float filterx[5][1] = {0.0625f, 0.25f, 0.375f, 0.25f, 0.0625f};
@@ -53,16 +51,18 @@ pipeline_mask(int R, int C, float threshold, float weight,
   }
 
 
+#if 1
   parac_iterator it2(iter_element; 2:2049:1; 2:2049:1){
     sharpen[it2x-2][it2y-2] = img[it2x][it2y] * (1+weight)
       - blury[it2x-2][it2y-2]*weight;
-
     float _ct0 = img[it2x][it2y];
     float _ct1 = sharpen[it2x-2][it2y-2];
-    float _ct2 =(abs( img[it2x][it2y] - blury[it2x-2][it2y-2]) < threshold)? _ct0:_ct1;
+    float _ct2 =(( img[it2x][it2y] - blury[it2x-2][it2y-2]) < threshold)? _ct0 : _ct1;
+    //float _ct2 =(abs( img[it2x][it2y] - blury[it2x-2][it2y-2]) < threshold)? _ct0 : _ct1;
+    //float _ct2 =(abs( img[it2x][it2y] - blury[it2x-2][it2y-2]) < threshold)? img[it2x][it2y]:sharpen[it2x-2][it2y-2];
     mask[it2x-2][it2y-2] = _ct2;
-
   }
+#endif
 
 #if 0
   parac_iterator(iter_element; 2:2049:1; 2:2049:1){
@@ -90,7 +90,6 @@ int main()
   blurx_src = (float*) malloc (sizeof(float)*M*PADN);
   blury_src = (float*) malloc (sizeof(float)*M*N);
   sharpen_src = (float*) malloc (sizeof(float)*M*N);
-  mask_src = (float*) malloc (sizeof(float)*M*N);
   
   rows = M;
   cols = N;
@@ -120,10 +119,9 @@ int main()
   parac_matrix float &blurx[M][PADN] = blurx_src;
   parac_matrix float &blury[M][N] = blury_src;
   parac_matrix float &sharpen[M][N] = sharpen_src;
-  parac_matrix float &mask[M][N] = mask_src;
 
   pipeline_mask(cols, rows, threshold, weight, 
-      image_ghost, res, blurx, blury, sharpen, mask);
+      image_ghost, res, blurx, blury, sharpen);
 
 
   return 0;
