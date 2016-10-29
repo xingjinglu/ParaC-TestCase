@@ -59,12 +59,15 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
 #endif
     for( int q = 0; q < RUNS; q++){
       size_t global_work_size[2];
+      size_t local_work_size[2];
       size_t transe;
       cl_event event_kernel;
       cl_kernel kernel_1 = clCreateKernel(g_program, "kernel_1", &status);
       checkErr(status, "clCreateKernel for kernel_1");
       global_work_size[0] = 600; // 4800
       global_work_size[1] = 6406;
+      local_work_size[0] = 128 ;
+      local_work_size[1] = 1;
       size_t inSrcWidth = 4802;
       size_t inSrcHeight = 6408;
       size_t in_srcsz = sizeof(short);
@@ -140,7 +143,7 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_1, 14, sizeof(int), (void *)&intermediateDstShift);
       checkErr(status, "clSetKernelArg");
-      status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
       checkErr(status, "clEnqueueNDRangeKernel");
       status = clFinish(g_queue);
       checkErr(status,"clFinish of kernel_1");
@@ -168,12 +171,15 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
 #endif
     for( int i = 0; i < RUNS; i++){
       size_t global_work_size[2];
+      size_t local_work_size[2];
       size_t transe;
       cl_event event_kernel;
       cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
       checkErr(status, "clCreateKernel for kernel_2");
       global_work_size[0] = 600;
       global_work_size[1] = 6406;
+      local_work_size[0] = 128;
+      local_work_size[1] = 1;
       size_t intermediateSrcWidth = 4802;
       size_t intermediateSrcHeight = 6408;
       size_t intermediate_srcsz = sizeof(short);
@@ -249,7 +255,8 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_2, 14, sizeof(int), (void *)&outDstShift);
       checkErr(status, "clSetKernelArg");
-      status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      //status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
       checkErr(status, "clEnqueueNDRangeKernel");
       status = clFinish(g_queue);
       checkErr(status,"clFinish of kernel_2");
