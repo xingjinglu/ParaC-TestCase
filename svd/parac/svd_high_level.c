@@ -17,7 +17,8 @@
 #define FLAG 1
 #define IN_PRODUCT 0
 
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 //仅用于测试新语言，仅更新A
 void svd(double (*A)[2][256][256], double (*S)[256], double (*V)[2][256][256]) {
@@ -87,8 +88,8 @@ void svd(double (*A)[2][256][256], double (*S)[256], double (*V)[2][256][256]) {
                 cl_event event_kernel;
                 cl_kernel kernel_1 = clCreateKernel(g_program, "kernel_1", &status);
                 checkErr(status, "clCreateKernel for kernel_1");
-                global_work_size[0] = (256 - start_index )/ 2;
-                global_work_size[1] = 1;
+                global_work_size[0] = 1;
+                global_work_size[1] = (256 - start_index )/ 2;
                 size_t local_work_size[2];
                 local_work_size[0] = 256;
                 local_work_size[1] = 1;
@@ -157,8 +158,8 @@ void svd(double (*A)[2][256][256], double (*S)[256], double (*V)[2][256][256]) {
     cl_event event_kernel;
     cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
     checkErr(status, "clCreateKernel for kernel_2");
-    global_work_size[0] = 256;
-    global_work_size[1] = 1;
+    global_work_size[0] = 1;
+    global_work_size[1] = 256;
     size_t local_work_size[2];
     local_work_size[0] = 256;
     local_work_size[1] = 1;
@@ -226,6 +227,11 @@ int main() {
     return 0;
   }
   double *data;
+  FILE *fin = fopen("./data/Matrix_input_A256.txt", "r");
+  if (!fin) {
+    printf("Matrix input A is not available\n");
+    return 1;
+  }
   double *A_data = (double *)malloc(sizeof(double) * 256 * 256 * 2);
   double *A_H_data = (double *)malloc(sizeof(double) * 256 * 256 * 2);
   double *V_data = (double *)malloc(sizeof(double) * 256 * 256 * 2);
@@ -233,10 +239,11 @@ int main() {
   memset(V_data, 0, 256 * 256 * 2 * sizeof(double));
   for (int i = 0; i < 256; i++) 
     V_data[i * 256 + i] = 1.F;
-  for (int i = 0; i < 256 * 2; i++) {
-    for (int j = 0; j < 256; j++) {
-      A_data[i * 256 + j] = rand() % 256;
-    }
+  for (int i = 0; i < 256; i++) {
+    for (int j = 0; j < 256; j++) 
+      fscanf(fin, "%lf", &A_data[i * 256 + j]);
+    for (int j = 0; j < 256; j++) 
+      fscanf(fin, "%lf", &A_data[256 * 256 + i * 256 + j]);
   }
   for (int i = 0; i < 256; i++) {
     for (int j = 0; j < 256; j++) {
@@ -248,8 +255,8 @@ int main() {
       A_H_data[(i + 256) * 256 + j] = A_data[(j + 256) * 256 + i];
     }
   }
-  double (*A)[2][256][256] = (double (*)[256][256])A_H_data;
-  double (*V)[2][256][256] = (double (*)[256][256])V_data;
+  double (*A)[2][256][256] = (double (*)[2][256][256])A_H_data;
+  double (*V)[2][256][256] = (double (*)[2][256][256])V_data;
   double S[256];
   svd(A, &S, V);
 }

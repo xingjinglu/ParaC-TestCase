@@ -330,8 +330,8 @@ int UpScaleNewX16(unsigned char* srcImage,int height,int width ,unsigned char *d
   unsigned char* pDst3=pDst2+dstWidth;
   unsigned char* pDst4=pDst3+dstWidth;
 
-  unsigned char* pTmp1=dstImage;
-  unsigned char* pTmp2=dstImage+dstWidth-1;
+  unsigned char* pTmp1=dstImage; // First line of dst.
+  unsigned char* pTmp2=dstImage+dstWidth-1; // Second line of dst
 
   /**************************/
   /* 插值法              */

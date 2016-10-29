@@ -204,9 +204,9 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
   unsigned char dst_ds[(Height + 1) / 2][(Width + 1) / 2];
 #endif
 
-  unsigned char **dst_horizon = (unsigned char**)  malloc( sizeof(unsigned char) *Height * Width );
-  unsigned char **dst_vertical = (unsigned char**) malloc (sizeof(unsigned char) *Height * Width);
-  unsigned char **dst_ds = (unsigned char**) malloc( sizeof( unsigned char) * ((Height + 1) / 2)* ((Width + 1) / 2));
+  unsigned char *dst_horizon = (unsigned char*)  malloc( sizeof(unsigned char) *Height * Width );
+  unsigned char *dst_vertical = (unsigned char*) malloc (sizeof(unsigned char) *Height * Width);
+  unsigned char *dst_ds = (unsigned char*) malloc( sizeof( unsigned char) * ((Height + 1) / 2)* ((Width + 1) / 2));
 
 #ifdef _VERIFY
 // For correct verify.
@@ -216,16 +216,16 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
   unsigned char *laplacian_cpu= (unsigned char *)malloc(Height * Width * sizeof(unsigned char));
 
 // For correct verify.
-    for(int i=0;i<2048;i++)
-      for(int j=0;j<2048;j++)
-        *(src_cpu+i*2048+j)= ((unsigned char*)Src)[i*2048+j];
-    PyramidFilterh(src_cpu,filter_cpu, 2048, 2048);
+    for(int i=0;i<Height;i++)
+      for(int j=0;j<Width;j++)
+        *(src_cpu+i*Width+j)= ((unsigned char*)Src)[i*Width+j];
+    PyramidFilterh(src_cpu,filter_cpu, Height, Width);
 #endif
 
 
    // kernel_1;
   {
- 
+  
     size_t global_work_size[2];
     size_t local_work_size[2];
     size_t transe;
@@ -237,7 +237,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     global_work_size[0] = Width/4;
     global_work_size[1] = Height;
     local_work_size[0] = 64;
-    local_work_size[1] = 1;
+    local_work_size[1] = 4;
 
     size_t SrcSrcWidth = Width;
     size_t SrcSrcHeight = Height;
@@ -329,7 +329,6 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     checkErr(status, "clSetKernelArg");
     status = clSetKernelArg(kernel_1, 14, sizeof(int), (void *)&dst_horizonDstShift);
     checkErr(status, "clSetKernelArg");
-    //status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
     status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
@@ -376,13 +375,13 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 
 
 #ifdef _VERIFY
-    for(int i = 0; i < 2048; i++)
+    for(int i = 0; i < Height; i++)
     {
-      for(int j = 0; j < 2048; j++)
+      for(int j = 0; j < Width; j++)
       {
-        if(filter_cpu[i*2048+j] !=((unsigned char*) dst_horizon)[i* 2048 +j])
+        if(filter_cpu[i*Width+j] !=((unsigned char*) dst_horizon)[i* Width +j])
         {
-          printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*2048+j], (int)((unsigned char*) dst_horizon)[i*2048 +j]);
+          printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*Width+j], (int)((unsigned char*) dst_horizon)[i*Width +j]);
           //printf("%u ",yPlaneDown[i][j]);
           abort();
         }
@@ -398,34 +397,23 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
   {
     // Verify.
 #ifdef _VERIFY
-    Downsample(filter_cpu, down_cpu, 2048,2048); 
+    Downsample(filter_cpu, down_cpu, Height, Width); 
+#if 0
+    printf("0 = %d, 1 = %d, 2 = %d, 3 = %d, 4 = %d \n", 
+        filter_cpu[0*512], filter_cpu[2*512], filter_cpu[512*4], filter_cpu[512*6], filter_cpu[512*8]);
+#endif
 #endif
      
-#if 0
-    printf("input-L0 for Downsample: ");
-    for( int i = 0; i < 4; i++){
-      printf(" %d = %d, ", i, filter_cpu[i]);
-    }
-    printf("\n input-L1");
-    for( int i = 0; i < 4; i++){
-      printf(" %d = %d, ", i, filter_cpu[i+2048]);
-    }
-    printf("\n input-L2");
-    for( int i = 0; i < 4; i++){
-      printf(" %d = %d, ", i, filter_cpu[i+4096]);
-    }
-    printf("\n");
-#endif
-
     size_t global_work_size[2];
+    size_t local_work_size[2];
     size_t transe;
     cl_event event_kernel;
     cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
     checkErr(status, "clCreateKernel for kernel_2");
-   // global_work_size[0] = Height/2;
-    //global_work_size[1] = Width/2;
-    global_work_size[0] = Width/8; // Horizon vector parallel.
+    global_work_size[0] = Width/2; // Horizon vector parallel.
     global_work_size[1] = Height/2;
+    local_work_size[0] = 1;
+    local_work_size[1] = 32;
     size_t filter_verticalSrcWidth = 1;
     size_t filter_verticalSrcHeight = 5;
     size_t filter_vertical_srcsz = sizeof(unsigned char);
@@ -510,7 +498,9 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     status = clSetKernelArg(kernel_2, 14, sizeof(int), (void *)&dst_dsDstShift);
     checkErr(status, "clSetKernelArg");
 
-    status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+
+    //status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+    status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
     checkErr(status,"clFinish of kernel_2");
@@ -537,31 +527,31 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 #endif
 
 #ifdef _VERIFY 
-    for(int i = 2048; i < 2048; i++)
+#if 0
+    for(int i = Height; i < Height; i++)
     {
       for(int j = 0; j < 10; j++)
       {
         //if(filter_cpu[i*1024+j] !=((unsigned char*) dst_horizon)[i* 1024 +j])
         {
           //   printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*1024+j], (int)((unsigned char*) dst_horizon)[i* 256 +j]);
-          printf("%d ", (int)filter_cpu[i*2048+j]);
+          printf("%d ", (int)filter_cpu[i*Width+j]);
         }
       }
       printf("\n");
     }
-
-    for(int i = 0; i < 1024; i++)
+#endif
+    for(int i = 0; i < Height/2; i++)
     {
-      for(int j = 0; j < 1024; j++)
+      for(int j = 0; j < Width/2; j++)
       {
-        if(down_cpu[i*1024+j] !=((unsigned char*) dst_ds)[i* 1024 +j])
+        if(down_cpu[i*(Width/2)+j] != ((unsigned char*) dst_ds)[i* (Width/2) +j])
         {
-          printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)down_cpu[i*1024+j], (int)((unsigned char*) dst_ds)[i* 1024 +j]);
+          printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)down_cpu[i*(Width/2)+j], (int)((unsigned char*) dst_ds)[i* (Width/2) +j]);
           //printf("%u ",yPlaneDown[i][j]);
           abort();
         }
       }
-      //printf("\n");
     }
     printf("down success\n");
 #endif
@@ -586,8 +576,8 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     checkErr(status, "clCreateKernel for kernel_3");
     global_work_size[0] = halfWidth;
     global_work_size[1] = halfHeight;
-    local_work_size[0] = 64;
-    local_work_size[1] = 1;
+    local_work_size[0] =128;
+    local_work_size[1] = 2;
     size_t SrcSrcWidth = Width;
     size_t SrcSrcHeight = Height;
     size_t Src_srcsz = sizeof(unsigned char);
@@ -678,6 +668,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     checkErr(status, "clSetKernelArg");
     status = clSetKernelArg(kernel_3, 16, sizeof(int), (void *)&layerDstShift);
     checkErr(status, "clSetKernelArg");
+    //status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
     status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
@@ -708,21 +699,22 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 
 
 #ifdef _VERIFY
+#if 0
     for(int i = 1; i < 1; i++){
       for(int j = 0; j < 16; j++){
         //if(filter_cpu[i*1024+j] !=((unsigned char*) dst_horizon)[i* 1024 +j])
         {
           //   printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(int)filter_cpu[i*1024+j], (int)((unsigned char*) dst_horizon)[i* 256 +j]);
-          printf("%d ", (int)laplacian_cpu[i*2048+j]);
+          printf("%d ", (int)laplacian_cpu[i*Width+j]);
         }
       }
       printf("\n");
     }
-
-    for(int i = 0; i < 2048; i++){
-        for(int j = 0; j < 2048; j++){
-            if((unsigned char)(laplacian_cpu[i*2048+j]) !=(unsigned char)(layer1[i* 2048 +j]) ){
-                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(unsigned char)laplacian_cpu[i*2048+j], (unsigned char)(layer1[i*2048 +j]) );
+#endif
+    for(int i = 0; i < Height; i++){
+        for(int j = 0; j < Width; j++){
+            if((unsigned char)(laplacian_cpu[i*Width+j]) !=(unsigned char)(layer1[i* Width +j]) ){
+                printf("i= %d, j = %d, a = %d, b=%d\n",i, j,(unsigned char)laplacian_cpu[i*Width+j], (unsigned char)(layer1[i*Width +j]) );
                 //printf("%u ",yPlaneDown[i][j]);
                 abort();
             }
@@ -731,7 +723,6 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     }
     printf("all success\n");
 #endif
-
   }
 
 
@@ -767,10 +758,10 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 
 
 int main() {
-  char inputfile[] = "laplacian_opt_lxj_2048.cl";
+  char inputfile[] = "laplacian_opt_lds_1024.cl";
   char *remain = NULL;
   //int height = 256, width = 256;
-  int height = 2048, width = 2048;
+  int height = 1024, width = 1024;
 
   //for( int count = 0; count < 3; count++)
   {
@@ -793,6 +784,8 @@ int main() {
 
     // Pre execute one time.
     Laplacian(height, width, (unsigned char*)src, (unsigned char*) Layer);
+    
+    printf("Pre execution\n");
 
     // Re-init.
     for (int i = 0; i < width * height; i++) {

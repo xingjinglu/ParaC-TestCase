@@ -204,9 +204,9 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
   unsigned char dst_ds[(Height + 1) / 2][(Width + 1) / 2];
 #endif
 
-  unsigned char **dst_horizon = (unsigned char**)  malloc( sizeof(unsigned char) *Height * Width );
-  unsigned char **dst_vertical = (unsigned char**) malloc (sizeof(unsigned char) *Height * Width);
-  unsigned char **dst_ds = (unsigned char**) malloc( sizeof( unsigned char) * ((Height + 1) / 2)* ((Width + 1) / 2));
+  unsigned char *dst_horizon = (unsigned char*)  malloc( sizeof(unsigned char) *Height * Width );
+  unsigned char *dst_vertical = (unsigned char*) malloc (sizeof(unsigned char) *Height * Width);
+  unsigned char *dst_ds = (unsigned char*) malloc( sizeof( unsigned char) * ((Height + 1) / 2)* ((Width + 1) / 2));
 
 #ifdef _VERIFY
 // For correct verify.
@@ -227,6 +227,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
   {
   
     size_t global_work_size[2];
+    size_t local_work_size[2];
     size_t transe;
 
     cl_event event_kernel;
@@ -235,6 +236,8 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 
     global_work_size[0] = Width/4;
     global_work_size[1] = Height;
+    local_work_size[0] = 256;
+    local_work_size[1] = 1;
 
     size_t SrcSrcWidth = Width;
     size_t SrcSrcHeight = Height;
@@ -326,7 +329,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     checkErr(status, "clSetKernelArg");
     status = clSetKernelArg(kernel_1, 14, sizeof(int), (void *)&dst_horizonDstShift);
     checkErr(status, "clSetKernelArg");
-    status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+    status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
     checkErr(status,"clFinish of kernel_1");
@@ -414,6 +417,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 #endif
 
     size_t global_work_size[2];
+    size_t local_work_size[2];
     size_t transe;
     cl_event event_kernel;
     cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
@@ -422,6 +426,8 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     //global_work_size[1] = Width/2;
     global_work_size[0] = Width/8; // Horizon vector parallel.
     global_work_size[1] = Height/2;
+    local_work_size[0] = 64;
+    local_work_size[1] = 1;
     size_t filter_verticalSrcWidth = 1;
     size_t filter_verticalSrcHeight = 5;
     size_t filter_vertical_srcsz = sizeof(unsigned char);
@@ -506,7 +512,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     status = clSetKernelArg(kernel_2, 14, sizeof(int), (void *)&dst_dsDstShift);
     checkErr(status, "clSetKernelArg");
 
-    status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+    status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
     checkErr(status,"clFinish of kernel_2");
@@ -575,12 +581,15 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
   /************Upsample + calculation******************************/
   {
     size_t global_work_size[2];
+    size_t local_work_size[2];
     size_t transe;
     cl_event event_kernel;
     cl_kernel kernel_3 = clCreateKernel(g_program, "kernel_3", &status);
     checkErr(status, "clCreateKernel for kernel_3");
     global_work_size[0] = halfWidth;
     global_work_size[1] = halfHeight;
+    local_work_size[0] = 256;
+    local_work_size[1] = 1;
     size_t SrcSrcWidth = Width;
     size_t SrcSrcHeight = Height;
     size_t Src_srcsz = sizeof(unsigned char);
@@ -671,7 +680,8 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     checkErr(status, "clSetKernelArg");
     status = clSetKernelArg(kernel_3, 16, sizeof(int), (void *)&layerDstShift);
     checkErr(status, "clSetKernelArg");
-    status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+    //status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+    status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
     checkErr(status,"clFinish of kernel_3");

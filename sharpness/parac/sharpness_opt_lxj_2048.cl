@@ -180,96 +180,65 @@ __kernel void kernel_2(
   int height = get_global_size(1); // 256
   const int gidx = get_global_id(0);
   const int gidy = get_global_id(1);
+  int lidx = get_local_id(0);
+  int lidy = get_local_id(1);
 
   /* kernel boundary check */
-  //printf("lid0 = %d, lid1 = %d, gidx = %d, gidy  = %d wid0 = %d, wid1 = %d\n",get_local_id(0), get_local_id(1), gidx, gidy, get_group_id(0), get_group_id(1) );
-  //if ( gidx >=2 || gidy >= 256 )
+
   if ( gidx >=2 || gidy >= height )
     return;
+
   /* kernel index calculation */
-  // srcImage[itx1][0], srcImage[it1x][M/4-1].
-  //int srcImageSrcIdx1 = srcImageSrcShift + ((float)gidy) * srcImageSrcStep + gidx * (1024/4-1);  
-  int srcImageSrcIdx1 = srcImageSrcShift + ((float)gidy) * srcImageSrcStep + gidx * (height-1);   // ?
 
-  // srcImage[it1x+1][0], [it1x+1][M/4-1].
-  //int srcImageSrcIdx2 = srcImageSrcShift + ((float)gidy + 1) *srcImageSrcStep + gidx * (1024/4-1);
-  int srcImageSrcIdx2 = srcImageSrcShift + ((float)gidy + 1) *srcImageSrcStep + gidx * (height-1);
+   // opt2_3
+  int srcImageSrcIdx1 =  mad24(gidx,  (height-1), mad24(gidy , srcImageSrcStep , srcImageSrcShift ) );   // ?
+  int srcImageSrcIdx2 = srcImageSrcIdx1 + srcImageSrcStep; 
 
-  
-  // dstImage[it1x*4 + y][M-2], [it1x*4+y][0]
-  // + 1 ---> 1, M-1
-  //int dstImageDSIdx1 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + gidx *(1024-2);
-  //int dstImageDSIdx2 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + gidx *(1024-2);
-  //int dstImageDSIdx3 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + gidx *(1024-2);
-  //int dstImageDSIdx4 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + gidx *(1024-2);
-  int dstImageDSIdx1 = dstImageDSShift + ((float)gidy * 4) *dstImageDSStep + gidx *(height*4-2);
-  int dstImageDSIdx2 = dstImageDSShift + ((float)gidy * 4 + 1) *dstImageDSStep + gidx *(height*4-2);
-  int dstImageDSIdx3 = dstImageDSShift + ((float)gidy * 4 + 2) *dstImageDSStep + gidx *(height*4-2);
-  int dstImageDSIdx4 = dstImageDSShift + ((float)gidy * 4 + 3) *dstImageDSStep + gidx *(height*4-2);
-
-
+  // opt2_3
+  int temp3 = gidx * ((height<<2)-2);
+  int temp4 = mad24((gidy<<2), dstImageDSStep, temp3);
 
   /* kernel operands */
   __global unsigned char *srcImageSrcDt1 = srcImageSrc + srcImageSrcIdx1;
   __global unsigned char *srcImageSrcDt2 = srcImageSrc + srcImageSrcIdx2;
 
-  __global unsigned char *dstImageDSDt1 = dstImageDS + dstImageDSIdx1;
-  __global unsigned char *dstImageDSDt2 = dstImageDS + dstImageDSIdx2;
-  __global unsigned char *dstImageDSDt3 = dstImageDS + dstImageDSIdx3;
-  __global unsigned char *dstImageDSDt4 = dstImageDS + dstImageDSIdx4;
+  __global unsigned char *dstImageDSDt1 = dstImageDS + dstImageDSShift + temp4;
+  __global unsigned char *dstImageDSDt2 = dstImageDSDt1 + dstImageDSStep;
+  __global unsigned char *dstImageDSDt3 = dstImageDSDt2 + dstImageDSStep;
+  __global unsigned char *dstImageDSDt4 = dstImageDSDt3 + dstImageDSStep;
 
-  // srcImage[it1x][0], srcImage[it1x][M/4-1];
+  // load data.
   uchar srcImageSrcDt1Temp = *srcImageSrcDt1;   
-  // srcImage[it1x+1][0], srcImage[it1x+1][M/4-1];
   uchar srcImageSrcDt2Temp = *srcImageSrcDt2;   
-
-  // dstImage[it1x*4+ y][0], [it1x*4+y][1];
-
 
   /* kernel operation */
   {
-    //if ( gidy == 255 ) 
-    if ( gidy == height-1) 
-    {
-      // dstImage[it1x*4+ y][0], [it1x*4+y][1]; 
-      *((__global uchar2*)(dstImageDSDt1)) = (srcImageSrcDt1Temp, srcImageSrcDt1Temp);
-      *((__global uchar2*)(dstImageDSDt2)) = (srcImageSrcDt1Temp, srcImageSrcDt1Temp);
-      *((__global uchar2*)(dstImageDSDt3)) = (srcImageSrcDt1Temp, srcImageSrcDt1Temp);
-      *((__global uchar2*)(dstImageDSDt4)) = (srcImageSrcDt1Temp, srcImageSrcDt1Temp);
-
-    } 
-    else {
+     
       float4 Temp1, Temp0; 
       float4 AddTemp0;
 
-      //float border_mp_0Result1 [4][1] ; 
-      // unrolled.
-      Temp0.s0 = 1.0f * srcImageSrcDt1Temp; 
-      Temp0.s1 = 3/4.0f  * srcImageSrcDt1Temp; 
-      Temp0.s2 = 2/4.0f  * srcImageSrcDt1Temp; 
-      Temp0.s3 = 1/4.0f * srcImageSrcDt1Temp; 
-
-      // border_mp_1 * srcImage[it1x+1][0], [][M/4-1];
-      Temp1.s0 = 0.0f * srcImageSrcDt2Temp; 
-      Temp1.s1 = 1/4.0f * srcImageSrcDt2Temp; 
-      Temp1.s2 = 2/4.0f * srcImageSrcDt2Temp; 
-      Temp1.s3 = 3/4.0f * srcImageSrcDt2Temp; 
-
-
-            // add 
-      //float border_mp_0Result1Result1[4][1];
-      AddTemp0.s0 = Temp0.s0 + Temp1.s0;
-      AddTemp0.s1 = Temp0.s1 + Temp1.s1;
-      AddTemp0.s2 = Temp0.s2 + Temp1.s2;
-      AddTemp0.s3 = Temp0.s3 + Temp1.s3;
+     Temp0 =( float4)(1.0, 3/4.0, 2/4.0, 1/4.0) * (float4)(srcImageSrcDt1Temp); 
+#if 1
+      //AddTemp0.s0 = mad(0.0f,  (float) srcImageSrcDt2Temp, Temp0.s0);
+      AddTemp0.s0 = Temp0.s0;
+      AddTemp0.s1 = mad(1/4.0f, (float)srcImageSrcDt2Temp, Temp0.s1);
+      AddTemp0.s2 = mad(2/4.0f, (float)srcImageSrcDt2Temp, Temp0.s2); 
+      AddTemp0.s3 = mad(3/4.0f, (float)srcImageSrcDt2Temp, Temp0.s3);; 
+#endif
 
       // dstImage[it1x*4:4:1][0] = add;
-      *((__global uchar2*)(dstImageDSDt1)) = ( (uchar)(AddTemp0.s0), (uchar)(AddTemp0.s0));
-      *((__global uchar2*)(dstImageDSDt2)) = ( (uchar)AddTemp0.s1, (uchar) AddTemp0.s1);
-      *((__global uchar2*)(dstImageDSDt3)) = ( (uchar)AddTemp0.s2, (uchar) AddTemp0.s2);
-      *((__global uchar2*)(dstImageDSDt4)) = ( (uchar)AddTemp0.s3, (uchar) AddTemp0.s3);
+      int choice = ( gidy ==  height - 1);
+#if 0
+      *((__global uchar2*)(dstImageDSDt1)) =(gidy == height -1)?(uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s0);
+      *((__global uchar2*)(dstImageDSDt2)) =(gidy == height -1)?(uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s1) ;
+      *((__global uchar2*)(dstImageDSDt3)) =(gidy == height -1)?(uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s2) ;
+      *((__global uchar2*)(dstImageDSDt4)) =(gidy == height -1)?(uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s3) ;
+#endif
+      *((__global uchar2*)(dstImageDSDt1)) = choice ? (uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s0);
+      *((__global uchar2*)(dstImageDSDt2)) = choice ? (uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s1) ;
+      *((__global uchar2*)(dstImageDSDt3)) = choice ? (uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s2) ;
+      *((__global uchar2*)(dstImageDSDt4)) = choice ? (uchar2)(srcImageSrcDt1Temp) : (uchar2)(AddTemp0.s3) ;
 
-    }
   }
 
 }
@@ -313,8 +282,10 @@ __kernel void kernel_3(
   int srcImageSrcIdx4;
   //int srcImageSrcIdx5 = srcImageSrcShift + (1024 / 4 - 1) *srcImageSrcStep + ((float)gidx) *sizeof(unsigned char);
   int srcImageSrcIdx5 = srcImageSrcShift + (width - 1) *srcImageSrcStep + ((float)gidx) *sizeof(unsigned char);
+
   //int srcImageSrcIdx6 = srcImageSrcShift + (1024 / 4 - 1) *srcImageSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
   int srcImageSrcIdx6 = srcImageSrcShift + (width - 1) *srcImageSrcStep + ((float)gidx + 1) *sizeof(unsigned char);
+
   int dstImageDSIdx1;
   int dstImageDSIdx2;
   int dstImageDSIdx3;
@@ -373,10 +344,11 @@ __kernel void kernel_3(
     if (gidx == width - 1) 
     {
       
-      *((__global uchar2*)(dstImageDSDt3)) = (Temp.s0, Temp.s0);
-      *((__global uchar2*)(dstImageDSDt2)) = (Temp.s0, Temp.s0);
-      *((__global uchar2*)(dstImageDSDt5)) = (Temp.s1, Temp.s1);
-      *((__global uchar2*)(dstImageDSDt7)) = (Temp.s1, Temp.s1);
+      *((__global uchar2*)(dstImageDSDt3)) = (uchar2)(Temp.s0);
+      *((__global uchar2*)(dstImageDSDt2)) = (uchar2)(Temp.s0);
+      *((__global uchar2*)(dstImageDSDt5)) = (uchar2)(Temp.s1);
+      *((__global uchar2*)(dstImageDSDt7)) = (uchar2)(Temp.s1);
+
       //*((__global uchar2*)(dstImageDSDt3)) = (srcImageSrcDt3Temp, srcImageSrcDt3Temp);
       //*((__global uchar2*)(dstImageDSDt2)) = (srcImageSrcDt3Temp, srcImageSrcDt3Temp);
       //*((__global uchar2*)(dstImageDSDt5)) = (srcImageSrcDt5Temp, srcImageSrcDt5Temp);
@@ -398,20 +370,28 @@ __kernel void kernel_3(
       Temp1.s3 = 1/4.0f  *  srcImageSrcDt3Temp; 
 #endif
 
+#if 0
       Temp0.s0 = 0.0     *  Temp.s2; 
       Temp0.s1 = 1/4.0f  *  Temp.s2; 
       Temp0.s2 = 2/4.0f  *  Temp.s2; 
       Temp0.s3 = 3/4.0f  *  Temp.s2; 
+
       Temp1.s0 = 1.0f    *  Temp.s0; 
       Temp1.s1 = 3/4.0f  *  Temp.s0; 
       Temp1.s2 = 2/4.0f  *  Temp.s0; 
       Temp1.s3 = 1/4.0f  *  Temp.s0; 
+#endif
+      // opt3_3 , vector *
+      Temp0 = (float4)(0.0, 1/4.0, 2/4.0, 3/4.0) * (float4)(Temp.s2);
+      Temp1 = (float4)(1.0, 3/4.0, 2/4.0, 1/4.0) * (float4)(Temp.s0);
 
+#if 0
        AddTemp0.s0 = Temp0.s0 + Temp1.s0;
        AddTemp0.s1 = Temp0.s1 + Temp1.s1;
        AddTemp0.s2 = Temp0.s2 + Temp1.s2;
        AddTemp0.s3 = Temp0.s3 + Temp1.s3;
-    //   AddTemp0 = Temp0 + Temp1;
+#endif
+       AddTemp0 = Temp0 + Temp1;
 
         *( (__global uchar4*)(dstImageDSDt3 )) = convert_uchar4(AddTemp0); 
         *( (__global uchar4*)(dstImageDSDt1 )) = convert_uchar4(AddTemp0);;
@@ -429,6 +409,7 @@ __kernel void kernel_3(
           Temp3.s3 = 1/4.0f  * srcImageSrcDt5Temp; 
 #endif
 
+#if 0
           Temp2.s0 = 0.0f   * Temp.s3; 
           Temp2.s1 = 1/4.0f * Temp.s3; 
           Temp2.s2 = 2/4.0f * Temp.s3; 
@@ -438,6 +419,11 @@ __kernel void kernel_3(
           Temp3.s1 = 3/4.0f  * Temp.s1; 
           Temp3.s2 = 2/4.0f  * Temp.s1; 
           Temp3.s3 = 1/4.0f  * Temp.s1; 
+#endif
+      // opt3_3 , vector *
+      Temp2 = (float4)(0.0, 1/4.0, 2/4.0, 3/4.0) * (float4)(Temp.s3);
+      Temp3 = (float4)(1.0, 3/4.0, 2/4.0, 1/4.0) * (float4)(Temp.s1);
+
           AddTemp1 = Temp2 + Temp3;
 
           *( (__global uchar4*)(dstImageDSDt5) ) = convert_uchar4(AddTemp1);
@@ -797,7 +783,7 @@ __kernel void kernel_6(
   /* kernel boundary check */
 
   /* kernel index calculation */
- // int pEdgeSrcIdx1 = pEdgeSrcShift+ ( gidx << 2 ) * sizeof(unsigned short)+ (float)gidy * pEdgeSrcStep;
+  // int pEdgeSrcIdx1 = pEdgeSrcShift+ ( gidx << 2 ) * sizeof(unsigned short)+ (float)gidy * pEdgeSrcStep;
   //int pEdgeSrcIdx1 =  mad24( gidx, 8, pEdgeSrcShift) + (float)gidy * pEdgeSrcStep;
   //int pEdgeSrcIdx1 =  mad24( gidx, 8, pEdgeSrcShift) + (float)gidy * pEdgeSrcStep;
   int pEdgeSrcIdx1 =   mad24((float)gidy,  pEdgeSrcStep, mad24( gidx, 8, pEdgeSrcShift));
@@ -809,10 +795,9 @@ __kernel void kernel_6(
   /* kernel operation */
   uint4 _rtmp0;
   if ((gidx << 2 ) < pEdgeSrcWidth && gidy < pEdgeSrcHeight)
-  
     _rtmp0 =convert_uint4( *( ( __global ushort4* )pEdgeSrcDt1 ));
-    *( _ltmp0 + lid) =    _rtmp0.s0   +    _rtmp0.s1   +    _rtmp0.s2   +    _rtmp0.s3  ;
-  
+
+  *( _ltmp0 + lid) =    _rtmp0.s0   +    _rtmp0.s1   +    _rtmp0.s2   +    _rtmp0.s3  ;
   barrier(CLK_LOCAL_MEM_FENCE);
 
   if ((gidx   < (pEdgeSrcWidth >> 2))  && gidy < pEdgeSrcHeight)
@@ -825,7 +810,7 @@ __kernel void kernel_6(
   if ((gidx << 2 ) < pEdgeSrcWidth && gidy < pEdgeSrcHeight)
   {
 #if 0
-if (lid < 64)
+    if (lid < 64)
       *(_ltmp0 + lid) += *(_ltmp0 + lid + 64);
     if (lid < 32)
       *(_ltmp0 + lid) += *(_ltmp0 + lid + 32);
@@ -856,8 +841,8 @@ if (lid < 64)
     if (lid < 1)
     {
       *(_ltmp0 + lid) += *(_ltmp0 + lid + 1);
-     atomic_add((__global int*) _gtmpDst, (int)_ltmp0[0]);
-     //atom_add(_gtmpDst, _ltmp0[0]);
+      atomic_add((__global int*) _gtmpDst, (int)_ltmp0[0]);
+      //atom_add(_gtmpDst, _ltmp0[0]);
     }
   }
 

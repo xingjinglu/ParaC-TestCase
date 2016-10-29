@@ -171,8 +171,8 @@ __kernel void kernel_1(
   int A_HDSIdx2;
   int V_HDSIdx3;
   int V_HDSIdx4;
-  int rotate_col_idxDSIdx5 = rotate_col_idxDSShift + ((float)gridx * 2 + start_index) *sizeof(int);
-  int rotate_col_idxDSIdx6 = rotate_col_idxDSShift + ((float)gridx * 2 + 1 + start_index) *sizeof(int);
+  int rotate_col_idxDSIdx5 = rotate_col_idxDSShift + (int)(((float)gridx * 2 + start_index) *sizeof(int));
+  int rotate_col_idxDSIdx6 = rotate_col_idxDSShift + (int)(((float)gridx * 2 + 1 + start_index) *sizeof(int));
 
   /* kernel operands */
   __global double *A_HDSDt1;
@@ -228,7 +228,7 @@ __kernel void kernel_1(
       double cos_x = sqrt(1 - sin_x * sin_x);
       double mid_result[2];
       double mid_result1[2];
-      double (*d[2]) = { &(double){0}, &(double){1}}; 
+      double (*d[2]) = { &(__private double){0}, &(__private double){1}}; 
       mid_result[1] = (*ci[1])[lidx] * cos_x + (*cj[1])[lidx] * cos_alpha * sin_x - (d[0][0] * (*cj[1])[lidx] + d[1][0] * (*cj[0])[lidx]) * sin_alpha * sin_x;
       mid_result[0] = (*ci[0])[lidx] * cos_x + (*cj[0])[lidx] * cos_alpha * sin_x - (d[0][0] * (*cj[0])[lidx] - d[1][0] * (*cj[1])[lidx]) * sin_alpha * sin_x;
       mid_result1[1] = (*cj[1])[lidx] * cos_x - (*ci[1])[lidx] * cos_alpha * sin_x - (d[0][0] * (*ci[1])[lidx] + d[1][0] * (*ci[0])[lidx]) * sin_alpha * sin_x;
@@ -295,8 +295,8 @@ __kernel void kernel_2(
     return;
 
   /* kernel index calculation */
-  int SDstIdx1 = SDstShift + ((float)gridx) *sizeof(double);
-  int A_HDSIdx1 = A_HDSShift + ((float)gridx) *A_HDSStep;
+  int SDstIdx1 = SDstShift + (int)(((float)gridx) *sizeof(double));
+  int A_HDSIdx1 = A_HDSShift + (int)(((float)gridx) *A_HDSStep);
 
   /* kernel operands */
   __global double *SDstDt1 = (__global double*) ((__global char *)SDst + SDstIdx1);

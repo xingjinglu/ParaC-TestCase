@@ -30,6 +30,9 @@
  double KernelTime1, KernelTime2, KernelTime3;
  unsigned long startTime, endTime;
  double tem, tem1;
+
+ struct timeval tstart[2], tend[2];
+ double ttotal[2];
 #endif
 
 
@@ -55,7 +58,7 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
   
   {
 #ifdef TIME_PROF
-    tem = 0, tem1 = 0;
+    tem = 0, tem1 = 0, ttotal[0] = 0, ttotal[1] = 0;
 #endif
     for( int q = 0; q < RUNS; q++){
       size_t global_work_size[2];
@@ -143,12 +146,18 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_1, 14, sizeof(int), (void *)&intermediateDstShift);
       checkErr(status, "clSetKernelArg");
+#ifdef TIME_PROF
+        gettimeofday(&tstart[0], NULL);
+#endif
       status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
       checkErr(status, "clEnqueueNDRangeKernel");
       status = clFinish(g_queue);
       checkErr(status,"clFinish of kernel_1");
 
 #ifdef TIME_PROF
+      gettimeofday(&tend[0], NULL);
+      ttotal[0] += (tend[0].tv_sec - tstart[0].tv_sec)*1000.0 + (tend[0].tv_usec - tstart[0].tv_usec)/1000.0;
+
       clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &startTime, NULL);
       clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endTime, NULL);
       tem1 += ((double)(endTime - startTime))/1000.0;
@@ -256,10 +265,17 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
       status = clSetKernelArg(kernel_2, 14, sizeof(int), (void *)&outDstShift);
       checkErr(status, "clSetKernelArg");
       //status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+#ifdef TIME_PROF
+      gettimeofday(&tstart[1], NULL);
+#endif
       status = clEnqueueNDRangeKernel(g_queue, kernel_2, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
       checkErr(status, "clEnqueueNDRangeKernel");
       status = clFinish(g_queue);
       checkErr(status,"clFinish of kernel_2");
+#ifdef TIME_PROF
+      gettimeofday(&tend[1], NULL);
+      ttotal[1] += 1000.0*(tend[1].tv_sec - tstart[1].tv_sec) + (tend[1].tv_usec - tstart[1].tv_usec)/1000.0;
+#endif
 
 
 #ifdef TIME_PROF
@@ -276,6 +292,7 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
 
 #ifdef TIME_PROF
    KernelTime2 = tem1 / RUNS;
+   std::cout<<"queue-0 time " << ttotal[0]/RUNS <<" ms, queue-1 time " <<  ttotal[1]/RUNS << "ms\n";
 #endif
   }
 }

@@ -570,7 +570,7 @@ int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char
       status = clEnqueueWriteBuffer(g_queue, dstImagedsBuf, CL_TRUE, 0,dstImage_dssz0Pad, dstImageDsBufH, 0, NULL, NULL);
 
 
-      /*--------- Upcol-------------------------*/
+      /*--------- UpCol-------------------------*/
       gettimeofday(&t11,NULL);
       size_t global_work_size[2];
       size_t local_work_size[2];
@@ -581,7 +581,7 @@ int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char
       //global_work_size[1] = 256;
       global_work_size[0] = 2;
       global_work_size[1] = height/4;
-      local_work_size[0] = 64;
+      local_work_size[0] = 32;
       local_work_size[1] = 1;
 
       status = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), (void *)&srcImagesrcBuf);
@@ -774,7 +774,7 @@ int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char
       //global_work_size[1] = 2;
       global_work_size[0] = width/4;
       global_work_size[1] = 2;
-      local_work_size[0] = 64;
+      local_work_size[0] = 32;
       local_work_size[1] = 1;
       status = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), (void *)&srcImagesrcBuf);
       checkErr(status, "clSetKernelArg");
@@ -1472,8 +1472,8 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             global_work_size[0] = width/4;
             global_work_size[1] = height;
             size_t local_work_size[2];
-            local_work_size[0] = 16;
-            local_work_size[1] = 16;
+            local_work_size[0] = 256;
+            local_work_size[1] = 1;
 
             status = clSetKernelArg(kernel_6, 0, sizeof(cl_mem), (void *)&pEdgesrcBuf);
             checkErr(status, "clSetKernelArg");

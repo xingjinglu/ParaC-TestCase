@@ -1133,7 +1133,7 @@ void Sharpness_cpu(unsigned char** yPlane,unsigned char** yPlaneCSER,int width,i
         sum +=*p++;
     mean=(sum+size/2)/size;
 
-    printf("cpu: sum = %d, mean = %d\n", sum, mean);
+    printf("cpu: sum = %ld, mean = %ld\n", sum, mean);
 
 
 #ifdef TIME_PAR
@@ -1250,12 +1250,12 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             src[i][j]=((unsigned char*)yPlane)[i*width+j];
             srcCSER[i][j]= ((unsigned char*)yPlaneCSER)[i*width+j]; 
         }
-
+  printf("ss\n");
     Sharpness_cpu(src, srcCSER,height,width,&cseParamPublic, dst1, pEdge1);
 #endif
 
     //unsigned short pEdge[height][width];
-    unsigned short **pEdge = (unsigned short**) malloc (sizeof(unsigned short)*height*width);
+    unsigned short *pEdge = (unsigned short*) malloc (sizeof(unsigned short)*height*width);
     char gx[3][3] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
     char gy[3][3] = { 1, 2, 1, 0, 0, 0, -1, -2, -1 };
 
@@ -1463,8 +1463,8 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             global_work_size[0] = width/4;
             global_work_size[1] = height;
             size_t local_work_size[2];
-            local_work_size[0] = 16;
-            local_work_size[1] = 16;
+            local_work_size[0] = 128;
+            local_work_size[1] = 2;
 
             status = clSetKernelArg(kernel_6, 0, sizeof(cl_mem), (void *)&pEdgesrcBuf);
             checkErr(status, "clSetKernelArg");
@@ -1694,9 +1694,9 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
         for(int j = 0; j < width; j++)
         {
             //if(i == 1020)
-            if(abs(dst1[i][j] -(int)((unsigned char*) dst)[i* width +j]) > 1)
+            if(abs(dst1[i][j] -((unsigned char*) dst)[i* width +j]) > 1)
             {
-                printf("sharpness: i= %d, j = %d, a = %d, b=%d\n",i, j,(int)dst1[i][j], (int)((unsigned char*) dst)[i* width +j]);
+                printf("sharpness: i= %d, j = %d, a = %d, b=%d\n",i, j,dst1[i][j], ((unsigned char*) dst)[i* width +j]);
                 abort();
             }
         }
@@ -1720,30 +1720,32 @@ void sharpness_total(int height, int width, unsigned char *yPlane1, unsigned cha
 
   //unsigned char yPlaneCSER[height][width];
   //unsigned char yPlaneDown[height / 4][width / 4];
-  unsigned char **yPlaneCSER = (unsigned char**) malloc( sizeof(unsigned char)*height*width);
-  unsigned char **yPlaneDown = (unsigned char**) malloc( sizeof(unsigned char)*(height / 4)*(width / 4));
+  unsigned char *yPlaneCSER = (unsigned char*) malloc( sizeof(unsigned char)*height*width);
+  unsigned char *yPlaneDown = (unsigned char*) malloc( sizeof(unsigned char)*(height / 4)*(width / 4));
 
   DownScaleNewX16(height, width, (unsigned char*)yPlane, (unsigned char*)yPlaneDown);
   //UpScaleNewX16(&yPlaneDown, &yPlaneCSER);
   UpScaleNewX16(height, width, (unsigned char*) yPlaneDown, (unsigned char*)yPlaneCSER);
   Sharpness(height, width, (unsigned char*) yPlane, (unsigned char*)yPlaneCSER, dst1, cseParamPublic);
 
+#if 1
   if( yPlaneCSER != NULL ){
-     free(yPlane[0]);
+     //free(yPlane[0]);
      free(yPlaneCSER);
      yPlaneCSER = NULL;
   }
   if( yPlaneDown != NULL){
-    free(yPlaneDown[0]);
+    //free(yPlaneDown[0]);
     free(yPlaneDown);
     yPlaneDown = NULL;
   }
+#endif
 }
 
 
 
 int main() {
-    char *inputfile = "sharpness_opt_lxj_4096.cl";
+    char inputfile[100] = "sharpness_opt_lxj_4096.cl";
     char *remain = NULL;
     if (-1 == openCLCreate(inputfile, remain)) {
         printf("openCL create fail !!!!!!");
@@ -1765,6 +1767,9 @@ int main() {
 #endif
     sharpness_total(height, width,(unsigned char*) yPlane,(unsigned char*) dst);
 
+    for (int i = 0; i < width * height; i++) {
+        src_data[i] = rand() % 100 + 1;
+    }
     //sharpness_total(yPlane, dst);
     sharpness_total(height, width, (unsigned char*) yPlane,(unsigned char*) dst);
 
