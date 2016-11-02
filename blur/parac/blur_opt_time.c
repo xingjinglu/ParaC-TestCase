@@ -156,7 +156,8 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
 
 #ifdef TIME_PROF
       gettimeofday(&tend[0], NULL);
-      ttotal[0] += (tend[0].tv_sec - tstart[0].tv_sec)*1000.0 + (tend[0].tv_usec - tstart[0].tv_usec)/1000.0;
+      if( q )
+        ttotal[0] += (tend[0].tv_sec - tstart[0].tv_sec)*1000.0 + (tend[0].tv_usec - tstart[0].tv_usec)/1000.0;
 
       clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &startTime, NULL);
       clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endTime, NULL);
@@ -178,7 +179,7 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
 #ifdef TIME_PROF
     tem = 0; tem1 = 0;
 #endif
-    for( int i = 0; i < RUNS; i++){
+    for( int q = 0; q < RUNS; q++){
       size_t global_work_size[2];
       size_t local_work_size[2];
       size_t transe;
@@ -274,7 +275,8 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
       checkErr(status,"clFinish of kernel_2");
 #ifdef TIME_PROF
       gettimeofday(&tend[1], NULL);
-      ttotal[1] += 1000.0*(tend[1].tv_sec - tstart[1].tv_sec) + (tend[1].tv_usec - tstart[1].tv_usec)/1000.0;
+      if( q )
+        ttotal[1] += 1000.0*(tend[1].tv_sec - tstart[1].tv_sec) + (tend[1].tv_usec - tstart[1].tv_usec)/1000.0;
 #endif
 
 
@@ -292,7 +294,7 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
 
 #ifdef TIME_PROF
    KernelTime2 = tem1 / RUNS;
-   std::cout<<"queue-0 time " << ttotal[0]/RUNS <<" ms, queue-1 time " <<  ttotal[1]/RUNS << "ms\n";
+   std::cout<<"queue-0 time " << ttotal[0]/(RUNS-1) <<" ms, queue-1 time " <<  ttotal[1]/(RUNS-1) << "ms\n";
 #endif
   }
 }

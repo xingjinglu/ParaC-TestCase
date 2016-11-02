@@ -29,8 +29,8 @@ __kernel void kernel_1(
     return;
 
   /* kernel index calculation */
-  int inSrcIdx2 = inSrcShift + ((float)gidy + -1 + 1) *inSrcStep + ((float)gidx + 1) *sizeof(short);
-  int intermediateDstIdx1 = intermediateDstShift + ((float)gidy + 1) *intermediateDstStep + ((float)gidx + 1) *sizeof(short);
+  int inSrcIdx2 = inSrcShift + (int)(((float)gidy + -1 + 1) *inSrcStep) + (int)(((float)gidx + 1) *sizeof(short));
+  int intermediateDstIdx1 = intermediateDstShift + (int)(((float)gidy + 1) *intermediateDstStep) + (int)(((float)gidx + 1) *sizeof(short));
 
   /* kernel operands */
   __global short *filter_vSrcDt1 = (__global char *)filter_vSrc + filter_vSrcShift;
@@ -39,21 +39,21 @@ __kernel void kernel_1(
 
   /* kernel operation */
   {
-         int filter_v[3];
-     int in[3];
-     int R2Next;
-     int res1;
+    //    int filter_v[3];
+    int in;
+    //int inNext;
+    int res1;
     {
-      filter_v[0] = ( int) (*((__global short*) ((__global char*) filter_vSrcDt1 + 0 * sizeof(short) + filter_vSrcStep * 0)));
-      in[0] = ( int) ( *((__global short*) ((__global char*) inSrcDt2 + 0 * sizeof(short) + inSrcStep * 0)));
-      res1 = filter_v[0] * in[0]; 
-      filter_v[0] = ( int) (*((__global short*) ((__global char*) filter_vSrcDt1 + 0 * sizeof(short) + filter_vSrcStep * 1)));
-      in[0] = ( int) ( *((__global short*) ((__global char*) inSrcDt2 + 0 * sizeof(short) + inSrcStep * 1)));
-      res1 += filter_v[0] * in[0]; 
-      filter_v[0] = ( int) (*((__global short*) ((__global char*) filter_vSrcDt1 + 0 * sizeof(short) + filter_vSrcStep * 2)));
-      in[0] = ( int) ( *((__global short*) ((__global char*) inSrcDt2 + 0 * sizeof(short) + inSrcStep * 2)));
-      res1 += filter_v[0] * in[0]; 
-    }
+    //filter_v[0] = ( int) (*((__global short*) ((__global char*) filter_vSrcDt1 + 0 * sizeof(short) + filter_vSrcStep * 0)));
+    in = ( int) ( *((__global short*) ((__global char*) inSrcDt2 )));
+    res1 =   in; // filter_v[0]; 
+    //filter_v[0] = ( int) (*((__global short*) ((__global char*) filter_vSrcDt1 + 0 * sizeof(short) + filter_vSrcStep * 1)));
+    in = ( int) ( *((__global short*) ((__global char*) inSrcDt2 + inSrcStep )));
+    res1 +=  in; // filter_v[0] *
+    //filter_v[0] = ( int) (*((__global short*) ((__global char*) filter_vSrcDt1 + 0 * sizeof(short) + filter_vSrcStep * 2)));
+    in = ( int) ( *((__global short*) ((__global char*) inSrcDt2  + inSrcStep * 2)));
+    res1 +=  in; // filter_v[0] *  
+  }
     *intermediateDstDt1 = res1 / 3;
   }
 
@@ -86,8 +86,8 @@ __kernel void kernel_2(
     return;
 
   /* kernel index calculation */
-  int intermediateSrcIdx2 = intermediateSrcShift + ((float)gidy + 1) *intermediateSrcStep + ((float)gidx *4 + -1 + 1) *sizeof(short);
-  int outDstIdx1 = outDstShift + ((float)gidy + 1) *outDstStep + ((float)gidx *4 + 1) *sizeof(short);
+  int intermediateSrcIdx2 = intermediateSrcShift + (int)(((float)gidy + 1) *intermediateSrcStep) + (int)(((float)gidx *4 + -1 + 1) *sizeof(short));
+  int outDstIdx1 = outDstShift + (int)(((float)gidy + 1) *outDstStep) + (int)(((float)gidx *4 + 1) *sizeof(short));
 
   /* kernel operands */
   __global short *filter_hSrcDt1 = (__global char *)filter_hSrc + filter_hSrcShift;
@@ -96,26 +96,26 @@ __kernel void kernel_2(
 
   /* kernel operation */
   {
-         int filter_h[3];
+        int filter_h[3];
     int4 intermediate;
-     int R2Next;
+    int intermediateNext;
     int4 res1;
     {
-      filter_h[0] = ( int) (*((__global short*) ((__global char*) filter_hSrcDt1 + 0 * sizeof(short) + filter_hSrcStep * 0)));
-      filter_h[1] = ( int) (*((__global short*) ((__global char*) filter_hSrcDt1 + 1 * sizeof(short) + filter_hSrcStep * 0)));
-      filter_h[2] = ( int) (*((__global short*) ((__global char*) filter_hSrcDt1 + 2 * sizeof(short) + filter_hSrcStep * 0)));
-      intermediate = vload4(0,  (__global char*)(intermediateSrcDt2) + 0 * intermediateSrcStep + 4 * 0 * sizeof(short));
-      res1.s0 = filter_h[0] * intermediate.s0 + filter_h[1] * intermediate.s1 + filter_h[2] * intermediate.s2;
-      res1.s1 = filter_h[0] * intermediate.s1 + filter_h[1] * intermediate.s2 + filter_h[2] * intermediate.s3;
-      res1.s2 = filter_h[0] * intermediate.s2 + filter_h[1] * intermediate.s3;
-      R2Next = ( int) ( *((__global short*) ((__global char*) intermediateSrcDt2 + intermediateSrcStep * 0 + 4 * 1 * sizeof( short) + 0 * sizeof(short))));
-      res1.s2 += filter_h[2]; R2Next; 
-      res1.s3 = filter_h[0] * intermediate.s3;
-      R2Next = ( int) ( *((__global short*) ((__global char*) intermediateSrcDt2 + intermediateSrcStep * 0 + 4 * 1 * sizeof( short) + 0 * sizeof(short))));
-      res1.s3 += filter_h[1]; R2Next; 
-      R2Next = ( int) ( *((__global short*) ((__global char*) intermediateSrcDt2 + intermediateSrcStep * 0 + 4 * 1 * sizeof( short) + 1 * sizeof(short))));
-      res1.s3 += filter_h[2]; R2Next; 
-    }
+    filter_h[0] = ( int) (*((__global short*) ((__global char*) filter_hSrcDt1 + 0 * sizeof(short) + filter_hSrcStep * 0)));
+    filter_h[1] = ( int) (*((__global short*) ((__global char*) filter_hSrcDt1 + 1 * sizeof(short) + filter_hSrcStep * 0)));
+    filter_h[2] = ( int) (*((__global short*) ((__global char*) filter_hSrcDt1 + 2 * sizeof(short) + filter_hSrcStep * 0)));
+    intermediate = convert_int4(vload4(0, (__global short*) ( (__global char*)(intermediateSrcDt2) + 0 * intermediateSrcStep + 4 * 0 * sizeof(short))));
+    res1.s0 = filter_h[0] * intermediate.s0 + filter_h[1] * intermediate.s1 + filter_h[2] * intermediate.s2;
+    res1.s1 = filter_h[0] * intermediate.s1 + filter_h[1] * intermediate.s2 + filter_h[2] * intermediate.s3;
+    res1.s2 = filter_h[0] * intermediate.s2 + filter_h[1] * intermediate.s3;
+    intermediateNext = ( int) ( *((__global short*) ((__global char*) intermediateSrcDt2 + intermediateSrcStep * 0 + 4 * 1 * sizeof( short) + 0 * sizeof(short))));
+    res1.s2 += filter_h[2] * intermediateNext; 
+    res1.s3 = filter_h[0] * intermediate.s3;
+    intermediateNext = ( int) ( *((__global short*) ((__global char*) intermediateSrcDt2 + intermediateSrcStep * 0 + 4 * 1 * sizeof( short) + 0 * sizeof(short))));
+    res1.s3 += filter_h[1] * intermediateNext; 
+    intermediateNext = ( int) ( *((__global short*) ((__global char*) intermediateSrcDt2 + intermediateSrcStep * 0 + 4 * 1 * sizeof( short) + 1 * sizeof(short))));
+    res1.s3 += filter_h[2] * intermediateNext; 
+  }
     short4 temp0;
     temp0 = convert_short4(res1 / 3);
     *outDstDt1 = temp0.s0;

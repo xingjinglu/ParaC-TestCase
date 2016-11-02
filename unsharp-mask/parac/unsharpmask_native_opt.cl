@@ -77,33 +77,40 @@ __kernel void kernel_2(
   const int gidy = get_global_id(1);
 
   /* kernel boundary check */
-  if ( gidx >= (2047/4) || gidy >= 2047 )
+  //if ( gidx >= (2047/4) || gidy >= 2047 )
+  //if ( gidx >= 512 || gidy >= 2047 )
+  if ( gidx >= 256 || gidy >= 2047 )
     return;
 
   /* kernel index calculation */
-  int blurxSrcIdx1 = blurxSrcShift + (int)(((float)gidy + -2 + 2) *blurxSrcStep) + (int)(((float)gidx *4 + -2 + 2) *sizeof(float));
-  int bluryDstIdx1 = bluryDstShift + (int)(((float)gidy + -2 + 2) *bluryDstStep) + (int)(((float)gidx *4 + -2 + 2) *sizeof(float));
+  int blurxSrcIdx1 = blurxSrcShift + (int)(((float)gidy ) *blurxSrcStep) + (int)(((float)gidx *8  ) *sizeof(float));
+  int bluryDstIdx1 = bluryDstShift + (int)(((float)gidy ) *bluryDstStep) + (int)(((float)gidx *8  ) *sizeof(float));
 
   /* kernel operands */
   __global float *blurxSrcDt1 = (__global char *)blurxSrc + blurxSrcIdx1;
-  //__global float *filterySrcDt2 = (__global char *)filterySrc + filterySrcShift;
   __global float *bluryDstDt1 = (__global char *)bluryDst + bluryDstIdx1;
 
   /* kernel operation */
   {
-        float8 blurx;
+    float8 blurx;
     float blurxNext;
-    //float filtery[5];
-    float4 res1;
-    {
-      //blurx = vload4(0, (__global float*) ( (__global char*)(blurxSrcDt1) + 0 * blurxSrcStep + 4 * 0 * sizeof(float)));
-      blurx = (convert_float8)(*((__global float8*) ( (__global char*)(blurxSrcDt1) + 0 * blurxSrcStep + 4 * 0 * sizeof(float))));
-      res1.s0 = blurx.s0 * 0.0625 + blurx.s1 * 0.25 + blurx.s2 * 0.375 + blurx.s3 * 0.25 + blurx.s4 * 0.0625; 
-      res1.s1 = blurx.s1 * 0.0625 + blurx.s2 * 0.25 + blurx.s3 * 0.375 + blurx.s4 * 0.25 + blurx.s5 * 0.0625; 
-      res1.s2 = blurx.s2 * 0.0625 + blurx.s3 * 0.25 + blurx.s4 * 0.375 + blurx.s5 * 0.25  + blurx.s6 * 0.0625; 
-      res1.s3 = blurx.s3 * 0.0625 + blurx.s4 * 0.25 + blurx.s5 * 0.375 + blurx.s6 * 0.25 +  blurx.s7 * 0.0625; 
-    }
-    *((__global float4*)bluryDstDt1) = res1;
+    float8 res1;
+
+    //blurx = vload4(0, (__global float*) ( (__global char*)(blurxSrcDt1) + 0 * blurxSrcStep + 4 * 0 * sizeof(float)));
+    blurx = (convert_float8)(*((__global float8*) ( (__global char*)(blurxSrcDt1)  )));
+    res1.s0 = blurx.s0 * 0.0625 + blurx.s1 * 0.25 + blurx.s2 * 0.375 + blurx.s3 * 0.25 + blurx.s4 * 0.0625; 
+    res1.s1 = blurx.s1 * 0.0625 + blurx.s2 * 0.25 + blurx.s3 * 0.375 + blurx.s4 * 0.25 + blurx.s5 * 0.0625; 
+    res1.s2 = blurx.s2 * 0.0625 + blurx.s3 * 0.25 + blurx.s4 * 0.375 + blurx.s5 * 0.25  + blurx.s6 * 0.0625; 
+    res1.s3 = blurx.s3 * 0.0625 + blurx.s4 * 0.25 + blurx.s5 * 0.375 + blurx.s6 * 0.25 +  blurx.s7 * 0.0625; 
+    //*((__global float4*)bluryDstDt1) = res1;
+
+    blurx = (convert_float8)(*((__global float8*) ( (__global char*)(blurxSrcDt1) + 4 * 1 * sizeof(float) )));
+    res1.s4 = blurx.s0 * 0.0625 + blurx.s1 * 0.25 + blurx.s2 * 0.375 + blurx.s3 * 0.25 + blurx.s4 * 0.0625; 
+    res1.s5 = blurx.s1 * 0.0625 + blurx.s2 * 0.25 + blurx.s3 * 0.375 + blurx.s4 * 0.25 + blurx.s5 * 0.0625; 
+    res1.s6 = blurx.s2 * 0.0625 + blurx.s3 * 0.25 + blurx.s4 * 0.375 + blurx.s5 * 0.25  + blurx.s6 * 0.0625; 
+    res1.s7 = blurx.s3 * 0.0625 + blurx.s4 * 0.25 + blurx.s5 * 0.375 + blurx.s6 * 0.25 +  blurx.s7 * 0.0625; 
+    *((__global float8*)(bluryDstDt1 )) = res1;
+
   }
 
 }
@@ -139,7 +146,8 @@ __kernel void kernel_3(
 
   /* kernel boundary check */
   //if ( gidx >= 2047 || gidy >= 2047 )
-  if ( gidx >= (512) || gidy >= 2047 )
+  //if ( gidx >= (512) || gidy >= 2047 )
+  if ( gidx >= (256) || gidy >= 2047 )
     return;
 
   /* kernel index calculation */
@@ -156,16 +164,28 @@ __kernel void kernel_3(
 
   /* kernel operation */
   {
+#if 0
     float4 img, blury, sharpen;
     img = (convert_float4)(*((__global float4*)imgSrcDt2));
     blury =(convert_float4)(*((__global float4*)blurySrcDt1));
-    sharpen = img * (1 + weight) - blury * weight;
-    *((__global float4*)sharpenDSDt1)  = sharpen;
-    float4 _ct0 = img;
-    float4 _ct1 = *(sharpenDSDt1);
+    sharpen = img + img * weight - blury * weight;
+    //*((__global float4*)sharpenDSDt1)  = sharpen;
+    //float4 _ct0 = img;
+    //float4 _ct1 = *(sharpenDSDt1);
     float4 Op_ans1 = ( img -  blury);
-    float4 _ct2 = ((Op_ans1) < threshold) ? _ct0 : _ct1;
+    float4 _ct2 = ((Op_ans1) < threshold) ? img : sharpen;
     *((__global float4*)maskDstDt1) = _ct2;
+#endif
+    float8 img, blury, sharpen;
+    img = (convert_float8)(*((__global float8*)imgSrcDt2));
+    blury =(convert_float8)(*((__global float8*)blurySrcDt1));
+    sharpen = img + img * weight - blury * weight;
+    //*((__global float4*)sharpenDSDt1)  = sharpen;
+    float8 Op_ans1 = ( img -  blury);
+    float8 _ct2 = ((Op_ans1) < threshold) ? img : sharpen;
+    *((__global float8*)maskDstDt1) = _ct2;
+
+
   }
 
 }
