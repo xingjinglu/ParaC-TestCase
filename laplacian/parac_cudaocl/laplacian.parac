@@ -1,0 +1,127 @@
+#include <stdlib.h>
+#define ROWS 1024
+#define COLS 1024
+#define M 1024
+#define N 1024
+int Laplacian(parac_matrix unsigned char &Src[M][N], parac_matrix unsigned char &layer[M][N])
+{
+    parac_matrix unsigned char filter_horizon[1][5] = {1,4,6,4,1};
+    parac_matrix unsigned char filter_vertical[5][1] = {1,4,6,4,1};
+    parac_matrix unsigned char dst_horizon[M][N];    
+    parac_matrix unsigned char dst_vertical[M][N];    
+    parac_matrix unsigned char dst_ds[(M+1)/2][(N+1)/2];            
+
+    //定义越界规则
+    parac_border_rule br
+    {
+        Src[*][-2] = Src[*][3]*4-Src[*][1]*4+Src[*][0]*2-Src[*][2];
+        Src[*][-1] = Src[*][1]*2-Src[*][3];
+        Src[*][+1] = Src[*][N-2]*2-Src[*][N-4];
+        Src[*][+2] = Src[*][N-4]*4-Src[*][N-2]*4+Src[*][N-1]*2-Src[*][N-3];
+    }
+
+    //水平滤波
+    parac_iterator it(iter_element; 0:M:1; 0:N:1) parac_border_rule(br)
+    {
+        dst_horizon[itx][ity] = (convolution(filter_horizon, Src[itx][ity-2:5:1])+8)/16;
+    }
+
+    //定义越界规
+    parac_border_rule br1
+    {
+        dst_horizon [-2][*] = dst_horizon [3][*]*4- dst_horizon [1][*]*4+ dst_horizon [0][*]*2- dst_horizon [2][*];
+        dst_horizon [-1][*] = dst_horizon [1][*]*2- dst_horizon [3][*];
+        dst_horizon [+1][*] = dst_horizon [M-2][*]*2- dst_horizon [M-4][*];
+        dst_horizon [+2][*] = dst_horizon [M-4][*]*4- dst_horizon [M-2][*]*4+ dst_horizon [M-1][*]*2- dst_horizon [M-3][*];
+    }
+
+
+    //垂直滤波+4倍下采样
+    parac_iterator it1(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1) parac_border_rule(br1)
+    {
+        dst_ds[it1x][it1y] = (convolution(filter_vertical, dst_horizon [it1x*2-2:5:1][it1y*2])+8)/16;
+    }
+
+    /*  分为两个kernel，暂时不采用这个方案
+    //垂直滤波
+    parac_iterator it1(iter_element; 0:M:1; 0:N:1) parac_border_rule(br1)
+    {
+        dst_vertical[it1x][it1y] = (convolution(dst_horizon [it1x-2:5:1][it1y], filter_vertical)+8)/16;
+    }
+    
+    //4倍下采样
+    parac_iterator it2(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1)
+    {
+        dst_ds[it1x][it1y] = dst_vertical[it1x *2][it1y*2];
+    }
+    */
+
+    //4倍上采样+差值矩阵
+    int halfWidth = N/2;
+    int halfHeight = M/2;
+    int widthOdd = N - (halfWidth*2);
+    int heightOdd = M - (halfHeight*2);
+    
+    // dst_ds: downsample;
+    parac_iterator it(iter_element; 0:(M+1)/2:1; 0:(N+1)/2:1)
+    {
+      if(itx == 0) // first line 
+      {
+        layer[0][ity*2] = Src[0][ity*2] - dst_ds[0][ity];
+
+        if(ity != (N+1)/2 -1) // !last the column of the first row.
+          layer[0][ity*2+1] =Src[0][ity*2+1]-(dst_ds[0][ity]+dst_ds[0][ity+1]+1)/2;
+        if(ity == ((N+1)/2 -1) && widthOdd ==0)
+          layer[0][ity*2 + 1] = Src[0][ity*2 + 1] - dst_ds[0][ity];
+      }
+      if(heightOdd == 0 && itx == (M+1)/2-1) // Last line.
+      {
+        layer[M-1][ity*2] = Src[M-1][ity*2] - dst_ds[(M+1)/2-1][ity];
+        if(ity != (N+1)/2 -1)
+          layer[M-1][ity*2+1] = Src[M-1][ity*2+1] - (dst_ds[(M+1)/2-1][ity]+dst_ds[(M+1)/2-1][ity+1]+1)/2;
+        if(ity == (N+1)/2 -1 && widthOdd ==0)
+          layer[M-1][ity*2 + 1] = Src[M-1][ity*2 + 1] - dst_ds[(M+1)/2-1][ity]; // bug.
+          //layer[M-1][ity*2 + 1] = Src[M-1][ity*2 + 1] - dst_ds[M-1][ity]; // bug.
+      }
+      if(itx!=0) // body
+      {
+        layer[2*itx-1][2*ity  ] = Src[2*itx-1][2*ity  ]-(dst_ds[itx-1][ity]+dst_ds[itx][ity]+1)/2;
+        layer[2*itx  ][2*ity  ] = Src[2*itx  ][2*ity  ]-dst_ds[itx][ity];
+
+        if(ity != (N+1)/2 -1)
+        {  
+          layer[2*itx-1][2*ity+1] = Src[2*itx-1][2*ity+1]-(dst_ds[itx-1][ity]+dst_ds[itx-1][ity+1]+dst_ds[itx][ity]+dst_ds[itx][ity+1]+2)/4;
+          layer[2*itx  ][2*ity+1] = Src[2*itx  ][2*ity+1]-(dst_ds[itx][ity]+dst_ds[itx][ity+1]+1)/2;
+        }
+
+        // last column.
+        if(widthOdd ==0 && ity == (N+1)/2 -1)
+        {
+          layer[2*itx-1][2*ity+1] = Src[2*itx-1][2*ity+1]-(dst_ds[itx-1][ity]+dst_ds[itx][ity]+1)/2; //2047
+          layer[2*itx  ][2*ity+1] =  Src[2*itx  ][2*ity+1]-dst_ds[itx][ity];
+          //layer[2*itx-1][2*ity+1] = Src[2*itx-1][2*ity]-(dst_ds[itx-1][ity]+dst_ds[itx][ity]+1)/2;
+          //layer[2*itx  ][2*ity+1] =  Src[2*itx  ][2*ity]-dst_ds[itx][ity];
+        }
+      }        
+    }
+    
+    return 0;
+}
+
+int main()
+{
+    unsigned char *src_data = (unsigned char *)malloc(sizeof(unsigned char) * ROWS * COLS);
+    unsigned char *dst_data = (unsigned char *)malloc(sizeof(unsigned char) * ROWS * COLS);
+    
+    parac_matrix unsigned char &src[ROWS][COLS] = src_data;
+    parac_matrix unsigned char &Layer[ROWS][COLS] = dst_data;
+    
+    for (int i = 0; i < ROWS*COLS; i++)
+    {
+        src_data[i] = rand()%100 + 1;
+    }
+  
+    Laplacian(src, Layer);
+    
+    return 0;
+}
