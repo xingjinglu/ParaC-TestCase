@@ -596,8 +596,8 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     checkErr(status, "clCreateKernel for kernel_3");
     global_work_size[0] = halfWidth;
     global_work_size[1] = halfHeight;
-    local_work_size[0] = 64;
-    local_work_size[1] = 1;
+    local_work_size[0] = 16;
+    local_work_size[1] = 16;
     size_t SrcSrcWidth = Width;
     size_t SrcSrcHeight = Height;
     size_t Src_srcsz = sizeof(unsigned char);

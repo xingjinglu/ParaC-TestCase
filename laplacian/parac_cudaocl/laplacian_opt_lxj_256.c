@@ -328,8 +328,8 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     checkErr(status, "clSetKernelArg");
     status = clSetKernelArg(kernel_1, 14, sizeof(int), (void *)&dst_horizonDstShift);
     checkErr(status, "clSetKernelArg");
-    //status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
-    status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
+    status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+    //status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
     checkErr(status,"clFinish of kernel_1");

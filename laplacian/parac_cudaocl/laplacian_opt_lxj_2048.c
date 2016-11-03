@@ -26,6 +26,13 @@ struct TEST_TIME{
   double time_kernel_up;
 };
 
+
+#ifdef TIME_PROF
+#define RUNS 10
+double tem1, tem2, tem3;
+
+#endif
+
 static int PyramidFilterh(unsigned char *pSrc, unsigned char* pDst, int width, int height)
 {
    int h, w;
@@ -578,126 +585,136 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
 
   /************Upsample + calculation******************************/
   {
-    size_t global_work_size[2];
-    size_t local_work_size[2];
-    size_t transe;
-    cl_event event_kernel;
-    cl_kernel kernel_3 = clCreateKernel(g_program, "kernel_3", &status);
-    checkErr(status, "clCreateKernel for kernel_3");
-    global_work_size[0] = halfWidth;
-    global_work_size[1] = halfHeight;
-    local_work_size[0] = 64;
-    local_work_size[1] = 1;
-    size_t SrcSrcWidth = Width;
-    size_t SrcSrcHeight = Height;
-    size_t Src_srcsz = sizeof(unsigned char);
-    size_t SrcSrcStep = SrcSrcWidth * Src_srcsz;
-    SrcSrcStep = (SrcSrcStep % PADDING < 16) ? ((SrcSrcStep / PADDING+1) * PADDING) : ((SrcSrcStep + PADDING) / PADDING+1) * PADDING;
-    size_t SrcSrcShift = SrcSrcStep * PADDING_LINE;
-    size_t Src_srcsz0Pad = SrcSrcStep * (SrcSrcHeight + (PADDING_LINE<<1));
-    unsigned char *SrcSrcBufH = (unsigned char*)malloc(Src_srcsz0Pad); 
-    for(int i = 0; i < SrcSrcHeight; i++){
-      memcpy( (char*)SrcSrcBufH+ (i + PADDING_LINE) * SrcSrcStep, (char*)Src+ i * SrcSrcWidth* sizeof(unsigned char), SrcSrcWidth * sizeof(unsigned char) );
-    }
+    tem3 = 0;
+    for( int q = 0; q < RUNS; q++){
+      size_t global_work_size[2];
+      size_t local_work_size[2];
+      size_t transe;
+      cl_event event_kernel;
+      cl_kernel kernel_3 = clCreateKernel(g_program, "kernel_3", &status);
+      checkErr(status, "clCreateKernel for kernel_3");
+      global_work_size[0] = halfWidth;
+      global_work_size[1] = halfHeight;
+      local_work_size[0] = 16;
+      local_work_size[1] = 16;
+      size_t SrcSrcWidth = Width;
+      size_t SrcSrcHeight = Height;
+      size_t Src_srcsz = sizeof(unsigned char);
+      size_t SrcSrcStep = SrcSrcWidth * Src_srcsz;
+      SrcSrcStep = (SrcSrcStep % PADDING < 16) ? ((SrcSrcStep / PADDING+1) * PADDING) : ((SrcSrcStep + PADDING) / PADDING+1) * PADDING;
+      size_t SrcSrcShift = SrcSrcStep * PADDING_LINE;
+      size_t Src_srcsz0Pad = SrcSrcStep * (SrcSrcHeight + (PADDING_LINE<<1));
+      unsigned char *SrcSrcBufH = (unsigned char*)malloc(Src_srcsz0Pad); 
+      for(int i = 0; i < SrcSrcHeight; i++){
+        memcpy( (char*)SrcSrcBufH+ (i + PADDING_LINE) * SrcSrcStep, (char*)Src+ i * SrcSrcWidth* sizeof(unsigned char), SrcSrcWidth * sizeof(unsigned char) );
+      }
 
 
-    size_t dst_dsSrcWidth = Width/2;
-    size_t dst_dsSrcHeight = Height/2;
-    size_t dst_ds_srcsz = sizeof(unsigned char);
-    size_t dst_dsSrcStep = dst_dsSrcWidth * dst_ds_srcsz;
-    dst_dsSrcStep = (dst_dsSrcStep % PADDING < 16) ? ((dst_dsSrcStep / PADDING+1) * PADDING) : ((dst_dsSrcStep + PADDING) / PADDING+1) * PADDING;
-    size_t dst_dsSrcShift = dst_dsSrcStep * PADDING_LINE;
-    size_t dst_ds_srcsz0Pad = dst_dsSrcStep * (dst_dsSrcHeight + (PADDING_LINE<<1));
-    unsigned char *dst_dsSrcBufH = (unsigned char*)malloc(dst_ds_srcsz0Pad); 
-    for(int i = 0; i < dst_dsSrcHeight; i++){
-      memcpy( (char*)dst_dsSrcBufH+ (i + PADDING_LINE) * dst_dsSrcStep, (char*)dst_ds+ i * dst_dsSrcWidth* sizeof(unsigned char), dst_dsSrcWidth * sizeof(unsigned char) );
-    }
+      size_t dst_dsSrcWidth = Width/2;
+      size_t dst_dsSrcHeight = Height/2;
+      size_t dst_ds_srcsz = sizeof(unsigned char);
+      size_t dst_dsSrcStep = dst_dsSrcWidth * dst_ds_srcsz;
+      dst_dsSrcStep = (dst_dsSrcStep % PADDING < 16) ? ((dst_dsSrcStep / PADDING+1) * PADDING) : ((dst_dsSrcStep + PADDING) / PADDING+1) * PADDING;
+      size_t dst_dsSrcShift = dst_dsSrcStep * PADDING_LINE;
+      size_t dst_ds_srcsz0Pad = dst_dsSrcStep * (dst_dsSrcHeight + (PADDING_LINE<<1));
+      unsigned char *dst_dsSrcBufH = (unsigned char*)malloc(dst_ds_srcsz0Pad); 
+      for(int i = 0; i < dst_dsSrcHeight; i++){
+        memcpy( (char*)dst_dsSrcBufH+ (i + PADDING_LINE) * dst_dsSrcStep, (char*)dst_ds+ i * dst_dsSrcWidth* sizeof(unsigned char), dst_dsSrcWidth * sizeof(unsigned char) );
+      }
 
-    size_t layerDstWidth = Width;
-    size_t layerDstHeight = Height;
-    size_t layer_dstsz = sizeof(unsigned char);
-    size_t layerDstStep = layerDstWidth * layer_dstsz;
-    layerDstStep = (layerDstStep % PADDING < 16) ? ((layerDstStep / PADDING+1) * PADDING) : ((layerDstStep + PADDING) / PADDING+1) * PADDING;
-    size_t layerDstShift = layerDstStep * PADDING_LINE;
-    size_t layer_dstsz0Pad = layerDstStep * (layerDstHeight + (PADDING_LINE<<1));
-    unsigned char *layerDstBufH = (unsigned char*)malloc(layer_dstsz0Pad); 
-    for(int i = 0; i < layerDstHeight; i++){
-      memcpy( (char*)layerDstBufH+ (i + PADDING_LINE) * layerDstStep,(char*)layer + i * layerDstWidth* sizeof(unsigned char),layerDstWidth* sizeof(unsigned char) );
-    }
+      size_t layerDstWidth = Width;
+      size_t layerDstHeight = Height;
+      size_t layer_dstsz = sizeof(unsigned char);
+      size_t layerDstStep = layerDstWidth * layer_dstsz;
+      layerDstStep = (layerDstStep % PADDING < 16) ? ((layerDstStep / PADDING+1) * PADDING) : ((layerDstStep + PADDING) / PADDING+1) * PADDING;
+      size_t layerDstShift = layerDstStep * PADDING_LINE;
+      size_t layer_dstsz0Pad = layerDstStep * (layerDstHeight + (PADDING_LINE<<1));
+      unsigned char *layerDstBufH = (unsigned char*)malloc(layer_dstsz0Pad); 
+      for(int i = 0; i < layerDstHeight; i++){
+        memcpy( (char*)layerDstBufH+ (i + PADDING_LINE) * layerDstStep,(char*)layer + i * layerDstWidth* sizeof(unsigned char),layerDstWidth* sizeof(unsigned char) );
+      }
 
 
 #ifdef TIME_PROF
-    gettimeofday(&timeUp0, NULL);
+      gettimeofday(&timeUp0, NULL);
 #endif
 
-    cl_mem SrcsrcBuf = clCreateBuffer(g_context, CL_MEM_READ_ONLY, Src_srcsz0Pad, NULL, &status);
-    checkErr(status, "clCreateBuffer");
-    status = clEnqueueWriteBuffer(g_queue, SrcsrcBuf, CL_TRUE, 0,Src_srcsz0Pad,SrcSrcBufH, 0, NULL, NULL);
-    checkErr(status, "clWriteBuffer");
-    status = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), (void *)&SrcsrcBuf);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 1, sizeof(int), (void *)&SrcSrcWidth);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 2, sizeof(int), (void *)&SrcSrcHeight);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 3, sizeof(int), (void *)&SrcSrcStep);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 4, sizeof(int), (void *)&SrcSrcShift);
-    checkErr(status, "clSetKernelArg");
+      cl_mem SrcsrcBuf = clCreateBuffer(g_context, CL_MEM_READ_ONLY, Src_srcsz0Pad, NULL, &status);
+      checkErr(status, "clCreateBuffer");
+      status = clEnqueueWriteBuffer(g_queue, SrcsrcBuf, CL_TRUE, 0,Src_srcsz0Pad,SrcSrcBufH, 0, NULL, NULL);
+      checkErr(status, "clWriteBuffer");
+      status = clSetKernelArg(kernel_3, 0, sizeof(cl_mem), (void *)&SrcsrcBuf);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 1, sizeof(int), (void *)&SrcSrcWidth);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 2, sizeof(int), (void *)&SrcSrcHeight);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 3, sizeof(int), (void *)&SrcSrcStep);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 4, sizeof(int), (void *)&SrcSrcShift);
+      checkErr(status, "clSetKernelArg");
 
-    cl_mem dst_dssrcBuf = clCreateBuffer(g_context, CL_MEM_READ_ONLY, dst_ds_srcsz0Pad, NULL, &status);
-    checkErr(status, "clCreateBuffer");
-    status = clEnqueueWriteBuffer(g_queue, dst_dssrcBuf, CL_TRUE, 0,dst_ds_srcsz0Pad,dst_dsSrcBufH, 0, NULL, NULL);
-    checkErr(status, "clWriteBuffer");
-    status = clSetKernelArg(kernel_3, 5, sizeof(cl_mem), (void *)&dst_dssrcBuf);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 6, sizeof(int), (void *)&dst_dsSrcWidth);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 7, sizeof(int), (void *)&dst_dsSrcHeight);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 8, sizeof(int), (void *)&dst_dsSrcStep);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 9, sizeof(int), (void *)&dst_dsSrcShift);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 10, sizeof(int), (void *)&widthOdd);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 11, sizeof(int), (void *)&heightOdd);
-    checkErr(status, "clSetKernelArg");
+      cl_mem dst_dssrcBuf = clCreateBuffer(g_context, CL_MEM_READ_ONLY, dst_ds_srcsz0Pad, NULL, &status);
+      checkErr(status, "clCreateBuffer");
+      status = clEnqueueWriteBuffer(g_queue, dst_dssrcBuf, CL_TRUE, 0,dst_ds_srcsz0Pad,dst_dsSrcBufH, 0, NULL, NULL);
+      checkErr(status, "clWriteBuffer");
+      status = clSetKernelArg(kernel_3, 5, sizeof(cl_mem), (void *)&dst_dssrcBuf);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 6, sizeof(int), (void *)&dst_dsSrcWidth);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 7, sizeof(int), (void *)&dst_dsSrcHeight);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 8, sizeof(int), (void *)&dst_dsSrcStep);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 9, sizeof(int), (void *)&dst_dsSrcShift);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 10, sizeof(int), (void *)&widthOdd);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 11, sizeof(int), (void *)&heightOdd);
+      checkErr(status, "clSetKernelArg");
 
-    cl_mem layerdstBuf = clCreateBuffer(g_context, CL_MEM_READ_WRITE, layer_dstsz0Pad, NULL, &status);
-    checkErr(status, "clCreateBuffer");
-    status = clEnqueueWriteBuffer(g_queue, layerdstBuf, CL_TRUE, 0,layer_dstsz0Pad,layerDstBufH, 0, NULL, NULL);
-    checkErr(status, "clWriteBuffer");
-    status = clSetKernelArg(kernel_3, 12, sizeof(cl_mem), (void *)&layerdstBuf);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 13, sizeof(int), (void *)&layerDstWidth);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 14, sizeof(int), (void *)&layerDstHeight);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 15, sizeof(int), (void *)&layerDstStep);
-    checkErr(status, "clSetKernelArg");
-    status = clSetKernelArg(kernel_3, 16, sizeof(int), (void *)&layerDstShift);
-    checkErr(status, "clSetKernelArg");
-    status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
-    checkErr(status, "clEnqueueNDRangeKernel");
-    status = clFinish(g_queue);
-    checkErr(status,"clFinish of kernel_3");
+      cl_mem layerdstBuf = clCreateBuffer(g_context, CL_MEM_READ_WRITE, layer_dstsz0Pad, NULL, &status);
+      checkErr(status, "clCreateBuffer");
+      status = clEnqueueWriteBuffer(g_queue, layerdstBuf, CL_TRUE, 0,layer_dstsz0Pad,layerDstBufH, 0, NULL, NULL);
+      checkErr(status, "clWriteBuffer");
+      status = clSetKernelArg(kernel_3, 12, sizeof(cl_mem), (void *)&layerdstBuf);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 13, sizeof(int), (void *)&layerDstWidth);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 14, sizeof(int), (void *)&layerDstHeight);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 15, sizeof(int), (void *)&layerDstStep);
+      checkErr(status, "clSetKernelArg");
+      status = clSetKernelArg(kernel_3, 16, sizeof(int), (void *)&layerDstShift);
+      checkErr(status, "clSetKernelArg");
+      //status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
+      checkErr(status, "clEnqueueNDRangeKernel");
+      status = clFinish(g_queue);
+      checkErr(status,"clFinish of kernel_3");
 
 #ifdef TIME_PROF
-    gettimeofday(&timeUp1, NULL);
+      gettimeofday(&timeUp1, NULL);
 #endif
 
 #ifdef TIME_KERNEL
-    clGetEventProfilingInfo(event_kernel,CL_PROFILING_COMMAND_START,sizeof(cl_ulong),&startTime,NULL);
-    clGetEventProfilingInfo(event_kernel,CL_PROFILING_COMMAND_END,sizeof(cl_ulong),&endTime,NULL);
-    kernelTimeUp = (endTime-startTime)/1000.0;
+      clGetEventProfilingInfo(event_kernel,CL_PROFILING_COMMAND_START,sizeof(cl_ulong),&startTime,NULL);
+      clGetEventProfilingInfo(event_kernel,CL_PROFILING_COMMAND_END,sizeof(cl_ulong),&endTime,NULL);
+      tem3 += (endTime-startTime)/1000.0;
+      //kernelTimeUp = (endTime-startTime)/1000.0;
 #endif
 
 
-    status = clEnqueueReadBuffer(g_queue, layerdstBuf, CL_TRUE, 0,layer_dstsz0Pad,layerDstBufH, 0, NULL, NULL);
-    for(int i = 0; i < layerDstHeight; i++){
-      memcpy( (char*)layer+ i *layerDstWidth* sizeof(unsigned char), (char*) layerDstBufH+ (i + PADDING_LINE)* layerDstStep, layerDstWidth* sizeof(unsigned char) );
+      status = clEnqueueReadBuffer(g_queue, layerdstBuf, CL_TRUE, 0,layer_dstsz0Pad,layerDstBufH, 0, NULL, NULL);
+      for(int i = 0; i < layerDstHeight; i++){
+        memcpy( (char*)layer+ i *layerDstWidth* sizeof(unsigned char), (char*) layerDstBufH+ (i + PADDING_LINE)* layerDstStep, layerDstWidth* sizeof(unsigned char) );
+      }
+
     }
+
+#ifdef TIME_PROF
+    kernelTimeUp = tem3 / RUNS;
+#endif
 
 #if 0
     clReleaseKernel(kernel_3);
@@ -732,6 +749,7 @@ int Laplacian(int Height, int Width, unsigned char *Src1, unsigned char *layer1)
     printf("all success\n");
 #endif
 
+    
   }
 
 
