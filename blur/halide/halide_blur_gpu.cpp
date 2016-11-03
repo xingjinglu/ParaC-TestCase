@@ -40,7 +40,7 @@ class HalideBlur {
 public:
     Func blur_x, blur_y;
     Image<uint16_t> input;
-    Var x, y, xi, yi, i;
+    Var x, y, xi, yi, i, y_inner,y_outer, x_inner, x_outer;
     // ImageParam input{UInt(16), 2, "input"};
 
    HalideBlur( Image<uint16_t> in) : input(in) {
@@ -76,13 +76,22 @@ public:
      Var block, thread;
 
 #if 1
-     //blur_x.split(i, block, thread, 16);
-     // Tread-groups and threads.
-     //blur_x.gpu_blocks(block)
-     //  .gpu_threads(thread);
-     blur_x.compute_root().gpu_tile(x, y, 8, 8);
-     //blur_y.compute_root().gpu_tile(x, y, 8, 8);
+     //blur_x.compute_root().vectorize(y,8); // works.
+     //blur_x.vectorize(y_outer, 4); // works.
+
+    // blur_x.compute_root().vectorize(x, 8).gpu_tile(x, y, 4, 8);
+
+#if 1
+     // Best schedule until now.
+     blur_x.compute_root().gpu_tile(x, y, 8, 8); 
      blur_y.gpu_tile(x, y, 8, 8);
+#endif
+
+#if 0
+     // Schedule advised by Adams.
+     blur_y.gpu_tile(x, y, 8, 8);
+#endif
+
 #endif
 
       //blur_x.gpu_threads(x, y);
