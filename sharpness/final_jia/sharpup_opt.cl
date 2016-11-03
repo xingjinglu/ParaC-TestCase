@@ -103,7 +103,7 @@ int   pEdgeShift)
   enhancedF = convert_float4(convert_int4(mad(pError_float4,strength,yPlaneCSER4)));
   strength  = mad(0.05f,edge2Order,mean_p4) / (mean_p4 + edge2Order);    //strength=oscStrength
 
-  pError_float4 = clamp(enhancedF,0,255);  //pError_float4=tt_enhanced 
+  pError_float4 = clamp(enhancedF,(convert_float4)0,(convert_float4)255);  //pError_float4=tt_enhanced 
   edge2Order    = mad(-strength,minValueF-enhancedF,minValueF);   //strength=oscStrength
   strength      = min(mad(strength,enhancedF - maxValueF,maxValueF),255);  //strength=oscStrength
   edge2Order    = select(pError_float4,max(0,edge2Order),enhancedF < minValueF);//pError_float4=tt_enhanced
