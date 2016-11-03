@@ -56,9 +56,9 @@ __kernel void kernel_1(
     lat0 = (int)(*(SrcSrcDt1 + 6));
     lat1 = (int)(*(SrcSrcDt1 + 7));
 #endif
-    pre = (convert_int2)(*(__global uchar2*)(SrcSrcDt1 ) );
-    SrcMid0 = (convert_int4)(*(__global uchar4*)( SrcSrcDt1 + 2 ));
-    lat = (convert_int2)(*(__global uchar2*)(SrcSrcDt1 + 6) );
+    pre = convert_int2(*(__global uchar2*)(SrcSrcDt1 ) );
+    SrcMid0 = convert_int4(*(__global uchar4*)( SrcSrcDt1 + 2 ));
+    lat = convert_int2(*(__global uchar2*)(SrcSrcDt1 + 6) );
 
     if ( gidx == 0 ){ 
       // SrcMid0 ==>{(*, 0), (*, 1), (*, 2), (*, 3)}; 
@@ -155,15 +155,15 @@ __kernel void kernel_2(
 
 
     // Padding to avoid accessing illegal address.
-    pre0 = (convert_int8)(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*0 ))); // maybe border.
-    pre1 = (convert_int8)(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*1 )));
-    mid0 = (convert_int8)(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*2)));
-    lat0 = (convert_int8)(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*3 )));
+    pre0 = convert_int8(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*0 ))); // maybe border.
+    pre1 = convert_int8(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*1 )));
+    mid0 = convert_int8(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*2)));
+    lat0 = convert_int8(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*3 )));
     // Padding to avoid accessing illegal address.
-    lat1 = (convert_int8)(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*4 )));
+    lat1 = convert_int8(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*4 )));
 
     if (gidy == 0 ){ 
-      mid5 = (convert_int8)(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*5 ))); // [3][*]
+      mid5 = convert_int8(*((__global uchar8*)(dst_horizonSrcDt1 + dst_horizonSrcStep*5 ))); // [3][*]
       // pre0--> (-2, *),  pre1 --> (-1, *), mid0-->0, lat0 --> 1, lat1--> 2
       // mid5--> (3, *)
       pre0 = mid5*4 - lat0*4 + mid0 * 2 - lat1; 
@@ -250,22 +250,22 @@ __kernel void kernel_3(
   // Src[0][ity*2], Src[0][ity*2+1]
   //SrcSrcIdx1 = SrcSrcShift + (gidx * 2);
   SrcSrcDt1 = SrcSrc + mad24(gidx, 2, SrcSrcShift);
-  src0 = (convert_short2)(*((__global uchar2*)(SrcSrcDt1)));
+  src0 = convert_short2(*((__global uchar2*)(SrcSrcDt1)));
 
   // Src[M-1][ity*2], [ity*2+1]
   int SrcSrcIdx3 = SrcSrcShift + 255 *SrcSrcStep + ((float)gidx * 2) *sizeof(unsigned char);
   __global unsigned char *SrcSrcDt3 = SrcSrc + SrcSrcIdx3;
-  src1 = (convert_short2)(*((__global uchar2*)(SrcSrcDt3)));
+  src1 = convert_short2(*((__global uchar2*)(SrcSrcDt3)));
 
   // Src[2*itx-1][2*ity]
   int SrcSrcIdx5 = SrcSrcShift + ((float)gidy * 2  -1) *SrcSrcStep + ((float)gidx * 2) ;
   __global unsigned char *SrcSrcDt5 = SrcSrc + SrcSrcIdx5;
-  src2 = (convert_short2)(*((__global uchar2*)(SrcSrcDt5)));
+  src2 = convert_short2(*((__global uchar2*)(SrcSrcDt5)));
 
   // Src[2*itx][2*ity]
   int SrcSrcIdx7 = SrcSrcShift + ((float)gidy * 2) *SrcSrcStep + ((float)gidx * 2) ;
   __global unsigned char *SrcSrcDt7 = SrcSrc + SrcSrcIdx7;
-  src3 = (convert_short2)(*((__global uchar2*)(SrcSrcDt7)));
+  src3 = convert_short2(*((__global uchar2*)(SrcSrcDt7)));
 
   // dst_ds[0][ity], dst_ds[0][ity+1];
   int dst_dsSrcIdx11 = dst_dsSrcShift + ((float)gidx) *sizeof(unsigned char);
@@ -326,7 +326,7 @@ __kernel void kernel_3(
 
     // body.
     if (gidy != 0) {
-      src2 = (convert_short2)(*((__global uchar2*)(SrcSrcDt5)));
+      src2 = convert_short2(*((__global uchar2*)(SrcSrcDt5)));
 
       layer2.s0 = src2.s0 - ((dst_ds2.s0 + dst_ds3.s0+1)>>1);
       layer3.s0 = src3.s0 - dst_ds3.s0;
