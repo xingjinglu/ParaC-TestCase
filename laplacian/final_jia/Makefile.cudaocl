@@ -1,0 +1,7 @@
+CFLAGS = -DTIME_PAR
+INC=/usr/local/cuda-7.5/include/
+lap:lap.cpp laplacian.cl
+	g++ -O3  lap.cpp $(CFLAGS) -o lap -lOpenCL -I$(INC)
+
+clean:
+	rm lap 
