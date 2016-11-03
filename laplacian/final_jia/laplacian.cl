@@ -62,7 +62,7 @@ int height)
      result.s2 = mad24(mid.s1,4,mid.s0) + mad24(6,mid.s2,later.s0) + mad24(mid.s3,4,8);
      result.s3 = mad24(mid.s2,4,mid.s1) + mad24(6,mid.s3,later.s1) + mad24(later.s0,4,8);
 
-     result = result >> 4;
+     result = result >> (short)(short)(short)(short)(short)(short)(short)(short)(short)4;
 
      *((__global uchar4 *)(pBufL+inputIndex)) = convert_uchar4(result);
 }
@@ -227,7 +227,7 @@ int height)
     result.s2 = mad24(mid.s3,4,mid.s2) + mad24(6,mid.s4,mid.s6) + mad24(mid.s5,4,8);
     result.s3 = mad24(mid.s5,4,mid.s4) + mad24(6,mid.s6,later.s0) + mad24(mid.s7,4,8);
 
-    result = result >> 4;
+    result = result >> (short)4;
 
     if(gidy != upheight-1)
     {

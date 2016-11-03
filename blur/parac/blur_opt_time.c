@@ -24,7 +24,7 @@
 //#define HEIGHT  4096
 
 
-#define RUNS 5
+#define RUNS 2
 
 #ifdef TIME_PROF
  double KernelTime1, KernelTime2, KernelTime3;
@@ -67,7 +67,8 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
       cl_event event_kernel;
       cl_kernel kernel_1 = clCreateKernel(g_program, "kernel_1", &status);
       checkErr(status, "clCreateKernel for kernel_1");
-      global_work_size[0] = 600; // 4800
+      //global_work_size[0] = 600; // 4800
+      global_work_size[0] = 640; // NVIDIA 4800
       global_work_size[1] = 6406;
       local_work_size[0] = 128 ;
       local_work_size[1] = 1;
@@ -186,7 +187,8 @@ void blur_conv(short (*in)[6408][4802], short (*intermediate)[6408][4802], short
       cl_event event_kernel;
       cl_kernel kernel_2 = clCreateKernel(g_program, "kernel_2", &status);
       checkErr(status, "clCreateKernel for kernel_2");
-      global_work_size[0] = 600;
+      ///global_work_size[0] = 600;
+      global_work_size[0] = 640;  // NVIDIA
       global_work_size[1] = 6406;
       local_work_size[0] = 128;
       local_work_size[1] = 1;

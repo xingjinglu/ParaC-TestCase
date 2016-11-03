@@ -146,7 +146,7 @@ static inline int openCLCreate(const char* inputfile,char * remain)
   g_context=clCreateContext(NULL,numdevices,device,NULL,NULL,&status);
   checkErr(status,"clCreateContext()");
 
-  g_queue=clCreateCommandQueue(g_context,device[1],CL_QUEUE_PROFILING_ENABLE,&status);
+  g_queue=clCreateCommandQueue(g_context,device[0],CL_QUEUE_PROFILING_ENABLE,&status);
   checkErr(status,"clCreateCommandQueue()");
 
   char *program_source=ReadSources((const char*)inputfile);
@@ -154,7 +154,7 @@ static inline int openCLCreate(const char* inputfile,char * remain)
   g_program=clCreateProgramWithSource(g_context,1,(const char**)&program_source,NULL,&status);
   checkErr(status,"clCreateProgramWithSource");
 
-  status=clBuildProgram(g_program,1,&device[1],remain,NULL,NULL);
+  status=clBuildProgram(g_program,1,&device[0],remain,NULL,NULL);
 
   if(status !=CL_SUCCESS)
   {
@@ -165,13 +165,13 @@ static inline int openCLCreate(const char* inputfile,char * remain)
     char *build_log = NULL;
     size_t build_log_size = 0;
 
-    log_status = clGetProgramBuildInfo(g_program, device[1], CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_size);
+    log_status = clGetProgramBuildInfo(g_program, device[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_size);
     if(log_status != CL_SUCCESS)
         std::cout << "Failed to build the program and get the build info." << std::endl;
 
     build_log = new char[build_log_size];
     memset(build_log, 0, build_log_size);
-    log_status = clGetProgramBuildInfo(g_program, device[1], CL_PROGRAM_BUILD_LOG, build_log_size, build_log, NULL);
+    log_status = clGetProgramBuildInfo(g_program, device[0], CL_PROGRAM_BUILD_LOG, build_log_size, build_log, NULL);
     if(log_status != CL_SUCCESS)
         std::cout << "Failed to build the program and get the build info." << std::endl;
 

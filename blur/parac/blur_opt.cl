@@ -43,12 +43,18 @@ __kernel void kernel_1(
     short8 res1;
     {
       // opt1: horizontal tiling(1,8)
-      in0 = ( convert_short8 ) ( *((__global short8*) ((__global char*) inSrcDt2 )));
-      in1 = ( convert_short8) ( *((__global short8*) ((__global char*) inSrcDt2  + inSrcStep * 1)));
-      in2 = ( convert_short8) ( *((__global short8*) ((__global char*) inSrcDt2 + inSrcStep * 2)));
+      in0 =  convert_short8  ( *((__global short8*) ((__global char*) inSrcDt2 )));
+      in1 =  convert_short8 ( *((__global short8*) ((__global char*) inSrcDt2  + inSrcStep * 1)));
+      in2 =  convert_short8 ( *((__global short8*) ((__global char*) inSrcDt2 + inSrcStep * 2)));
       res1 =  in0 + in1 + in2; 
     }
-    *((__global short8*)(intermediateDstDt1)) = res1 / 3;
+#if 0
+    *((__global short8*)(intermediateDstDt1)) = res1; // /convert_short8(3);
+#endif
+   *(intermediateDstDt1+0) = res1.s0; // /convert_short8(3);
+   *(intermediateDstDt1+1) = res1.s1; // /convert_short8(3);
+   //*(intermediateDstDt1+2) = res1.s2; // /convert_short8(3);
+   //*(intermediateDstDt1+3) = res1.s3; // /convert_short8(3);
   }
 
 }
@@ -112,7 +118,7 @@ __kernel void kernel_2(
   }
 #endif
 
-#if 1 // tile(8)
+#if 0 // tile(8)
   {
     short8 intermediate;
     short intermediateNext;
@@ -134,7 +140,7 @@ __kernel void kernel_2(
     res1.s7 += intermediateNext; 
   }
 
-    *((__global short8*)(outDstDt1)) =  res1/3;
+    *((__global short8*)(outDstDt1)) =  res1/convert_short8(3);
   }
 #endif
 

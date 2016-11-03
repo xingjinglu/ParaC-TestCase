@@ -176,7 +176,7 @@ int openCLCreate(cl_context* context,cl_command_queue* queue,const char* inputfi
   *context=clCreateContext(NULL,numdevices,device,NULL,NULL,&status);
 	checkErr(status,"clCreateContext()");
 	
-	*queue=clCreateCommandQueue(*context,device[1],CL_QUEUE_PROFILING_ENABLE,&status);
+	*queue=clCreateCommandQueue(*context,device[0],CL_QUEUE_PROFILING_ENABLE,&status);
 	checkErr(status,"clCreateCommandQueue()");
 	
 	char *program_source=ReadSources((const char*)inputfile);
@@ -185,7 +185,7 @@ int openCLCreate(cl_context* context,cl_command_queue* queue,const char* inputfi
 	g_program=clCreateProgramWithSource(g_context,1,(const char**)&program_source,NULL,&status);
 	checkErr(status,"clCreateProgramWithSource");
 
-	status=clBuildProgram(g_program,1,&device[1],remain,NULL,NULL);
+	status=clBuildProgram(g_program,1,&device[0],remain,NULL,NULL);
 
   if(status !=CL_SUCCESS)
 	{
