@@ -1,0 +1,20 @@
+sum = 676788760, mean = 161
+Finsh execute CPU version of sharpness 
+sum = 676788760, mean = 161
+Finsh execute CPU version of sharpness 
+------Total time(ms)------
+down = 63.316650
+up_gpu = 4.158450
+up_row=0.050650
+up_col=0.081100
+sobel = 5.129900
+mean = 0.268550
+sharpness = 3.377000
+------Kernel time(ms)------
+down = 0.066182
+up_col = 0.021846
+up_row=0.015771
+up=0.078616
+sobel = 0.189053
+mean = 0.107125
+sharpness = 0.323877

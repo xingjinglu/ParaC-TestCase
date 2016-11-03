@@ -1,0 +1,20 @@
+ss
+sum = 42024530, mean = 160
+ss
+sum = 42024530, mean = 160
+------Total time(ms)------
+down = 1.584000
+up_gpu = 0.517000
+up_row=0.046000
+up_col=0.066000
+sobel = 0.578000
+mean = 0.107700
+sharpness = 0.301250
+------Kernel time(ms)------
+down = 0.018880
+up_col = 0.014176
+up_row=0.010592
+up=0.017440
+sobel = 0.024995
+mean = 0.018586
+sharpness = 0.033461

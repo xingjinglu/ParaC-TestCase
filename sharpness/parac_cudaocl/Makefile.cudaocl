@@ -1,0 +1,23 @@
+#CFLAGS = -DTIME_PROF -D_VERIFY
+CFLAGS = -DTIME_PROF -D_VERIFY
+INC=/usr/local/cuda-7.5/include/
+all: sharpness_256 sharpness_512 sharpness_1024 sharpness_2048 sharpness_4096 
+#all:sharpness_256 sharpness_512 sharpness_1024 sharpness_2048 sharpness_4096 
+sharpness:sharpness.c sharpness.cl
+	g++ -O3 sharpness.c -o sharpness -lOpenCL -I$(INC) #-lfreeimage
+sharpness_256:sharpness_opt_lxj_256.c sharpness_opt_lxj_256.cl
+	g++ -O3  $(CFLAGS) sharpness_opt_lxj_256.c -o sharpness_256 -lOpenCL -I$(INC) # -lfreeimage
+sharpness_512:sharpness_opt_lxj_512.c sharpness_opt_lxj_512.cl
+	g++ -O3  $(CFLAGS) sharpness_opt_lxj_512.c -o sharpness_512 -lOpenCL -I$(INC) # -lfreeimage
+sharpness_1024:sharpness_opt_lxj_1024.c sharpness_opt_lxj_1024.cl
+	g++ -O3  $(CFLAGS) sharpness_opt_lxj_1024.c -o sharpness_1024 -lOpenCL -I$(INC) #-lfreeimage
+sharpness_2048:sharpness_opt_lxj_2048.c sharpness_opt_lxj_2048.cl
+	g++ -O3  $(CFLAGS) sharpness_opt_lxj_2048.c -o sharpness_2048 -lOpenCL -I$(INC) #-lfreeimage
+sharpness_4096:sharpness_opt_lxj_4096.c sharpness_opt_lxj_4096.cl
+	g++ -O3  $(CFLAGS) sharpness_opt_lxj_4096.c -o sharpness_4096 -lOpenCL -I$(INC) #-lfreeimage
+clean:
+	rm sharpness sharpness_time sharpness_opt sharpness_256 sharpness_512 sharpness_1024 sharpness_2048 sharpness_4096
+
+
+	
+

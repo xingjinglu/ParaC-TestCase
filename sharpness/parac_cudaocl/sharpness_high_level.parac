@@ -1,0 +1,199 @@
+#include<stdlib.h>
+
+#define ROWS 1024
+#define COLS 1024
+#define M 1024
+#define N 1024
+
+typedef struct __MMC_CSE_PARAMETER_PUBLIC
+{
+	float peak;
+	float cutoffCoef;
+	float cutoff2;
+	float cutoff3Coef;
+}MMC_CSE_PARAMETER_PUBLIC;
+
+
+//M is height, N is width
+int DownScaleNewX16 (/*int M, int N, */parac_matrix unsigned char &pImageSrc[M][N], parac_matrix unsigned char &pImageDst[M/4][N/4])
+{
+  parac_iterator it(iter_element; 0: M: 4; 0: N: 4)
+  {
+      pImageDst[itx/4][ity/4] = (matrix_sum(pImageSrc[itx:4:1][ity:4:1]) + 8) >> 4;
+  }
+}
+
+int UpScaleNewX16 (/*int M, int N, */parac_matrix unsigned char &srcImage[M/4][N/4], parac_matrix unsigned char &dstImage[M][N]){
+
+  // UpBorderCol.
+  /*The first and last two columns*/
+  parac_matrix float border_mp_0[4][1] = {1.0, 3/4.0f, 2/4.0f, 1/4.0f};
+  parac_matrix float border_mp_1[4][1] = {0.0, 1/4.0f, 2/4.0f, 3/4.0f}; 
+
+  parac_iterator it1(iter_element; 0:M/4:1;0:1:1 ) 
+  {
+    if(it1x == M/4-1)
+    {
+      dstImage[it1x*4][0]   = srcImage[it1x][0];
+      dstImage[it1x*4+1][0] = srcImage[it1x][0];
+
+      dstImage[it1x*4][1]   = srcImage[it1x][0];
+      dstImage[it1x*4+1][1] = srcImage[it1x][0];
+
+      dstImage[it1x*4][M-2] = srcImage[it1x][M/4-1];
+      dstImage[it1x*4+1][M-2] = srcImage[it1x][M/4-1];
+      dstImage[it1x*4+2][M-2] = srcImage[it1x][M/4-1];
+      dstImage[it1x*4+3][M-2] = srcImage[it1x][M/4-1];
+
+      dstImage[it1x*4][M-1] = srcImage[it1x][M/4-1];
+      dstImage[it1x*4+1][M-1] = srcImage[it1x][M/4-1];
+      dstImage[it1x*4+2][M-1] = srcImage[it1x][M/4-1];
+      dstImage[it1x*4+3][M-1] = srcImage[it1x][M/4-1];
+
+    }
+    else
+    {
+      dstImage[it1x*4:4:1][0]   = dstImage[it1x*4:4:1][1]   = srcImage[it1x][0]     * border_mp_0 + srcImage[it1x+1][0]     * border_mp_1;
+      dstImage[it1x*4:4:1][M-2] = dstImage[it1x*4:4:1][M-1] = srcImage[it1x][M/4-1] * border_mp_0 + srcImage[it1x+1][M/4-1] * border_mp_1;
+
+    }		
+  }
+   
+  // The first and last two rows
+  parac_iterator it2(iter_element; ;0:N/4:1) 
+  {
+    if(it2y == N/4-1)
+    {
+      dstImage[0][it2y*4] = srcImage[0][it2y];
+      dstImage[0][it2y*4+1] = srcImage[0][it2y];
+
+      dstImage[1][it2y*4] = srcImage[0][it2y];
+      dstImage[1][it2y*4+1] = srcImage[0][it2y];
+
+      dstImage[N-2][it2y*4] = srcImage[N/4-1][it2y];
+      dstImage[N-2][it2y*4+1] = srcImage[N/4-1][it2y];
+
+      dstImage[N-1][it2y*4] = srcImage[N/4-1][it2y];
+      dstImage[N-1][it2y*4+1] = srcImage[N/4-1][it2y];
+    }
+    else
+    {
+      dstImage[0][it2y*4:4:1]    = dstImage[1][it2y*4:4:1]   = srcImage[0][it2y]     * transe(border_mp_0) + srcImage[0][it2y+1]     * transe(border_mp_1); 
+      dstImage[N-2][it2y*4:4:1]  = dstImage[N-1][it2y*4:4:1] = srcImage[N/4-1][it2y] * transe(border_mp_0) + srcImage[N/4-1][it2y+1] * transe(border_mp_1);
+
+    }		
+  }
+  
+  // body
+  parac_matrix float  mp[4][2] = {7/8.0f, 1/8.0f, 5/8.0f, 3/8.0f, 3/8.0f, 5/8.0f, 1/8.0f, 7/8.0f};
+  parac_iterator it(iter_element; 0:M/4-1:1; 0:N/4-1:1) 
+  {
+    dstImage[itx*4+2:4:1][ity*4+2:4:1] = mp * srcImage[itx:2:1][ity:2:1] * transe(mp);
+  }
+}
+
+void Sharpness (parac_matrix unsigned char &yPlane[M][N], parac_matrix unsigned char &yPlaneCSER[M][N], parac_matrix unsigned char &dst[M][N], MMC_CSE_PARAMETER_PUBLIC& cseParamPublic){
+
+  parac_matrix unsigned short pEdge[M][N] ;
+
+
+
+
+  //SobelX16 (yPlane, pEdge);
+  parac_matrix char gx[3][3]  = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+  parac_matrix char gy[3][3] = {1, 2, 1, 0, 0, 0, -1, -2, -1};
+
+
+  parac_iterator it1(iter_element; 0: M: 1; 0:N:1) 
+  {
+    if(it1x == 0 ||   (it1y) ==0 ||  it1x == M-1 ||   it1y == N-1)
+      pEdge[it1x][it1y] = 0; 
+    else
+      pEdge[it1x][it1y] = abs (convolution (gx, yPlane[it1x-1:3:1][it1y-1:3:1])) + abs (convolution (gy, yPlane[it1x-1:3:1][it1y-1:3:1]));
+  }
+
+  /*MeanX16*/
+  short mean = matrix_sum(pEdge) / (M * N) + 1 / 2;   
+
+  cseParamPublic.cutoff2 = 256.0f;
+  cseParamPublic.cutoff3Coef = 1.0f;
+  cseParamPublic.cutoffCoef = 1.0f;
+  cseParamPublic.peak = 2.0f;
+
+  float weight_tmp = (1 / cseParamPublic.cutoff2);
+  float strength_tmp = 1 / cseParamPublic.cutoffCoef*mean;
+  float tmp2 = cseParamPublic.peak - 1.0;
+   
+  float cutoff2Order = pow (cseParamPublic.cutoff3Coef*mean, 4); // 0922
+  parac_border_rule r1 
+  {
+    yPlane[-1][*] = 0;
+    yPlane[+1][*] = 0;
+    yPlane[*][-1] = 0;
+    yPlane[*][+1] = 0;
+  }	
+
+  float m1 = 1.0/mean; m1 = m1 * m1 * m1 * m1;
+  float m2 = 1.0/256; m2 = m2 * m2 * m2 * m2;
+
+  parac_iterator it(iter_element; 0:M:1; 0:N:1) parac_border_rule (r1)
+  {
+    unsigned char maxValue = matrix_max (yPlane[itx-1:3:1][ity-1:3:1]);
+    unsigned char minValue = matrix_min (yPlane[itx-1:3:1][ity-1:3:1]); 
+
+    float pError = yPlane[itx][ity] - yPlaneCSER[itx][ity];
+    float edge2Order = (float)pEdge[itx][ity] * pEdge[itx][ity] * pEdge[itx][ity] * pEdge[itx][ity];
+    float enhancedF = edge2Order * m1 + 1;
+    float strength = edge2Order * m2 + 1;
+
+    strength = (enhancedF - 1)/(enhancedF * strength) + 1;
+    enhancedF = pError * strength + yPlaneCSER[itx][ity];
+    strength = (0.05f * edge2Order + cutoff2Order)/(cutoff2Order + edge2Order);
+
+    float pSharpness_value  = enhancedF > 255 ? 255 : (enhancedF < 0 ? 0 : enhancedF);
+
+    edge2Order = minValue - strength *(minValue - enhancedF);
+    strength = maxValue + strength *(enhancedF - maxValue);
+    strength = strength < 255 ? strength : 255;
+    edge2Order = enhancedF < minValue ? (edge2Order > 0 ? edge2Order : 0) : pSharpness_value;   
+
+    dst[itx][ity] = enhancedF > maxValue ?  strength : edge2Order;
+  }
+
+}
+
+void sharpness_total(parac_matrix unsigned char &yPlane[M][N], parac_matrix unsigned char &dst[M][N])
+{
+	MMC_CSE_PARAMETER_PUBLIC cseParamPublic;
+	cseParamPublic.cutoff2=256.0f;
+	cseParamPublic.cutoff3Coef=1.0f;
+	cseParamPublic.cutoffCoef=1.0f;
+	cseParamPublic.peak=2.0f;
+  
+	parac_matrix unsigned char yPlaneCSER[M][N];
+	parac_matrix unsigned char yPlaneDown[M/4][N/4] ;
+ 
+	DownScaleNewX16 (yPlane, yPlaneDown);
+	UpScaleNewX16 (yPlaneDown, yPlaneCSER);
+	Sharpness (yPlane, yPlaneCSER, dst, cseParamPublic);
+}
+
+int main(){
+
+  unsigned char *src_data = (unsigned char *)malloc(sizeof(unsigned char) * ROWS * COLS);
+  unsigned char *dst_data = (unsigned char *)malloc(sizeof(unsigned char) * ROWS * COLS);
+
+  for(int i=0;i<ROWS*COLS;i++)
+  {
+    src_data[i]=rand()%100+1;
+  }
+
+  parac_matrix unsigned char &yPlane[ROWS][COLS] = src_data;  //生成parac_matrix
+  parac_matrix unsigned char &dst[ROWS][COLS] = dst_data;
+
+  sharpness_total(yPlane, dst);
+
+  dst_data = dst; //从parac_matrix中获取最终结果
+
+  return 0;
+}

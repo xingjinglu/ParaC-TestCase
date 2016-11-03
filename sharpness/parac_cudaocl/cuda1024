@@ -1,0 +1,22 @@
+down success
+ss
+sum = 168864012, mean = 161
+down success
+ss
+sum = 168864012, mean = 161
+------Total time(ms)------
+down = 17.208000
+up_gpu = 1.153300
+up_row=0.042200
+up_col=0.068200
+sobel = 1.703350
+mean = 0.147400
+sharpness = 1.018950
+------Kernel time(ms)------
+down = 0.022438
+up_col = 0.015878
+up_row=0.011768
+up=0.029365
+sobel = 0.055094
+mean = 0.034998
+sharpness = 0.091384
