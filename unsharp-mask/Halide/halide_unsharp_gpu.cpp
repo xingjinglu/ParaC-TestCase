@@ -11,7 +11,7 @@
 #include "../support/benchmark.h"
 //#include "halide_image.h"
 #include "halide_image_io.h"
-#include "../support/auto_build.h"
+//#include "../support/auto_build.h"
 //#include "HalideBuffer.h"
 
 
@@ -54,15 +54,10 @@ class HalideUnsharp{
     HalideUnsharp( Image<float>input ): in(input){
 
       kernel(x) = exp(-x*x/(2*sigma*sigma)) / (sqrtf(2*M_PI)*sigma);
-#if 1
+
       in_bounded = BoundaryConditions::repeat_edge(in);
       gray(x, y) = 0.299f * in_bounded(x, y) + 0.587f * in_bounded(x, y)
         + 0.114f * in_bounded(x, y);
-#endif
-#if 0
-      gray(x, y) = 0.299f * in(x, y) + 0.587f * in(x, y)
-        + 0.114f * in(x, y);
-#endif
 
       blur_y(x, y) = (kernel(0) * gray(x, y) +
           kernel(1) * (gray(x, y-1) +
@@ -87,7 +82,7 @@ class HalideUnsharp{
       unsharp(x, y) = ratio(x, y) * in(x, y);
 
       //unsharp.bound(x, 0, 1536).bound(y, 0, 2560).bound(c, 0, 3);
-      unsharp.estimate(x, 0, 1536).estimate(y, 0, 2560);
+      //unsharp.estimate(x, 0, 1536).estimate(y, 0, 2560);
 
     }
 
@@ -95,7 +90,7 @@ class HalideUnsharp{
     void schedule_for_gpu(){
       printf("gpu schedule \n");
       Var xi, yi;
-#if 1 
+#if 1
       unsharp.compute_root()
         .reorder( x, y)
         .gpu_tile(x, y, 16, 16);
@@ -109,18 +104,25 @@ class HalideUnsharp{
         .unroll(x, 2)
         .gpu_threads(x, y);
 #endif
-
 #if 0
-      unsharp.compute_root()
-        .gpu_tile(x, y, 16, 16);
-      gray.compute_at(unsharp, Var::gpu_blocks())
-        .tile(x, y, xi, yi, 2, 2)
-        .unroll(xi)
-        .unroll(yi)
-        .gpu_threads(x, y);
-      blur_y.compute_at(unsharp, Var::gpu_blocks())
-        .unroll(x, 2)
-        .gpu_threads(x, y);
+      //kernel.compute_root().vectorize(x, 4);  // work.
+      kernel.compute_root();
+      blur_y.compute_at(unsharp, y).vectorize(x, 4);// works
+      //ratio.compute_at(unsharp, y).vectorize(x, 8);
+      unsharp.vectorize(x, 4).parallel(y).reorder(x, y);
+#endif
+
+      //in_bounded.compute_at(gray).gpu_tile(x, y, 8, 8);
+      //gray.compute_at(blur_y).gpu_tile(x, y, 8, 8);
+      //blur_y.compute_at(blur_x).gpu_tile(x, y, 8, 8); 
+      //blur_x.compute_at(unsharp).gpu_tile(x, y, 8, 8);
+      //sharpen.compute_at(ratio).gpu_tile(x, y, 8, 8);
+      //ratio.compute_at(unsharp).gpu_tile(x, y, 8, 8);
+      //unsharp.gpu_tile(x, y, 8, 8); // not work
+#if 0
+      blur_y.compute_at(unsharp, y).vectorize(x, 8);
+      ratio.compute_at(unsharp, y).vectorize(x, 8);
+      unsharp.vectorize(x, 8).parallel(y).reorder(x, y);
 #endif
 
       Target target = get_host_target();

@@ -1,11 +1,12 @@
-TESTS=filter_auto filter_ref filter_naive filter_sweep filter_rand
+TESTS=filter_auto filter_ref filter_naive filter_sweep filter_rand filter_auto_gpu filter_naive_gpu
 include ../support/Makefile.inc
 
 auto: clean_auto filter_auto
 
 unsharp: unsharp.cpp
 	$(CXX) $(CXXFLAGS) unsharp.cpp $(LIB_HALIDE) -o \
-		unsharp -lpthread -ldl -lz $(LDFLAGS) $(LLVM_SHARED_LIBS) -ltinfo
+		unsharp -lpthread -ldl -lz $(LDFLAGS) $(LLVM_SHARED_LIBS) 
+#unsharp -lpthread -ldl -lz $(LDFLAGS) $(LLVM_SHARED_LIBS) -ltinfo
 
 unsharp_ref.o: unsharp
 	./unsharp 0
@@ -32,7 +33,13 @@ unsharp_rand.o: unsharp
 filter_%: unsharp_%.o filter.cpp
 	$(CXX) $(CXXFLAGS) $^ -lpthread -ldl -o $@ \
 		$(PNGFLAGS)
+filter_auto%: unsharp_auto%.o filter.cpp
+	$(CXX) $(CXXFLAGS) $^ -lpthread -ldl -o $@ \
+		$(PNGFLAGS)
+filter_naive%: unsharp_naive%.o filter.cpp
+	$(CXX) $(CXXFLAGS) $^ -lpthread -ldl -o $@ \
+		$(PNGFLAGS)
 
 clean: clean_variants
 	rm -f unsharp unsharp.o unsharp.h\
-		filter_ref filter_auto filter_sweep filter_rand out.png
+		filter_ref filter_auto filter_sweep filter_rand out.png unsharp_gpu
