@@ -10,7 +10,7 @@
 //#define COLS 1024
 //#define M 1024
 //#define N 1024
-#define RUNS 1
+#define RUNS 20
 
 #define MIN2(a,b)  ((a)<(b) ? (a):(b))
 #define MAX2(a,b)  ((a)>(b) ? (a):(b))

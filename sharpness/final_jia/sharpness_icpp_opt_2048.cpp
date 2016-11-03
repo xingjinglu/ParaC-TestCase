@@ -178,7 +178,7 @@ int openCLCreate(cl_context* context,cl_command_queue* queue,const char* inputfi
   *context=clCreateContext(NULL,numdevices,device,NULL,NULL,&status);
 	checkErr(status,"clCreateContext()");
 	
-	*queue=clCreateCommandQueue(*context,device[1],CL_QUEUE_PROFILING_ENABLE,&status);
+	*queue=clCreateCommandQueue(*context,device[0],CL_QUEUE_PROFILING_ENABLE,&status);
 	checkErr(status,"clCreateCommandQueue()");
 	
 	char *program_source=ReadSources((const char*)inputfile);
@@ -186,17 +186,32 @@ int openCLCreate(cl_context* context,cl_command_queue* queue,const char* inputfi
 	program=clCreateProgramWithSource(g_context,1,(const char**)&program_source,NULL,&status);
 	checkErr(status,"clCreateProgramWithSource");
 	
-	status=clBuildProgram(program,1,&device[1],NULL,NULL,NULL);
+	status=clBuildProgram(program,1,&device[0],NULL,NULL,NULL);
 	
 	if(status !=CL_SUCCESS)
-	{
-		printf("Error: build kernel fails\n");
-		size_t len;
-		clGetProgramBuildInfo(program,*device,CL_PROGRAM_BUILD_LOG,sizeof(BufferError),BufferError,&len);
-		BufferError[len]='\0';
-		printf("%s",BufferError);
-		checkErr(status,"clBuildProgram");
-		getchar();
+  {
+    printf("Error: build kernel fails\n");
+    cl_int log_status;
+    char *build_log = NULL;
+    size_t len;
+    log_status = clGetProgramBuildInfo(program,device[0], CL_PROGRAM_BUILD_LOG, 0, NULL,&len);
+    if( log_status != CL_SUCCESS )
+      std::cout << "Failed to build the program and get the build info." << std::endl;
+
+    build_log = new char[len];
+    memset(build_log, 0, len);
+
+    log_status = clGetProgramBuildInfo(program, device[0], CL_PROGRAM_BUILD_LOG, len, build_log, NULL);
+    if(log_status != CL_SUCCESS)
+      std::cout << "Failed to build the program and get the build info." << std::endl;
+
+    std::cout << "\n\t\t\tBUILD LOG\n";
+    std::cout << build_log << std::endl;
+    delete [] build_log;
+
+
+
+	
 		return -1;
 	}
 	

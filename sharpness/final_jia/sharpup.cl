@@ -140,7 +140,7 @@ int pEdgeShift)
   else
   {
       uc1     = (int)*(pPadSrc + inputIndex - 1);
-	    pSrcL0  = (convert_int4)(*((__global uchar4*)(pPadSrc + inputIndex)));
+	    pSrcL0  = convert_int4(*((__global uchar4*)(pPadSrc + inputIndex)));
       uc2     = (int)*(pPadSrc + inputIndex + 4);
 
       res0.s0 = uc1 + (pSrcL0.s0<<1) + pSrcL0.s1;
@@ -155,7 +155,7 @@ int pEdgeShift)
       
 	    inputIndex += pSrcStepwide;
       uc1     = (int) *(pPadSrc + inputIndex - 1);
-      pSrcL0  = (convert_int4)(*((__global uchar4*)(pPadSrc + inputIndex)));
+      pSrcL0  = convert_int4(*((__global uchar4*)(pPadSrc + inputIndex)));
       uc2     = (int) *(pPadSrc + inputIndex + 4);
 
       res1.s0 += (pSrcL0.s1 - uc1)<<1;
@@ -165,7 +165,7 @@ int pEdgeShift)
 	    
 	    inputIndex += pSrcStepwide;
       uc1     = (int)*(pPadSrc + inputIndex - 1);
-	    pSrcL0  = (convert_int4)(*((__global uchar4*)(pPadSrc + inputIndex)));
+	    pSrcL0  = convert_int4(*((__global uchar4*)(pPadSrc + inputIndex)));
       uc2     = (int)*(pPadSrc + inputIndex + 4);
 
       res0.s0 -= uc1 + (pSrcL0.s0<<1) + pSrcL0.s1;
