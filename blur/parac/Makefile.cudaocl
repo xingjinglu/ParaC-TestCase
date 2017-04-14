@@ -1,0 +1,13 @@
+all: blur blur-time blur-opt
+INC=/usr/local/cuda-7.5/include/
+CFLAGS= -O3 -DTIME_PROF
+blur:blur.c blur.cl
+	g++ -I ./ $(CFLAGS) blur.c -o blur -lOpenCL  -I$(INC) # -I/opt/AMDAPPSDK/include -lfreeimage
+blur-time:blur_time.c blur.cl
+	g++ -I ./ $(CFLAGS) blur_time.c -o blur-time  -lOpenCL -I$(INC) # -I/opt/AMDAPPSDK/include -lfreeimage
+blur-opt:blur_opt_time.c blur_opt.cl
+	g++ -I ./ $(CFLAGS) blur_opt_time.c -o blur-opt -lOpenCL -I$(INC) #-I/opt/AMDAPPSDK/include -lfreeimage
+clean:
+	rm blur blur-time blur-opt
+	
+
