@@ -1,0 +1,16 @@
+1. version details.
+1.1 For x86-64.
+1) sharpness_x86.cpp Shigang Li for X86-64
+2) sharpness_comparison.cpp Guangli Li, based on Shg Li versoin.
+  >> Parallization  Mean and DownScale with SIMD.
+  >> Get no performance gains.
+3) sharpness_ser_opt.cpp  Xingjing Lu
+  >> Do optimization on the serial version,such as
+     Inline,... 
+ >> The version is the same as the simd version if remove simd code from sharpness_x86.cpp.
+4) sharpness_simd_x86_ntimer.cpp
+   It is the same SIMD version as the sharpness_x86.cpp, except add new timer funcs.
+
+
+1.2 For ARM Neon.
+1) sharpness_arm.cpp  Shigang Li
