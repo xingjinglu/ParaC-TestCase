@@ -1,0 +1,10 @@
+Normal_laplacian, 1st iterator,  total time : 1.059ms
+Normal_laplacian, 2nd iterator,  total time : 1.806ms
+Normal_laplacian, 3th iterator,  total time : 2.337ms
+Normal_laplacian, serial version,  total time : 5.202ms
+
+Parallel_laplacian, 1st iterator,  total time : 0.627ms
+Parallel_laplacian, 2nd iterator,  total time : 0.305ms
+Parallel_laplacian, 3th iterator,  total time : 1.913ms
+Parallel_laplacian, serial version,  total time : 2.845ms
+
