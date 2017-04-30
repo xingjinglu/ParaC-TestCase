@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -O2
+CFLAGS = -O3
 all: sharp  sharpparac seropt #sharp_arm 
 #all: x86_orig arm_orig
 

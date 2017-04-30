@@ -327,11 +327,16 @@ static void UpsampleX4_reverse(unsigned char *pSrc ,signed short*pDst,unsigned c
     }
 }
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {   
-    int ssize=1024;
-    int height = ssize;
-    int width = ssize;
+    
+    if( argc != 3 ){
+      printf("usage:sharpness width height\n");
+      return -1;
+    }
+    int height = atoi(argv[2]);
+    int width = atoi(argv[1]);
+
     unsigned char * Source = new unsigned char[width * height];
     double duration_cpu; 
     for(int i=0; i < height; i++) {
