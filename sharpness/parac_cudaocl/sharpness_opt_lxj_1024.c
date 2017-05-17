@@ -182,8 +182,8 @@ int DownScaleNewX16(int height, int width, unsigned char *pImageSrc1, unsigned c
       global_work_size[1] = height/4;
 
       size_t local_work_size[2];
-      local_work_size[0] = 16;
-      local_work_size[1] = 4;
+      local_work_size[0] = 256;
+      local_work_size[1] = 1;
 
       status = clSetKernelArg(kernel_1, 0, sizeof(cl_mem), (void *)&pImageSrcsrcBuf);
       checkErr(status, "clSetKernelArg");
@@ -581,8 +581,8 @@ int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char
       //global_work_size[1] = 256;
       global_work_size[0] = 2;
       global_work_size[1] = height/4;
-      local_work_size[0] = 256;
-      local_work_size[1] = 1;
+      local_work_size[0] = 1;
+      local_work_size[1] = 256;
 
       status = clSetKernelArg(kernel_2, 0, sizeof(cl_mem), (void *)&srcImagesrcBuf);
       checkErr(status, "clSetKernelArg");
@@ -817,7 +817,8 @@ int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char
       status = clSetKernelArg(kernel_3, 19, sizeof(int), (void *)&dstImageDSShift);
       checkErr(status, "clSetKernelArg");
 
-      status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      //status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      status = clEnqueueNDRangeKernel(g_queue, kernel_3, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
       checkErr(status, "clEnqueueNDRangeKernel");
       status = clFinish(g_queue);
       checkErr(status,"clFinish of kernel_3");
@@ -966,15 +967,17 @@ int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char
       status = clEnqueueWriteBuffer(g_queue, mpsrcBuf, CL_TRUE, 0,mp_srcsz0Pad,mpSrcBufH, 0, NULL, NULL);
       checkErr(status, "clWriteBuffer");
       size_t global_work_size[2];
+      size_t local_work_size[2];
+
       cl_event event_kernel;
       cl_kernel kernel_4 = clCreateKernel(g_program, "kernel_4", &status);
       checkErr(status, "clCreateKernel for kernel_4");
 
       gettimeofday(&t11,NULL);
-      //global_work_size[0] = 256;
-      //global_work_size[1] = 256;
       global_work_size[0] = width/4;
       global_work_size[1] = height/4;
+      local_work_size[0] = 256;
+      local_work_size[1] = 1;
       status = clSetKernelArg(kernel_4, 0, sizeof(cl_mem), (void *)&srcImagesrcBuf);
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_4, 1, sizeof(int), (void *)&srcImageSrcWidth);
@@ -1021,8 +1024,8 @@ int UpScaleNewX16(int height, int width, unsigned char *srcImage1, unsigned char
       checkErr(status, "clSetKernelArg");
       status = clSetKernelArg(kernel_4, 14, sizeof(int), (void *)&dstImageDstShift);
       checkErr(status, "clSetKernelArg");
-
       status = clEnqueueNDRangeKernel(g_queue, kernel_4, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+      //status = clEnqueueNDRangeKernel(g_queue, kernel_4, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
       checkErr(status, "clEnqueueNDRangeKernel");
       status = clFinish(g_queue);
 
@@ -1325,8 +1328,8 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             //global_work_size[1] = 1024; //
             global_work_size[0] = width/4;
             global_work_size[1] = height; //
-            //local_work_size[0] = 256;
-            //local_work_size[1] = 1;
+            local_work_size[0] = 256;
+            local_work_size[1] = 1;
             status = clSetKernelArg(kernel_5, 0, sizeof(cl_mem), (void *)&yPlanesrcBuf);
             checkErr(status, "clSetKernelArg");
             status = clSetKernelArg(kernel_5, 1, sizeof(int), (void *)&yPlaneSrcWidth);
@@ -1382,7 +1385,8 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             status = clSetKernelArg(kernel_5, 19, sizeof(int), (void *)&pEdgeDstShift);
             checkErr(status, "clSetKernelArg");
 
-            status = clEnqueueNDRangeKernel(g_queue, kernel_5, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+            //status = clEnqueueNDRangeKernel(g_queue, kernel_5, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+            status = clEnqueueNDRangeKernel(g_queue, kernel_5, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
             checkErr(status, "clEnqueueNDRangeKernel");
             status = clFinish(g_queue);
             checkErr(status,"clFinish of kernel_5");
@@ -1597,6 +1601,7 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             gettimeofday(&t11,NULL);
 
             size_t global_work_size[2];
+            size_t local_work_size[2];
             cl_event event_kernel;
             cl_kernel kernel_7 = clCreateKernel(g_program, "kernel_7", &status);
             checkErr(status, "clCreateKernel for kernel_7");
@@ -1604,6 +1609,8 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             //global_work_size[1] = 1024;
             global_work_size[0] = width/4;
             global_work_size[1] = height;
+            local_work_size[0] = 128;
+            local_work_size[1] = 1; 
             status = clSetKernelArg(kernel_7, 0, sizeof(cl_mem), (void *)&yPlanesrcBuf);
             checkErr(status, "clSetKernelArg");
             status = clSetKernelArg(kernel_7, 1, sizeof(int), (void *)&yPlaneSrcWidth);
@@ -1664,8 +1671,8 @@ void Sharpness(int height, int width, unsigned char *yPlane1, unsigned char *yPl
             checkErr(status, "clSetKernelArg");
             status = clSetKernelArg(kernel_7, 22, sizeof(int), (void *)&dstDstShift);
             checkErr(status, "clSetKernelArg");
-
-            status = clEnqueueNDRangeKernel(g_queue, kernel_7, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+            //status = clEnqueueNDRangeKernel(g_queue, kernel_7, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
+            status = clEnqueueNDRangeKernel(g_queue, kernel_7, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
             checkErr(status, "clEnqueueNDRangeKernel");
             status = clFinish(g_queue);
             checkErr(status,"clFinish of kernel_7");
