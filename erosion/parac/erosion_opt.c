@@ -20,18 +20,20 @@ void erosion(int height, int width, unsigned char (*src)[1024][1024], unsigned c
   int mid = (structWidth + 1) / 2 - 1;
   unsigned char val = 255;
 
-
-  
   {
-   // gettimeofday(&ts1, NULL);
+    totalTime = 0.0;
 
+    for( int k = 0; k < 10; k++){
     size_t global_work_size[2];
+    size_t local_work_size[2];
     size_t transe;
     cl_event event_kernel;
     cl_kernel kernel_1 = clCreateKernel(g_program, "kernel_1", &status);
     checkErr(status, "clCreateKernel for kernel_1");
     global_work_size[0] = (width - mid - 1 - mid )/ 1;
     global_work_size[1] = (height - mid - 1 - mid )/ 1;
+    local_work_size[0] = 16;
+    local_work_size[1] = 16;
     status = clSetKernelArg(kernel_1, 0, sizeof(int), (void *)&height);
     checkErr(status, "clSetKernelArg");
     status = clSetKernelArg(kernel_1, 1, sizeof(int), (void *)&width);
@@ -47,8 +49,8 @@ void erosion(int height, int width, unsigned char (*src)[1024][1024], unsigned c
     checkErr(status, "clCreateBuffer");
     unsigned char *srcSrcBufH = (unsigned char*)malloc(src_srcsz0Pad); 
     for(int i = 0; i < srcSrcHeight; i++){
-  memcpy( (char*)srcSrcBufH+ (i + PADDING_LINE) * srcSrcStep, (char*)src+ i * srcSrcWidth* sizeof(unsigned char), srcSrcWidth * sizeof(unsigned char) );
-  }
+      memcpy( (char*)srcSrcBufH+ (i + PADDING_LINE) * srcSrcStep, (char*)src+ i * srcSrcWidth* sizeof(unsigned char), srcSrcWidth * sizeof(unsigned char) );
+    }
     status = clEnqueueWriteBuffer(g_queue, srcsrcBuf, CL_TRUE, 0,src_srcsz0Pad,srcSrcBufH, 0, NULL, NULL);
     checkErr(status, "clWriteBuffer");
     status = clSetKernelArg(kernel_1, 2, sizeof(cl_mem), (void *)&srcsrcBuf);
@@ -74,8 +76,8 @@ void erosion(int height, int width, unsigned char (*src)[1024][1024], unsigned c
     checkErr(status, "clCreateBuffer");
     unsigned char *dstDstBufH = (unsigned char*)malloc(dst_dstsz0Pad); 
     for(int i = 0; i < dstDstHeight; i++){
-  memcpy( (char*)dstDstBufH+ (i + PADDING_LINE) * dstDstStep,(char*)dst + i * dstDstWidth* sizeof(unsigned char),dstDstWidth* sizeof(unsigned char) );
-  }
+      memcpy( (char*)dstDstBufH+ (i + PADDING_LINE) * dstDstStep,(char*)dst + i * dstDstWidth* sizeof(unsigned char),dstDstWidth* sizeof(unsigned char) );
+    }
     status = clEnqueueWriteBuffer(g_queue, dstdstBuf, CL_TRUE, 0,dst_dstsz0Pad,dstDstBufH, 0, NULL, NULL);
     checkErr(status, "clWriteBuffer");
     status = clSetKernelArg(kernel_1, 8, sizeof(cl_mem), (void *)&dstdstBuf);
@@ -94,6 +96,7 @@ void erosion(int height, int width, unsigned char (*src)[1024][1024], unsigned c
     checkErr(status,"clEnqueueWrite");
     status = clSetKernelArg(kernel_1, 13, sizeof(cl_mem), (void *)&valBuf);
     checkErr(status, "clSetKernelArg");
+    //status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, local_work_size, 0, NULL, &event_kernel);
     status = clEnqueueNDRangeKernel(g_queue, kernel_1, 2, NULL, global_work_size, NULL, 0, NULL, &event_kernel);
     checkErr(status, "clEnqueueNDRangeKernel");
     status = clFinish(g_queue);
@@ -102,16 +105,17 @@ void erosion(int height, int width, unsigned char (*src)[1024][1024], unsigned c
     // Time profiling.
     clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &startTime, NULL);
     clGetEventProfilingInfo(event_kernel, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &endTime, NULL);
-    totalTime = (endTime - startTime)/1000000.0;
+    totalTime += (endTime - startTime)/1000000.0;
 
 
-      status = clEnqueueReadBuffer(g_queue, valBuf, CL_TRUE, 0, sizeof(unsigned char), &val, 0, NULL, NULL);
+    status = clEnqueueReadBuffer(g_queue, valBuf, CL_TRUE, 0, sizeof(unsigned char), &val, 0, NULL, NULL);
     checkErr(status,"clEnqueueReadBuffer");
     status = clEnqueueReadBuffer(g_queue, dstdstBuf, CL_TRUE, 0,dst_dstsz0Pad,dstDstBufH, 0, NULL, NULL);
     for(int i = 0; i < dstDstHeight; i++){
-  memcpy( (char*)dst+ i *dstDstWidth* sizeof(unsigned char), (char*) dstDstBufH+ (i + PADDING_LINE)* dstDstStep, dstDstWidth* sizeof(unsigned char) );
-  }
-  
+      memcpy( (char*)dst+ i *dstDstWidth* sizeof(unsigned char), (char*) dstDstBufH+ (i + PADDING_LINE)* dstDstStep, dstDstWidth* sizeof(unsigned char) );
+    }
+
+    }
   }
 }
 
@@ -120,7 +124,7 @@ void erosion(int height, int width, unsigned char (*src)[1024][1024], unsigned c
 
 
 int main(int argc, char *argv[]) {
-  char inputfile[] = "erosion.cl";
+  char inputfile[] = "erosion_opt.cl";
   char *remain = NULL;
   if (-1 == openCLCreate(inputfile, remain)) {
     printf("openCL create fail !!!!!!");
@@ -142,9 +146,12 @@ int main(int argc, char *argv[]) {
     }
   unsigned char (*parac_src)[1024][1024] = (unsigned char (*)[1024][1024])src;
   unsigned char (*parac_dst)[1024][1024] = (unsigned char (*)[1024][1024])dst;
+  // warm up.
   erosion(Height, Width, parac_src, parac_dst, 3, 3);
 
-  printf("time = %f ms\n", totalTime);
+  erosion(Height, Width, parac_src, parac_dst, 3, 3);
+
+  printf("time = %f ms\n", totalTime/10);
   return 0;
 }
 

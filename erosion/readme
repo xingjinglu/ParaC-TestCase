@@ -1,7 +1,16 @@
-serial version: erosion.cpp
-cuda vesion: erosion.cu
-parac version: erosion.parac
-OpenCL-manual verson: erosion.cl
+----serial version: erosion.cpp
+
+----cuda vesion: erosion.cu
+
+----parac version: erosion.parac--------
+dir ./parac/erosion.parac
+optimizations
+1) remove redundant global memory access; *val
+2) vload3,  
+3) vectorization, vectlen = 4, should take care of bounder case later.
+4) hoist read/write have no effects.
+
+----OpenCL-manual verson: erosion.cl----
 
 
 

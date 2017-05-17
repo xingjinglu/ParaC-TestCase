@@ -6,6 +6,7 @@
 #include <helper_functions.h>
 
 const char *sSDKname = "erosion";
+cudaStream_t stream;
 
 __global__ void MorphErosion_cuda(unsigned char*src, 
      unsigned char*dst, int width,int height, 
@@ -27,11 +28,25 @@ __global__ void MorphErosion_cuda(unsigned char*src,
 
   unsigned char val = 255;
 
+#if 1
   for(int m = 0; m < structWidth; m++){
     for(int n = 0; n < structHeight; n++){
       val &= src[(y+n)*width+x+m];
     }
   }
+#endif
+#if 0
+  val = val & src[y*width+x];
+  val = val & src[y*width+x+1];
+  val = val & src[y*width+x+2];
+  val = val & src[(y+1)*width+x];
+  val = val & src[(y+1)*width+x+1];
+  val = val & src[(y+1)*width+x+2];
+  val = val & src[(y+2)*width+x];
+  val = val & src[(y+2)*width+x+1];
+  val = val & src[(y+2)*width+x+2];
+  val = val & src[(y+1)*width+x+2];
+#endif
 
   dst[y*width+x] = val;
 }
@@ -91,6 +106,12 @@ main(int argc, char *argv[])
 
   unsigned char *d_src, *d_dst;
 
+  //
+  checkCudaErrors(cudaStreamCreate(&stream));
+
+  //
+
+
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
 
@@ -108,14 +129,18 @@ main(int argc, char *argv[])
   MorphErosion_cuda<<<numBlocks, threadPerBlock>>>(d_src, d_dst, Width, Height, 3, 3);
 
   // Real do.
-  cudaEventRecord(start, 0);
-  MorphErosion_cuda<<<grid, block>>>(d_src, d_dst, Width, Height, 3, 3);
-  cudaEventRecord(stop, 0);
-  cudaEventSynchronize(stop);
-
   float kernel_time;
-  cudaEventElapsedTime(&kernel_time, start, stop);
-  printf(" Kernel\t\t\t: %f ms \n", kernel_time);
+  float total_time = 0.0;
+  for( int i = 0; i < 10; i++){
+    cudaEventRecord(start, 0);
+    MorphErosion_cuda<<<numBlocks, threadPerBlock>>>(d_src, d_dst, Width, Height, 3, 3);
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&kernel_time, start, stop);
+    total_time += kernel_time;
+  }
+
+  printf(" Kernel\t\t\t: %f ms \n", total_time/10);
 
 
   checkCudaErrors( cudaMemcpy(dst, d_dst, memsize, cudaMemcpyDeviceToHost ) );
@@ -131,6 +156,7 @@ main(int argc, char *argv[])
       free(dst);
 
 
+      cudaStreamDestroy(stream);
       cudaEventDestroy(start);
       cudaEventDestroy(stop);
 
