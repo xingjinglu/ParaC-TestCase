@@ -1,0 +1,8 @@
+serial version: erosion.cpp
+cuda vesion: erosion.cu
+parac version: erosion.parac
+OpenCL-manual verson: erosion.cl
+
+
+
+
