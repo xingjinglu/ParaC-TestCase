@@ -1,0 +1,12 @@
+#CFLAGS = -DTIME_PROF -D_VERIFY                                                                                                                                             
+CFLAGS = -DTIME_PROF -D_VERIFY
+INC=/usr/local/cuda-7.5/include/
+all: erosion
+erosion:erosion.c erosion.cl
+	g++ -O3 erosion.c -o erosion -lOpenCL -I$(INC) #-lfreeimage
+clean:
+	rm erosion
+
+
+	
+

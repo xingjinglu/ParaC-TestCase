@@ -1,0 +1,11 @@
+CFLAGS = -DTIME_PROF -D_VERIFY -D_OPTBANK
+#CFLAGS = -DTIME_PROF 
+all: erosion 
+erosion:erosion.c erosion.cl
+	g++ -O3 erosion.c -o erosion -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+clean:
+	rm erosion
+
+
+	
+
