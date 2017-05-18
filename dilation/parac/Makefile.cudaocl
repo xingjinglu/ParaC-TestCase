@@ -1,0 +1,22 @@
+#CFLAGS = -DTIME_PROF -D_VERIFY                                                                                                                                             
+CFLAGS = -DTIME_PROF -D_VERIFY
+INC=/usr/local/cuda-7.5/include/
+all: dilation dilation_opt dilation_vect dilation_opt_256 dilation_opt_512 dilation_opt_2048 dilation_opt_4096 dilation_opt_1024
+dilation:dilation.c dilation.cl 
+	g++ -O3 dilation.c -o dilation -lOpenCL -I$(INC) #-lfreeimage
+dilation_opt:dilation_opt.c dilation_opt.cl 
+	g++ -O3 dilation_opt.c -o dilation_opt -lOpenCL -I$(INC) #-lfreeimage
+dilation_vect:dilation_opt_vect.c dilation_opt_vect.cl 
+	g++ -O3 dilation_opt_vect.c -o dilation_vect -lOpenCL -I$(INC) #-lfreeimage
+dilation_opt_256:dilation_opt_vect_256.c dilation_opt_vect.cl 
+	g++ -O3 dilation_opt_vect_256.c -o dilation_opt_256 -lOpenCL -I$(INC) #-lfreeimage
+dilation_opt_512:dilation_opt_vect_512.c dilation_opt_vect.cl 
+	g++ -O3 dilation_opt_vect_512.c -o dilation_opt_512 -lOpenCL -I$(INC) #-lfreeimage
+dilation_opt_1024:dilation_opt_vect_1024.c dilation_opt_vect.cl 
+	g++ -O3 dilation_opt_vect_1024.c -o dilation_opt_1024 -lOpenCL -I$(INC) #-lfreeimage
+dilation_opt_2048:dilation_opt_vect_2048.c dilation_opt_vect.cl 
+	g++ -O3 dilation_opt_vect_2048.c -o dilation_opt_2048 -lOpenCL -I$(INC) #-lfreeimage
+dilation_opt_4096:dilation_opt_vect_4096.c dilation_opt_vect.cl 
+	g++ -O3 dilation_opt_vect_4096.c -o dilation_opt_4096 -lOpenCL -I$(INC) #-lfreeimage
+clean:
+	rm dilation dilation_opt dilation_vect  dilation_opt_256 dilation_opt_512 dilation_opt_2048 dilation_opt_4096 dilation_opt_1024

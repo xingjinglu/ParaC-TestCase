@@ -19,7 +19,7 @@ erosion_opt_2048:erosion_opt_vect_2048.c erosion_opt_vect.cl
 erosion_opt_4096:erosion_opt_vect_4096.c erosion_opt_vect.cl 
 	g++ -O3 erosion_opt_vect_4096.c -o erosion_opt_4096 -lOpenCL -I$(INC) #-lfreeimage
 clean:
-	rm erosion erosion_opt erosion_vect
+	rm erosion erosion_opt erosion_vect erosion_opt_256 erosion_opt_512 erosion_opt_2048 erosion_opt_4096 erosion_opt_1024
 
 
 	

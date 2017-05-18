@@ -1,0 +1,83 @@
+#include<math.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<sys/time.h>
+
+struct timeval ts1, te1;
+
+void dilation(int width, int height, parac_matrix unsigned char &src[height][width],
+    parac_matrix unsigned char &dst[height][width], 
+     int structWidth, int structHeight)
+{
+  int mid = (structWidth+1)/2 -1; // 3 or 4
+  unsigned char val = 0;
+
+  //gettimeofday(&ts1, NULL);
+
+  parac_iterator it(iter_element; mid:height-mid-1:1; mid:width-mid-1:1 ){
+    if(itx < mid || itx > width-mid-1 ){
+      dst[itx][ity] = src[itx][ity];
+    }
+    else if( ity < mid || ity > width-mid-1){
+      dst[itx][ity] = src[itx][ity];
+    }
+    else{
+#if 0
+      for( int m = 0; m < structWidth; m++){
+        for( int n = 0; n < structHeight; n++){
+          val &= src[itx+n][ity+m];
+        }
+      }
+#endif
+      val |=  src[itx][ity];
+      val |=  src[itx][ity+1];
+      val |=  src[itx][ity+2];
+      val |=  src[itx+1][ity];
+      val |=  src[itx+1][ity+1];
+      val |=  src[itx+1][ity+2];
+      val |=  src[itx+2][ity];
+      val |=  src[itx+2][ity+1];
+      val |=  src[itx+2][ity+2];
+      dst[itx][ity] = val;
+    }
+  } 
+ 
+    //gettimeofday(&te1, NULL);
+
+}
+
+
+
+int main(int argc, char *argv[])
+{
+  if( argc < 3 ){
+    printf("Please input Height and Width \n");
+    return 0;
+  }
+
+  int Height = atoi(argv[1]);
+  int Width = atoi(argv[2]);
+
+  unsigned char *src = (unsigned char*) malloc(sizeof(unsigned char)*Width*Height);
+  unsigned char *dst = (unsigned char*) malloc(sizeof(unsigned char)*Width*Height);
+
+  for(int i = 0; i < Height; i++)
+    for( int j = 0; j < Width; j++){
+      src[i*Width+j] = rand()%255;
+    }
+
+
+  parac_matrix unsigned char &parac_src[Height][Width] = src;
+  parac_matrix unsigned char &parac_dst[Height][Width] = dst;
+
+  // warm up.
+  dilation(Width, Height, parac_src, parac_dst,  3, 3 );
+
+  //double total = (double)(te1.tv_usec - ts1.tv_usec)*0.001 + (te1.tv_sec - ts1.tv_sec)*1000;
+  //double total2 = (double)(te2.tv_usec - ts2.tv_usec)*0.001 + (te2.tv_sec - ts2.tv_sec)*1000;
+
+  //printf("Total: %f ms\n", total);
+  //printf("Total2: %f ms\n", total2);
+
+  return 0;
+}
