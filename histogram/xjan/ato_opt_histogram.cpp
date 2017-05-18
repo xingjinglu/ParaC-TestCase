@@ -266,9 +266,9 @@ int main(int argc, char * argv[])
     globalThreads[2]= 1;
 
     int k=256*256;
-    for(int i=0;i<5 && k<IMAGE_LENGTH;i++, k=k*2)
+    for(int i=0;i<12 && k<=IMAGE_LENGTH;i++, k=k*2)
     { 
-        printf("-------------------IMG LEN %d--------------------\n", k);
+        printf("-------------------IMG LEN %d--------------------\t", k);
         int temp_workgroup_num = div_up(k, localThreads[0]*PROCESS_NUM_PER_THREAD);
 
         globalThreads[0]= temp_workgroup_num * localThreads[0];
@@ -330,7 +330,7 @@ int main(int argc, char * argv[])
 
         long long int sum =0 ;
 
-        printf("CPU begin to compute\n");
+        printf("CPU begin to compute\t");
         gettimeofday(&time1,NULL);
         int * cpu_dis_res =(int *)malloc(sizeof(int)*256);
         memset(cpu_dis_res,0,sizeof(int)*256);
@@ -347,7 +347,7 @@ int main(int argc, char * argv[])
 
         }
         gettimeofday(&time2,NULL);
-        printf("CPU exe time:%lldus\n",getTime(time1,time2));
+        printf("CPU exe time:\t%lld\tus\t",getTime(time1,time2));
 
         for(int j=0;j<R+30;j++) 
         {
@@ -415,8 +415,8 @@ int main(int argc, char * argv[])
             }
 
         if(i==256)
-            printf("ATO Bingo~\n");
-        printf("ATO exe time:%lldus\n", gpu_exe_time);
+            printf("ATO Bingo~\t");
+        printf("ATO exe time:\t%lld\tus\t", gpu_exe_time);
 
         for(int i=0;i<R+30;i++)
         {
@@ -523,15 +523,15 @@ int main(int argc, char * argv[])
                 break; 
             }
         if(i==256)
-            printf("OPT Bingo~\n");
+            printf("OPT Bingo~\t");
 
-        printf("OPT exe time:%lldus \t", exe_time);
-        printf("statistic:%lldus \treduce:%lldus\n",statistics_time,reduce_time);
+        printf("OPT exe time\t%lld\tus\t", exe_time);
+        printf("statistic:\t%lld\tus \treduce:\t%lld\tus\t",statistics_time,reduce_time);
         float statistics_bandwidth = 1e9*(k + 256*temp_workgroup_num)*sizeof(int)/1024/1024/1024/statistics_time/1000;
         float reduce_bandwidth = 1e9*(256*temp_workgroup_num+ 256)*sizeof(int)/1024/1024/1024/reduce_time/1000;
-        printf("statistic's bandwidth: %10.2f GB/s \treduce's bandwidth:  %10.2f GB/s \n",statistics_bandwidth,reduce_bandwidth);
+        printf("statistic's bandwidth: %10.2f GB/s \treduce's bandwidth:  %10.2f GB/s \t",statistics_bandwidth,reduce_bandwidth);
 
-        printf("-------------------IMG LEN --------------------\n\n");
+        printf("-------------------IMG LEN --------------------\n");
     }
 
     status = clReleaseProgram(program);
