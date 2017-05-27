@@ -53,11 +53,36 @@ __kernel void kernel_1(
 
   /* kernel operation */
   {
+    uchar tval; //= *val;
+    uchar tDt3 = *srcSrcDt3;
+    //*dstDstDt1 = tDt3;
+
+#if 1
     if (gidy < mid || gidy > height - mid - 1) {
-             *dstDstDt1 = *srcSrcDt3;
+             //*dstDstDt1 = *srcSrcDt3;
+                *dstDstDt1 = tDt3;
+             return;
           } else if (gidx < mid || gidx > width - mid - 1) {
-             *dstDstDt1 = *srcSrcDt3;
-          } else {
+             //*dstDstDt1 = *srcSrcDt3;
+             dstDstDt1 = tDt3;
+             return;
+          } else 
+#endif
+  //  if( gidy >= mid && gidy <= (height-mid-1) && gidx >= mid && gidx <= (width-mid-1) )
+       {
+       tval = *val;
+      //tval = tval & (*(srcSrcDt3));
+      tval = tval & tDt3; //(*(srcSrcDt3));
+      //tval = tval &  *(srcSrcDt4);
+      tval = tval & *(srcSrcDt5);
+      tval = tval & *(srcSrcDt6);
+      tval = tval & *(srcSrcDt7);
+      tval = tval & *(srcSrcDt8);
+      tval = tval & *(srcSrcDt9);
+      tval = tval & *(srcSrcDt10);
+      tval = tval & *(srcSrcDt11);
+             *dstDstDt1 = tval;
+#if 0
       *val = *val & (*(srcSrcDt3));
       *val = *val &  *(srcSrcDt4);
       *val = *val & *(srcSrcDt5);
@@ -68,6 +93,7 @@ __kernel void kernel_1(
       *val = *val & *(srcSrcDt10);
       *val = *val & *(srcSrcDt11);
              *dstDstDt1 = val;
+#endif
     }
   }
 

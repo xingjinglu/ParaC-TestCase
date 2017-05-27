@@ -49,14 +49,18 @@ __kernel void kernel_1(
     uchar8 src2 = vload8(0, srcSrcDt6);
     uchar8 src3 = vload8(0, srcSrcDt9);
     uchar4 res;
+    *dstDstDt1 = src1.s0;
 
-    if (gidy < mid || gidy > height - mid - 1) {
-    *dstDstDt1 = src1.s0; //*srcSrcDt3;
-    //  return;
-    } else if (gidx < mid || gidx > width - mid - 1) {
-    *dstDstDt1 = src1.s0; //*srcSrcDt3;
-   //   return;
-    } else {
+#if 1
+
+    
+    //else 
+#endif
+
+    //if( gidy >= mid && gidy <= (height-mid-1) && gidx >= mid && gidx <= (width-mid-1) )
+
+    {
+
 #if 0 
       *val = *val & (*(srcSrcDt3));
       *val = *val &  *(srcSrcDt4);
@@ -119,6 +123,15 @@ __kernel void kernel_1(
       vstore4(res, 0, dstDstDt1);
 #endif
     }
+    if (gidy < mid || gidy > height - mid - 1) {
+    *dstDstDt1 = src1.s0; //*srcSrcDt3;
+    } 
+    else if (gidx < mid || gidx > width - mid - 1) {
+    *dstDstDt1 = src1.s0; //*srcSrcDt3;
+    } 
+    else;
+
+
   }
 
 }
