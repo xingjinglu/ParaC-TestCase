@@ -1,10 +1,27 @@
 CFLAGS = -DTIME_PROF -D_VERIFY -D_OPTBANK
+#	g++ -O3 erosion.c -o erosion -lOpenCL -I/opt/AMDAPPSDK-3.0/include -lfreeimage
 #CFLAGS = -DTIME_PROF 
-all: erosion 
+INC=/opt/AMDAPPSDK-3.0/include /opt/AMDAPPSDK-3.0/lib/x86_64/libOpenCL.so
+all: erosion erosion_opt erosion_vect erosion_opt_256 erosion_opt_512 erosion_opt_2048 erosion_opt_4096 erosion_opt_1024
 erosion:erosion.c erosion.cl
-	g++ -O3 erosion.c -o erosion -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+	g++ -O3 erosion.c -o erosion  -I$(INC)
+erosion_opt:erosion_opt.c erosion_opt.cl
+	g++ -O3 erosion_opt.c -o erosion_opt  -I$(INC)
+erosion_vect:erosion_opt_vect.c erosion_opt_vect.cl
+	g++ -O3 erosion_opt_vect.c -o erosion_vect  -I$(INC)
+erosion_opt_256:erosion_opt_vect_256.c erosion_opt_vect.cl
+	g++ -O3 erosion_opt_vect_256.c -o erosion_opt_256  -I$(INC)
+erosion_opt_512:erosion_opt_vect_512.c erosion_opt_vect.cl
+	g++ -O3 erosion_opt_vect_512.c -o erosion_opt_512  -I$(INC)
+erosion_opt_1024:erosion_opt_vect_1024.c erosion_opt_vect.cl
+	g++ -O3 erosion_opt_vect_1024.c -o erosion_opt_1024  -I$(INC)
+erosion_opt_2048:erosion_opt_vect_2048.c erosion_opt_vect.cl
+	g++ -O3 erosion_opt_vect_2048.c -o erosion_opt_2048  -I$(INC)
+erosion_opt_4096:erosion_opt_vect_4096.c erosion_opt_vect.cl
+	g++ -O3 erosion_opt_vect_4096.c -o erosion_opt_4096  -I$(INC)
+
 clean:
-	rm erosion
+	rm erosion erosion_opt erosion_vect erosion_opt_256 erosion_opt_512 erosion_opt_1024 erosion_opt_2048 erosion_opt_4096
 
 
 	

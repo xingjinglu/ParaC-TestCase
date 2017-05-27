@@ -1,10 +1,27 @@
 CFLAGS = -DTIME_PROF -D_VERIFY -D_OPTBANK
+#	g++ -O3 dilation.c -o dilation -lOpenCL -I/opt/AMDAPPSDK-3.0/include -lfreeimage
 #CFLAGS = -DTIME_PROF 
-all: erosion 
-erosion:erosion.c erosion.cl
-	g++ -O3 erosion.c -o erosion -lOpenCL -I/opt/AMDAPPSDK/include -lfreeimage
+INC=/opt/AMDAPPSDK-3.0/include /opt/AMDAPPSDK-3.0/lib/x86_64/libOpenCL.so
+all: dilation dilation_opt dilation_vect dilation_opt_256 dilation_opt_512 dilation_opt_2048 dilation_opt_4096 dilation_opt_1024
+dilation:dilation.c dilation.cl
+	g++ -O3 dilation.c -o dilation  -I$(INC)
+dilation_opt:dilation_opt.c dilation_opt.cl
+	g++ -O3 dilation_opt.c -o dilation_opt  -I$(INC)
+dilation_vect:dilation_opt_vect.c dilation_opt_vect.cl
+	g++ -O3 dilation_opt_vect.c -o dilation_vect  -I$(INC)
+dilation_opt_256:dilation_opt_vect_256.c dilation_opt_vect.cl
+	g++ -O3 dilation_opt_vect_256.c -o dilation_opt_256  -I$(INC)
+dilation_opt_512:dilation_opt_vect_512.c dilation_opt_vect.cl
+	g++ -O3 dilation_opt_vect_512.c -o dilation_opt_512  -I$(INC)
+dilation_opt_1024:dilation_opt_vect_1024.c dilation_opt_vect.cl
+	g++ -O3 dilation_opt_vect_1024.c -o dilation_opt_1024  -I$(INC)
+dilation_opt_2048:dilation_opt_vect_2048.c dilation_opt_vect.cl
+	g++ -O3 dilation_opt_vect_2048.c -o dilation_opt_2048  -I$(INC)
+dilation_opt_4096:dilation_opt_vect_4096.c dilation_opt_vect.cl
+	g++ -O3 dilation_opt_vect_4096.c -o dilation_opt_4096  -I$(INC)
+
 clean:
-	rm erosion
+	rm dilation dilation_opt dilation_vect dilation_opt_256 dilation_opt_512 dilation_opt_1024 dilation_opt_2048 dilation_opt_4096
 
 
 	
